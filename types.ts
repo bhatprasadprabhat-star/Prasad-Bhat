@@ -46,7 +46,7 @@ export interface SearchSource {
   uri: string;
 }
 
-export type Language = 'en' | 'kn' | 'hi' | 'te' | 'ta' | 'ml' | 'mr';
+export type Language = 'en' | 'kn' | 'hi' | 'te' | 'ta' | 'ml' | 'mr' | 'tcy' | 'kok' | 'gu' | 'bn';
 
 export type UserMode = 'SCHOLAR' | 'SEEKER';
 

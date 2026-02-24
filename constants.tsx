@@ -70,7 +70,11 @@ export const LANGUAGES = [
   { code: 'te', name: 'తెలుగు' },
   { code: 'ta', name: 'தமிழ்' },
   { code: 'ml', name: 'മലയാളം' },
-  { code: 'mr', name: 'ಮರಾಠಿ' }
+  { code: 'mr', name: 'मराठी' },
+  { code: 'tcy', name: 'ತುಳು' },
+  { code: 'kok', name: 'कोंकणी' },
+  { code: 'gu', name: 'ગુજરાતી' },
+  { code: 'bn', name: 'বাংলা' }
 ];
 
 export const TRANSLATIONS: Record<string, any> = {
@@ -141,5 +145,39 @@ export const TRANSLATIONS: Record<string, any> = {
     daily_title: "ಇಂದಿನ ಮುಹೂರ್ತ ಮತ್ತು ಭವಿಷ್ಯ",
     muhurta_title: "ಶುಭ ಮುಹೂರ್ತಗಳು",
     muhurta_select: "ಉದ್ದೇಶವನ್ನು ಆರಿಸಿ"
+  },
+  mr: {
+    tagline: "जिथे ज्योतिषशास्त्राचा तर्काशी मेळ बसतो",
+    horoscope: "कुंडली",
+    matching: "गुणमेलन",
+    daily: "दैनंदिन राशिभविष्य",
+    muhurta: "मुहूर्त",
+    chat: "अ‍ॅस्ट्रो चॅट",
+    prashna: "प्रश्न",
+    menu_details: "कुंडली विश्लेषण",
+    menu_timeline: "जीवन कालक्रम (भूत, वर्तमान, भविष्य)",
+    menu_hora: "शास्त्रीय होरा विश्लेषण",
+    menu_sphta: "ग्रहांचे अंश",
+    menu_rasi: "राशी कुंडली",
+    menu_navamsha: "नवांश कुंडली",
+    menu_bhava: "भाव चलित",
+    menu_sandhi: "संधी विश्लेषण",
+    menu_panchangam: "पंचांग",
+    menu_dasha: "विंशोत्तरी दशा",
+    menu_shadvarga: "षड्वर्ग बल",
+    menu_ashtaka: "अष्टकवर्ग",
+    menu_trisputa: "त्रिसफुट विश्लेषण",
+    menu_dhumadi: "धूमादि समूह",
+    back: "मागे",
+    submit: "कुंडली तयार करा",
+    lang_select: "भाषा",
+    save_profile: "प्रोफाइल जतन करा",
+    saved_profiles: "अलीकडील कुंडली",
+    matching_title: "गुणमेलन आणि सुसंगतता",
+    conclusion: "दैवी निर्णय",
+    select_rasi: "राशी निवडा",
+    daily_title: "आजचे राशिभविष्य",
+    muhurta_title: "शुभ मुहूर्त",
+    muhurta_select: "उद्देश निवडा"
   }
 };

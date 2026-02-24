@@ -1,6 +1,6 @@
 {
   "name": "Final astro app",
-  "description": "A comprehensive South Indian style astrology application featuring real-time Panchangam, conversational AI astrologers via Gemini Live, and celestial image animation with Veo.",
+  "description": "A comprehensive South Indian style astrology application featuring real-time Panchangam, conversational AI astrologers via Gemini Live, and visually engaging celestial background effects.",
   "requestFramePermissions": [
     "camera",
     "microphone",

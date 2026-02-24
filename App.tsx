@@ -1,29 +1,72 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { AppTab, Language, UserIntake, MatchingIntake, UserMode } from './types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Stars, Sparkles, Moon, Sun, Compass } from 'lucide-react';
+import { AppTab, Language, UserIntake, MatchingIntake, UserMode, PlanetPosition, CityData } from './types';
 import LiveAstrologer from './components/LiveAstrologer';
-import VeoAnimator from './components/VeoAnimator';
 import SearchAssistant from './components/SearchAssistant';
 import SouthIndianChart from './components/SouthIndianChart';
 import { generateHoroscope, findMuhurtha, matchKundali, generateDailyForecastForRasi, searchCities, generatePrashnaAnalysis } from './services/gemini';
 import { RASIS, TRANSLATIONS, LANGUAGES, COLORS, HOURS, MINUTES, MUHURTA_TYPES } from './constants';
 
-const MandalaBackground = () => (
-  <div className="fixed inset-0 pointer-events-none opacity-[0.03] overflow-hidden flex items-center justify-center z-0">
-    <svg viewBox="0 0 200 200" className="w-[180vmax] h-[180vmax] animate-[spin_400s_linear_infinite] text-[#431407]">
-      <g fill="none" stroke="currentColor" strokeWidth="0.1">
-        {[...Array(18)].map((_, i) => (
-          <circle key={i} cx="100" cy="100" r={5 + i * 10} />
-        ))}
-        {[...Array(36)].map((_, i) => (
-          <line key={i} x1="100" y1="100" x2={100 + 160 * Math.cos(i * Math.PI / 18)} y2={100 + 160 * Math.sin(i * Math.PI / 18)} />
-        ))}
-      </g>
-    </svg>
-  </div>
-);
+const MandalaBackground = React.memo(() => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    {/* Deep Space Gradient */}
+    <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#020617]"></div>
+    
+    {/* Animated Stars */}
+    <div className="absolute inset-0 opacity-30">
+      {[...Array(30)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-white rounded-full"
+          initial={{ 
+            x: Math.random() * 100 + 'vw', 
+            y: Math.random() * 100 + 'vh',
+            opacity: Math.random(),
+            scale: Math.random() * 0.5 + 0.5
+          }}
+          animate={{ 
+            opacity: [0.2, 0.8, 0.2],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{ 
+            duration: Math.random() * 3 + 2, 
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      ))}
+    </div>
 
-const FantasticLogo = ({ className = "" }: { className?: string }) => (
+    {/* Rotating Mandala */}
+    <div className="absolute inset-0 flex items-center justify-center opacity-[0.05]">
+      <motion.svg 
+        viewBox="0 0 200 200" 
+        className="w-[180vmax] h-[180vmax] text-[#D4AF37]"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 400, repeat: Infinity, ease: "linear" }}
+      >
+        <g fill="none" stroke="currentColor" strokeWidth="0.1">
+          {[...Array(18)].map((_, i) => (
+            <circle key={i} cx="100" cy="100" r={5 + i * 10} />
+          ))}
+          {[...Array(36)].map((_, i) => (
+            <line key={i} x1="100" y1="100" x2={100 + 160 * Math.cos(i * Math.PI / 18)} y2={100 + 160 * Math.sin(i * Math.PI / 18)} />
+          ))}
+        </g>
+      </motion.svg>
+    </div>
+
+    {/* Subtle Nebula Clouds */}
+    <div className="absolute inset-0 opacity-20 mix-blend-screen">
+      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#431407] blur-[150px] rounded-full animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#1e1b4b] blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+    </div>
+  </div>
+));
+
+const FantasticLogo = React.memo(({ className = "" }: { className?: string }) => (
   <div className={`relative w-36 h-36 sm:w-56 md:w-80 group cursor-default perspective-1000 ${className}`}>
     <div className="absolute inset-[-10px] sm:inset-[-25px] border-2 border-[#D4AF37]/50 rounded-full animate-[spin_100s_linear_infinite]"></div>
     <div className="absolute inset-0 animate-[spin_70s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity duration-1000">
@@ -49,7 +92,7 @@ const FantasticLogo = ({ className = "" }: { className?: string }) => (
       </svg>
     </div>
   </div>
-);
+));
 
 const TimePicker = ({ time, ampm, onChange }: { time: string, ampm: string, onChange: (t: string, a: string) => void }) => {
   const [h, m] = (time || '12:00').split(':');
@@ -225,21 +268,51 @@ const App: React.FC = () => {
 
   if (!mode) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#020617] p-6 animate-in fade-in duration-700 overflow-hidden relative">
+      <motion.div 
+        key="mode-selection"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="min-h-screen flex flex-col items-center justify-center bg-[#020617] p-6 overflow-hidden relative"
+      >
         <MandalaBackground />
-        <div className="absolute top-6 sm:top-16 opacity-30 pointer-events-none scale-50 sm:scale-75">
+        <motion.div 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="absolute top-6 sm:top-16 opacity-30 pointer-events-none scale-50 sm:scale-75"
+        >
           <FantasticLogo />
-        </div>
+        </motion.div>
         
         <div className="z-10 text-center mb-8 sm:mb-12 mt-16">
-          <h1 className="text-4xl sm:text-7xl font-black text-[#D4AF37] astrological-font tracking-widest uppercase mb-2 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]">Astro Logic</h1>
-          <p className="text-white font-serif italic text-sm sm:text-xl tracking-wide">Sacred Geometry • Ancient Logic</p>
+          <motion.h1 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-4xl sm:text-7xl font-black text-[#D4AF37] astrological-font tracking-widest uppercase mb-2 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]"
+          >
+            Astro Logic
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-white font-serif italic text-sm sm:text-xl tracking-wide"
+          >
+            Sacred Geometry • Ancient Logic
+          </motion.p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 w-full max-w-5xl z-10">
-          <button 
+          <motion.button 
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.8, type: "spring" }}
+            whileHover={{ scale: 1.02, backgroundColor: "rgba(212, 175, 55, 0.2)" }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setMode('SEEKER')}
-            className="flex-1 group relative flex flex-col items-center justify-center p-8 sm:p-14 transition-all duration-300 bg-white/10 border-2 border-[#D4AF37]/40 rounded-[2rem] sm:rounded-[3rem] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37] shadow-xl overflow-hidden"
+            className="flex-1 group relative flex flex-col items-center justify-center p-8 sm:p-14 transition-all duration-300 bg-white/10 border-2 border-[#D4AF37]/40 rounded-[2rem] sm:rounded-[3rem] shadow-xl overflow-hidden"
           >
             <div className="z-10 text-center space-y-4">
               <span className="text-5xl sm:text-7xl block group-hover:scale-110 transition-transform">🌟</span>
@@ -251,11 +324,16 @@ const App: React.FC = () => {
                 <span className="inline-block px-6 py-3 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-[10px] font-black tracking-widest group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all">Select Seeker</span>
               </div>
             </div>
-          </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.8, type: "spring" }}
+            whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 153, 51, 0.2)" }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setMode('SCHOLAR')}
-            className="flex-1 group relative flex flex-col items-center justify-center p-8 sm:p-14 transition-all duration-300 bg-white/10 border-2 border-[#FF9933]/40 rounded-[2rem] sm:rounded-[3rem] hover:bg-[#FF9933]/20 hover:border-[#FF9933] shadow-xl overflow-hidden"
+            className="flex-1 group relative flex flex-col items-center justify-center p-8 sm:p-14 transition-all duration-300 bg-white/10 border-2 border-[#FF9933]/40 rounded-[2rem] sm:rounded-[3rem] shadow-xl overflow-hidden"
           >
             <div className="z-10 text-center space-y-4">
               <span className="text-5xl sm:text-7xl block group-hover:scale-110 transition-transform">📜</span>
@@ -267,9 +345,9 @@ const App: React.FC = () => {
                 <span className="inline-block px-6 py-3 border-2 border-[#FF9933] text-[#FF9933] rounded-full uppercase text-[10px] font-black tracking-widest group-hover:bg-[#FF9933] group-hover:text-[#020617] transition-all">Select Scholar</span>
               </div>
             </div>
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -337,7 +415,14 @@ const App: React.FC = () => {
   const renderTabContent = () => {
     if (analysisResult) {
       return (
-        <div className="min-h-screen parchment-bg flex flex-col animate-in zoom-in-95 duration-500 relative overflow-x-hidden">
+        <motion.div 
+          key="analysis"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+        >
           <MandalaBackground />
           <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-6 flex items-center shadow-2xl sticky top-0 z-30 border-b border-[#D4AF37]/40">
             <button onClick={() => setAnalysisResult(null)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
@@ -347,20 +432,37 @@ const App: React.FC = () => {
           </header>
           <div className="flex-1 p-4 sm:p-10 md:p-16 overflow-y-auto max-w-6xl mx-auto w-full pb-48 z-10">
             {chartData && (
-              <div className="mb-10 animate-in zoom-in-95 duration-700">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
                 <h3 className="text-center text-[#431407] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">Celestial Map (Rasi)</h3>
                 <SouthIndianChart data={chartData} />
-              </div>
+              </motion.div>
             )}
-            <div className={`analysis-rich-text detailed-view p-6 sm:p-12 md:p-16 bg-white/95 border-2 border-[#D4AF37]/20 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} dangerouslySetInnerHTML={{ __html: analysisResult }} />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className={`analysis-rich-text detailed-view p-6 sm:p-12 md:p-16 bg-white/95 border-2 border-[#D4AF37]/20 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
+              dangerouslySetInnerHTML={{ __html: analysisResult }} 
+            />
           </div>
-        </div>
+        </motion.div>
       );
     }
     switch(activeTab) {
       case AppTab.DASHBOARD:
         return (
-          <div className="min-h-screen flex flex-col parchment-bg overflow-x-hidden animate-in fade-in duration-700 relative">
+          <motion.div 
+            key="dashboard"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen flex flex-col parchment-bg overflow-x-hidden relative"
+          >
             <MandalaBackground />
             <nav className="w-full px-4 sm:px-8 py-5 sm:py-10 flex justify-between items-center z-20">
               <div className="flex items-center gap-3">
@@ -390,9 +492,30 @@ const App: React.FC = () => {
             </nav>
 
             <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-16 text-center max-w-7xl mx-auto w-full relative z-10">
-              <div className="mb-8 sm:mb-12 scale-75 sm:scale-100"><FantasticLogo /></div>
-              <h1 className="text-4xl sm:text-7xl md:text-9xl font-black text-[#431407] mb-4 sm:mb-8 tracking-tighter astrological-font leading-tight drop-shadow-lg">Astro Logic</h1>
-              <p className="text-sm sm:text-2xl md:text-3xl font-serif italic text-[#7C2D12] max-w-4xl mx-auto opacity-95 mb-10 sm:mb-20 leading-relaxed px-4 italic">"{t.tagline}"</p>
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="mb-8 sm:mb-12 scale-75 sm:scale-100"
+              >
+                <FantasticLogo />
+              </motion.div>
+              <motion.h1 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl sm:text-7xl md:text-9xl font-black text-[#431407] mb-4 sm:mb-8 tracking-tighter astrological-font leading-tight drop-shadow-lg"
+              >
+                Astro Logic
+              </motion.h1>
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-sm sm:text-2xl md:text-3xl font-serif italic text-[#7C2D12] max-w-4xl mx-auto opacity-95 mb-10 sm:mb-20 leading-relaxed px-4 italic"
+              >
+                "{t.tagline}"
+              </motion.p>
 
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6 w-full px-2">
                 {[
@@ -401,24 +524,38 @@ const App: React.FC = () => {
                   { id: AppTab.MATCHING, label: t.matching, icon: '💑', desc: mode === 'SCHOLAR' ? 'Synergy' : 'Love' },
                   { id: AppTab.MUHURTHA, label: t.muhurta, icon: '⏰', desc: mode === 'SCHOLAR' ? 'Kala' : 'Lucky' },
                   { id: AppTab.PRASHNA, label: 'Prashna', icon: '❓', desc: mode === 'SCHOLAR' ? 'Horary' : 'Oracle' }
-                ].map(item => (
-                  <button key={item.id} onClick={() => setActiveTab(item.id)} className="group relative bg-white/70 border-2 border-[#D4AF37]/20 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 transition-all duration-300 hover:bg-white hover:-translate-y-1.5 hover:shadow-2xl flex flex-col items-center gap-2 sm:gap-4 shadow-xl backdrop-blur-md overflow-hidden">
+                ].map((item, idx) => (
+                  <motion.button 
+                    key={item.id} 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 + idx * 0.1 }}
+                    onClick={() => setActiveTab(item.id)} 
+                    className="group relative bg-white/70 border-2 border-[#D4AF37]/20 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 transition-all duration-300 hover:bg-white hover:-translate-y-1.5 hover:shadow-2xl flex flex-col items-center gap-2 sm:gap-4 shadow-xl backdrop-blur-md overflow-hidden"
+                  >
                     <span className="text-4xl sm:text-6xl group-hover:scale-110 transition-all drop-shadow-md">{item.icon}</span>
                     <div className="space-y-0.5">
                       <h3 className="text-[10px] sm:text-sm md:text-lg font-black uppercase tracking-wider text-[#431407] whitespace-nowrap">{item.label}</h3>
                       <p className="text-[8px] sm:text-[10px] text-[#7C2D12]/70 uppercase font-black tracking-widest">{item.desc}</p>
                     </div>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </section>
             
             <footer className="w-full py-8 text-center text-[8px] sm:text-[10px] text-[#431407]/40 font-black uppercase tracking-[0.8em] z-10 px-4">Divine Order • Celestial Alignment • Deep Knowledge</footer>
-          </div>
+          </motion.div>
         );
       case AppTab.HOROSCOPE:
         return horoscopeState === 'MENU' ? (
-          <div className="min-h-screen parchment-bg flex flex-col animate-in slide-in-from-right duration-500 relative overflow-x-hidden">
+          <motion.div 
+            key="horoscope-menu"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+          >
             <MandalaBackground />
             <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
               <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
@@ -434,17 +571,44 @@ const App: React.FC = () => {
                 { id: 'menu_rasi', label: mode === 'SCHOLAR' ? 'Rasi Kundli' : 'The Soul Map' }, 
                 { id: 'menu_dasha', label: mode === 'SCHOLAR' ? 'Vimshottari' : 'Life Phase' }, 
                 { id: 'menu_ashtaka', label: mode === 'SCHOLAR' ? 'Ashtakavarga' : 'Power Score' } 
-              ].map((item) => (
-                <button key={item.id} onClick={() => handleAction('HOROSCOPE', item.label)} className="menu-button-parchment group p-8 sm:p-12 border-2 rounded-[2rem] sm:rounded-[3rem] shadow-xl transition-all active:scale-95">
+              ].map((item, idx) => (
+                <motion.button 
+                  key={item.id} 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleAction('HOROSCOPE', item.label)} 
+                  className="menu-button-parchment group p-8 sm:p-12 border-2 rounded-[2rem] sm:rounded-[3rem] shadow-xl transition-all"
+                >
                   <span className="text-sm sm:text-lg md:text-xl font-black text-[#431407] group-hover:text-[#7C2D12] transition-colors uppercase tracking-widest">{item.label}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
-        ) : renderHoroscopeIntake();
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="horoscope-intake"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="min-h-screen"
+          >
+            {renderHoroscopeIntake()}
+          </motion.div>
+        );
       case AppTab.DAILY_PREDICTION:
         return (
-          <div className="min-h-screen parchment-bg flex flex-col animate-in fade-in duration-500 relative overflow-x-hidden">
+          <motion.div 
+            key="daily"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+          >
              <MandalaBackground />
              <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
                 <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
@@ -453,18 +617,34 @@ const App: React.FC = () => {
                 <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] tracking-tight uppercase astrological-font">{t.daily_title}</h2>
              </header>
              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8 p-5 sm:p-12 max-w-6xl mx-auto w-full pb-48 z-10">
-                {RASIS.map((rasi) => (
-                  <button key={rasi.name} onClick={() => handleAction('DAILY', rasi.name)} className="menu-button-parchment aspect-square flex flex-col items-center justify-center gap-2 sm:gap-5 hover:scale-105 group rounded-[1.5rem] sm:rounded-[2.5rem] shadow-lg">
+                {RASIS.map((rasi, idx) => (
+                  <motion.button 
+                    key={rasi.name} 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.03 }}
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAction('DAILY', rasi.name)} 
+                    className="menu-button-parchment aspect-square flex flex-col items-center justify-center gap-2 sm:gap-5 group rounded-[1.5rem] sm:rounded-[2.5rem] shadow-lg"
+                  >
                     <span className="text-4xl sm:text-7xl group-hover:rotate-6 transition-all drop-shadow-lg">{rasi.icon}</span>
                     <span className="text-[10px] sm:text-sm md:text-lg font-black uppercase tracking-widest text-[#431407]">{rasi.name}</span>
-                  </button>
+                  </motion.button>
                 ))}
              </div>
-          </div>
+          </motion.div>
         );
       case AppTab.MATCHING:
         return (
-          <div className="min-h-screen parchment-bg flex flex-col animate-in fade-in duration-500 relative overflow-x-hidden">
+          <motion.div 
+            key="matching"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+          >
              <MandalaBackground />
              <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
                 <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
@@ -473,7 +653,12 @@ const App: React.FC = () => {
                 <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] tracking-tight uppercase astrological-font">Matching</h2>
              </header>
              <div className="p-4 sm:p-10 md:p-16 max-w-5xl mx-auto w-full space-y-8 sm:space-y-16 pb-48 z-10">
-                <div className="p-6 sm:p-12 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-6 shadow-2xl relative backdrop-blur-md">
+                <motion.div 
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="p-6 sm:p-12 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-6 shadow-2xl relative backdrop-blur-md"
+                >
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-[#431407] text-[#D4AF37] rounded-full text-[9px] sm:text-xs font-black uppercase tracking-widest shadow-xl">Partner One</div>
                   <div className="grid gap-4 sm:gap-6">
                     <input value={matchingIntake.person1.name} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, name: e.target.value}})} placeholder="First Name" className="details-input" />
@@ -482,8 +667,13 @@ const App: React.FC = () => {
                       <TimePicker time={matchingIntake.person1.tob} ampm={matchingIntake.person1.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, tob: t, ampm: a}})} />
                     </div>
                   </div>
-                </div>
-                <div className="p-6 sm:p-12 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-6 shadow-2xl relative backdrop-blur-md">
+                </motion.div>
+                <motion.div 
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="p-6 sm:p-12 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-6 shadow-2xl relative backdrop-blur-md"
+                >
                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-[#D4AF37] text-[#431407] rounded-full text-[9px] sm:text-xs font-black uppercase tracking-widest shadow-xl">Partner Two</div>
                   <div className="grid gap-4 sm:gap-6">
                     <input value={matchingIntake.person2.name} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, name: e.target.value}})} placeholder="Second Name" className="details-input" />
@@ -492,14 +682,31 @@ const App: React.FC = () => {
                       <TimePicker time={matchingIntake.person2.tob} ampm={matchingIntake.person2.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, tob: t, ampm: a}})} />
                     </div>
                   </div>
-                </div>
-                <button onClick={() => handleAction('MATCHING')} className="astro-btn-maroon py-5 sm:py-9 text-lg sm:text-2xl font-black rounded-full shadow-2xl active:scale-95 transition-transform">Get Verdict</button>
+                </motion.div>
+                <motion.button 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAction('MATCHING')} 
+                  className="astro-btn-maroon py-5 sm:py-9 text-lg sm:text-2xl font-black rounded-full shadow-2xl"
+                >
+                  Get Verdict
+                </motion.button>
              </div>
-          </div>
+          </motion.div>
         );
       case AppTab.MUHURTHA:
         return (
-          <div className="min-h-screen parchment-bg flex flex-col animate-in fade-in duration-500 relative overflow-x-hidden">
+          <motion.div 
+            key="muhurta"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+          >
              <MandalaBackground />
              <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
                 <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
@@ -508,18 +715,34 @@ const App: React.FC = () => {
                 <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">Muhurta</h2>
              </header>
              <div className="p-4 sm:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto w-full pb-48 z-10">
-                {MUHURTA_TYPES.map(m => (
-                  <button key={m.id} onClick={() => handleAction('MUHURTA', m.label)} className="group bg-white/80 border-2 border-[#D4AF37]/20 p-6 sm:p-10 rounded-[1.5rem] sm:rounded-[2rem] hover:bg-[#431407] transition-all duration-300 hover:-translate-y-1.5 flex flex-col items-center gap-3 sm:gap-5 shadow-xl backdrop-blur-md">
+                {MUHURTA_TYPES.map((m, idx) => (
+                  <motion.button 
+                    key={m.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.02 }}
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(67, 20, 7, 1)", color: "rgba(212, 175, 55, 1)" }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAction('MUHURTA', m.label)} 
+                    className="group bg-white/80 border-2 border-[#D4AF37]/20 p-6 sm:p-10 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-300 flex flex-col items-center gap-3 sm:gap-5 shadow-xl backdrop-blur-md"
+                  >
                     <span className="text-3xl sm:text-5xl group-hover:scale-110 transition-all drop-shadow-md">✨</span>
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-wide text-[#431407] group-hover:text-[#D4AF37] text-center transition-colors px-2 leading-relaxed">{m.label}</span>
-                  </button>
+                  </motion.button>
                 ))}
              </div>
-          </div>
+          </motion.div>
         );
       case AppTab.PRASHNA: 
         return (
-          <div className="min-h-screen parchment-bg flex flex-col animate-in fade-in duration-500 relative overflow-x-hidden">
+          <motion.div 
+            key="prashna"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+          >
             <MandalaBackground />
             <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
               <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
@@ -528,7 +751,12 @@ const App: React.FC = () => {
               <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">Oracle</h2>
             </header>
             <div className="p-4 sm:p-10 md:p-16 max-w-4xl mx-auto w-full space-y-10 sm:space-y-16 pb-48 z-10">
-              <div className="p-8 sm:p-14 bg-white/85 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-10 text-center shadow-2xl backdrop-blur-md">
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="p-8 sm:p-14 bg-white/85 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-10 text-center shadow-2xl backdrop-blur-md"
+              >
                 <span className="text-7xl sm:text-9xl mb-2 block drop-shadow-xl animate-pulse">🕉️</span>
                 <h3 className="text-2xl sm:text-4xl font-black text-[#431407] uppercase tracking-widest">Ask Guruji</h3>
                 <div className="space-y-8 text-left">
@@ -538,13 +766,21 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1 opacity-80">Location</label>
-                    <CitySearch value={prashnaInput.pob} onChange={v => setPrashnaInput({...prashnaInput, pob: v})} />
+                    <CitySearch value={prashnaInput.pob} onChange={v => setPrashnaInput({...prashnaInput, pob: v.name})} />
                   </div>
                 </div>
-                <button disabled={!prashnaInput.question} onClick={() => handleAction('PRASHNA')} className="astro-btn-maroon py-5 sm:py-8 text-xl sm:text-3xl font-black rounded-full disabled:opacity-50 active:scale-95 transition-transform">Seek Answer</button>
-              </div>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={!prashnaInput.question} 
+                  onClick={() => handleAction('PRASHNA')} 
+                  className="astro-btn-maroon py-5 sm:py-8 text-xl sm:text-3xl font-black rounded-full disabled:opacity-50"
+                >
+                  Seek Answer
+                </motion.button>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         );
       default: return null;
     }
@@ -555,7 +791,7 @@ const App: React.FC = () => {
       <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-[60] pointer-events-none">
         <button onClick={() => setIsChatOverlayOpen(!isChatOverlayOpen)} className="pointer-events-auto w-16 h-16 sm:w-24 sm:h-24 bg-[#431407] rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-4 sm:border-8 border-[#D4AF37] flex flex-col items-center justify-center hover:scale-105 active:scale-95 transition-all group">
           <span className="text-2xl sm:text-5xl drop-shadow-lg group-hover:rotate-6 transition-transform">{isChatOverlayOpen ? '✕' : '🙏'}</span>
-          {!isChatOverlayOpen && <span className="hidden sm:block text-[9px] font-black uppercase text-[#D4AF37] tracking-widest mt-0.5">Guruji</span>}
+          {!isChatOverlayOpen && <span className="hidden sm:block text-[9px] font-black uppercase text-[#D4AF37] tracking-widest mt-0.5 text-center">Ask Help for Guruji</span>}
         </button>
         
         {isChatOverlayOpen && (
@@ -564,7 +800,7 @@ const App: React.FC = () => {
                <div className="flex items-center gap-3 z-10">
                   <span className="text-2xl sm:text-3xl">🕉️</span>
                   <div className="flex flex-col">
-                    <span className="font-black uppercase tracking-widest text-sm sm:text-xl astrological-font leading-tight">Guruji Live</span>
+                    <span className="font-black uppercase tracking-widest text-sm sm:text-xl astrological-font leading-tight">Ask Help for Guruji</span>
                     <span className="text-[8px] sm:text-[10px] uppercase tracking-widest opacity-60">Sacred Conversation</span>
                   </div>
                </div>
@@ -587,7 +823,11 @@ const App: React.FC = () => {
         </div>
       )}
       
-      <main>{renderTabContent()}</main>
+      <main>
+        <AnimatePresence mode="wait">
+          {renderTabContent()}
+        </AnimatePresence>
+      </main>
 
       <style>{`
         .parchment-bg { background: #FDF5E6; background-image: radial-gradient(circle at 50% 50%, #FDF5E6 0%, #F5E6D3 100%); position: relative; }

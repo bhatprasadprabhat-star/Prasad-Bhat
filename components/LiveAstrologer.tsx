@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { GoogleGenAI, Modality, Blob, LiveServerMessage } from '@google/genai';
 import { encode, decode, decodeAudioData } from '../services/gemini';
 
@@ -128,12 +129,26 @@ const LiveAstrologer: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-8 p-4 sm:p-10 h-full overflow-y-auto">
-      <div className={`w-20 h-20 sm:w-36 sm:h-36 rounded-full border-4 sm:border-8 flex items-center justify-center transition-all duration-500 shadow-2xl ${isActive ? 'border-[#431407] scale-105' : 'border-slate-300'}`}>
-        <span className={`text-4xl sm:text-7xl ${isActive ? 'opacity-100' : 'opacity-40'}`}>🙏</span>
+      <div className="relative">
+        <div className={`w-20 h-20 sm:w-36 sm:h-36 rounded-full border-4 sm:border-8 flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden ${isActive ? 'border-[#431407] scale-105' : 'border-slate-300'}`}>
+          <img 
+            src="https://picsum.photos/seed/sanyasi/200/200" 
+            alt="Ancient Sanyasi" 
+            referrerPolicy="no-referrer"
+            className={`w-full h-full object-cover transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-60 grayscale'}`}
+          />
+        </div>
+        {isActive && (
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute -inset-2 border-4 border-[#D4AF37] rounded-full pointer-events-none"
+          />
+        )}
       </div>
       
       <div className="text-center">
-        <h3 className="text-xl sm:text-3xl font-black text-[#431407] uppercase tracking-[0.1em] astrological-font leading-tight">Divine Oracle</h3>
+        <h3 className="text-xl sm:text-3xl font-black text-[#431407] uppercase tracking-[0.1em] astrological-font leading-tight">Ask Help for Guruji</h3>
         <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#431407] text-[#D4AF37] text-[10px] sm:text-[11px] font-black uppercase tracking-widest shadow-md">
           <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-slate-400'}`}></span>
           {status}
@@ -146,6 +161,27 @@ const LiveAstrologer: React.FC = () => {
         ) : (
           <button onClick={stopSession} className="w-full py-4.5 bg-white border-2 border-[#431407] text-[#431407] font-black rounded-3xl shadow-md uppercase tracking-[0.15em] text-xs sm:text-sm active:bg-slate-50 transition-all">Pranama (End)</button>
         )}
+      </div>
+
+      <div className="w-full flex flex-wrap gap-2 justify-center">
+        {['Career Guidance', 'Love & Marriage', 'Health & Energy', 'Spiritual Path'].map((topic) => (
+          <button 
+            key={topic}
+            onClick={() => {
+              if (isActive && sessionRef.current) {
+                // In a real scenario, we might send this as text if the API supports it, 
+                // or just encourage the user to speak it.
+                // For now, we'll just show a toast or a hint.
+                setTranscription(prev => [...prev, "You (Hint): I want help with " + topic]);
+              } else if (!isActive) {
+                startSession();
+              }
+            }}
+            className="px-3 py-1.5 bg-white/50 border border-[#431407]/20 rounded-full text-[10px] sm:text-xs font-bold text-[#431407] hover:bg-[#431407] hover:text-[#D4AF37] transition-all shadow-sm"
+          >
+            {topic}
+          </button>
+        ))}
       </div>
 
       <div className="w-full flex-1 min-h-[160px] overflow-y-auto bg-white/70 border-2 border-[#431407]/10 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-inner flex flex-col gap-4">

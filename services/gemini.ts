@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { UserIntake, MatchingIntake, SearchSource, Language, UserMode } from "../types";
+import { UserIntake, MatchingIntake, SearchSource, Language, UserMode, CityData } from "../types";
 
 // Vedic Horoscope generation
 export const generateHoroscope = async (intake: UserIntake, section: string, lang: Language, mode: UserMode = 'SEEKER') => {
