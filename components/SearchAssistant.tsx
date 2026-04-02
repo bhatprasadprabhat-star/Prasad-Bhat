@@ -1,19 +1,26 @@
 
 import React, { useState } from 'react';
 import { fetchGroundingSearch } from '../services/gemini';
-import { SearchSource } from '../types';
+import { SearchSource, Language } from '../types';
+import { TRANSLATIONS } from '../constants';
 
-const SearchAssistant: React.FC = () => {
+interface SearchAssistantProps {
+  lang: Language;
+}
+
+const SearchAssistant: React.FC<SearchAssistantProps> = ({ lang }) => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<{ text: string, sources: SearchSource[] } | null>(null);
+
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query) return;
     setIsLoading(true);
     try {
-      const data = await fetchGroundingSearch(query);
+      const data = await fetchGroundingSearch(`${query} (Respond in ${lang} language)`);
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -24,23 +31,23 @@ const SearchAssistant: React.FC = () => {
 
   return (
     <div className="p-6 bg-slate-900/80 rounded-2xl border border-yellow-700/30 max-w-3xl mx-auto">
-      <h3 className="text-xl font-bold text-yellow-500 mb-4 astrological-font">Current Celestial Insights</h3>
-      <p className="text-sm text-slate-400 mb-6">Search for real-time planet transits, upcoming eclipses, or specific astrological events grounded with Google Search.</p>
+      <h3 className="text-xl font-bold text-yellow-500 mb-4 astrological-font">{t.celestial_insights_title || 'Current Celestial Insights'}</h3>
+      <p className="text-sm text-slate-400 mb-6">{t.search_assistant_desc || 'Search for real-time planet transits, upcoming eclipses, or specific astrological events grounded with Google Search.'}</p>
 
       <form onSubmit={handleSearch} className="flex gap-2">
         <input 
           type="text" 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="e.g., Jupiter transit in 2024 effects on Mesha Rasi"
-          className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-yellow-600"
+          placeholder={t.search_assistant_placeholder || "e.g., Jupiter transit in 2024 effects on Mesha Rasi"}
+          className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-yellow-600 font-bold"
         />
         <button 
           disabled={isLoading}
           type="submit"
           className="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50"
         >
-          {isLoading ? 'Searching...' : 'Ask Stars'}
+          {isLoading ? (t.searching || 'Searching...') : (t.ask_stars || 'Ask Stars')}
         </button>
       </form>
 
@@ -51,7 +58,7 @@ const SearchAssistant: React.FC = () => {
           </div>
           {result.sources.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-widest mb-2">Sources</h4>
+              <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-widest mb-2">{t.sources || 'Sources'}</h4>
               <div className="flex flex-wrap gap-2">
                 {result.sources.map((s, i) => (
                   <a 

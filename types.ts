@@ -26,6 +26,7 @@ export interface CityData {
   lat: string;
   lon: string;
   tz: string;
+  pincode?: string;
 }
 
 export interface MatchingIntake {
@@ -50,6 +51,14 @@ export type Language = 'en' | 'kn' | 'hi' | 'te' | 'ta' | 'ml' | 'mr' | 'tcy' | 
 
 export type UserMode = 'SCHOLAR' | 'SEEKER';
 
+export enum OnboardingStep {
+  SPLASH = 'splash',
+  LANG_SELECT = 'lang_select',
+  QUICK_LOGIN = 'quick_login',
+  MODE_SELECT = 'mode_select',
+  COMPLETED = 'completed'
+}
+
 export enum AppTab {
   DASHBOARD = 'Home',
   DAILY_PREDICTION = 'Daily Forecast',
@@ -57,5 +66,9 @@ export enum AppTab {
   PRASHNA = 'Prashna',
   MUHURTHA = 'Muhurta',
   MATCHING = 'Matching',
-  CHAT = 'Astro Chat'
+  LIFE_PARTNER = 'Life Partner',
+  PANCHANGA = 'Panchanga',
+  TIMELINE = 'Life Timeline',
+  BLOG = 'Blog',
+  PROFILE = 'Profile'
 }

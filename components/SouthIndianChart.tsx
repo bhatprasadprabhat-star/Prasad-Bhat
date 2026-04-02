@@ -1,21 +1,55 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Sparkles, Sun, Moon, Flame, Zap, Crown, Heart, Anchor, Cloud, Wind, Compass } from 'lucide-react';
 import { RasiChartData } from '../types';
-import { RASIS } from '../constants.tsx';
+import { RASIS, TRANSLATIONS } from '../constants.tsx';
+import { Language } from '../types';
+
+const PLANET_ICONS: Record<string, any> = {
+  "Sun": Sun,
+  "Moon": Moon,
+  "Mars": Flame,
+  "Mercury": Zap,
+  "Jupiter": Crown,
+  "Venus": Heart,
+  "Saturn": Anchor,
+  "Rahu": Cloud,
+  "Ketu": Wind,
+  "Lagna": Compass
+};
+
+const PLANET_COLORS: Record<string, string> = {
+  "Sun": "#f59e0b",
+  "Moon": "#94a3b8",
+  "Mars": "#ef4444",
+  "Mercury": "#10b981",
+  "Jupiter": "#eab308",
+  "Venus": "#ec4899",
+  "Saturn": "#475569",
+  "Rahu": "#1e293b",
+  "Ketu": "#64748b",
+  "Lagna": "#8b5cf6"
+};
 
 interface SouthIndianChartProps {
   data: RasiChartData;
+  lang: Language;
+  title?: string;
 }
 
-const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data }) => {
+const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data, lang, title }) => {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   // Traditional South Indian order (clockwise from top-left offset)
   // Grid layout 4x4
   const gridMap: { [key: number]: number } = {
     11: 0, 0: 1, 1: 2, 2: 3, 3: 7, 4: 11, 5: 15, 6: 14, 7: 13, 8: 12, 9: 8, 10: 4
   };
 
-  const getPlanetsInRasi = (rasiIdx: number) => data.filter(p => p.rasi === rasiIdx);
+  const getPlanetsInRasi = (rasiIdx: number) => {
+    if (!Array.isArray(data)) return [];
+    return data.filter(p => p.rasi === rasiIdx);
+  };
 
   const renderCell = (gridIdx: number) => {
     const rasiIdx = Object.keys(gridMap).find(key => gridMap[parseInt(key)] === gridIdx);
@@ -23,17 +57,32 @@ const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data }) 
 
     if (isCenter) {
       if (gridIdx === 5) return (
-        <div key={gridIdx} className="col-span-2 row-span-2 flex items-center justify-center p-2 sm:p-4 border border-[#431407]/20">
-          <motion.svg 
-            viewBox="0 0 100 100" 
-            className="w-16 h-16 sm:w-24 md:w-32 fill-[#7C2D12] opacity-40"
+        <div key={gridIdx} className="col-span-2 row-span-2 flex items-center justify-center p-2 overflow-hidden relative">
+          {/* Traditional Wavy Sun Icon matching the image exactly */}
+          <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            className="w-full h-full max-w-[90%] max-h-[90%] flex items-center justify-center"
           >
-             <path d="M50 0 L55 20 L45 20 Z M50 100 L45 80 L55 80 Z M0 50 L20 45 L20 55 Z M100 50 L80 55 L80 45 Z" />
-             <circle cx="50" cy="50" r="20" className="stroke-[#7C2D12] stroke-[1.5] fill-none" />
-             <circle cx="50" cy="50" r="5" fill="currentColor" />
-          </motion.svg>
+            <svg viewBox="0 0 100 100" className="w-full h-full text-[#f97316] drop-shadow-xl">
+              {/* Sun Core */}
+              <circle cx="50" cy="50" r="18" fill="currentColor" />
+              <circle cx="50" cy="50" r="14" fill="none" stroke="white" strokeWidth="1" opacity="0.4" />
+              
+              {/* Wavy Tribal Rays */}
+              {[...Array(12)].map((_, i) => (
+                <path
+                  key={i}
+                  d="M50 35 C60 22, 40 10, 50 0 C60 10, 40 22, 50 35"
+                  fill="currentColor"
+                  transform={`rotate(${i * 30} 50 50)`}
+                />
+              ))}
+              
+              {/* Inner Detail */}
+              <circle cx="50" cy="50" r="10" fill="white" opacity="0.15" />
+            </svg>
+          </motion.div>
         </div>
       );
       return null;
@@ -41,44 +90,71 @@ const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data }) 
 
     const rIdx = rasiIdx !== undefined ? parseInt(rasiIdx) : -1;
     const planets = rIdx !== -1 ? getPlanetsInRasi(rIdx) : [];
+    const rasiName = rIdx !== -1 ? (t[RASIS[rIdx].label_key] || RASIS[rIdx].name) : "";
 
     return (
       <motion.div 
         key={gridIdx} 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: gridIdx * 0.02 }}
-        className="aspect-square border border-[#431407]/30 flex flex-col p-0.5 sm:p-1 relative overflow-hidden bg-white/5"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: gridIdx * 0.005 }}
+        className="aspect-square border-2 border-[#5d4037]/80 flex flex-col p-1 relative overflow-hidden group bg-transparent"
       >
-        <div className="flex flex-wrap gap-0.5 sm:gap-1 justify-center items-center h-full content-center">
-          {planets.map((p, i) => (
-            <motion.div 
-              key={i} 
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.5 + i * 0.1, type: "spring" }}
-              className="text-[10px] sm:text-xs md:text-sm font-black text-[#431407]"
-            >
-              {p.name.substring(0, 2)}
-            </motion.div>
-          ))}
-          {planets.length === 0 && rIdx !== -1 && (
-             <span className="text-[7px] sm:text-[9px] opacity-10 text-[#431407] font-black uppercase">{RASIS[rIdx].name.substring(0,3)}</span>
-          )}
+        {/* Rasi Name Label - Very subtle */}
+        {rIdx !== -1 && (
+          <div className="absolute bottom-0.5 right-1 z-0">
+            <span className="text-[5px] sm:text-[8px] font-bold text-[#5d4037]/10 uppercase">
+              {rasiName}
+            </span>
+          </div>
+        )}
+
+        {/* Planets Container */}
+        <div className="flex flex-wrap gap-1 sm:gap-3 justify-start items-start h-full content-start z-10 p-1 sm:p-3">
+          {planets.map((p, i) => {
+            const planetLabel = t[p.label_key] || p.name;
+            
+            return (
+              <motion.div 
+                key={i} 
+                initial={{ scale: 0, y: -5 }}
+                animate={{ scale: 1, y: 0 }}
+                className="flex flex-col items-start"
+                title={`${p.name} - ${p.degree}°`}
+              >
+                <span className="text-[14px] sm:text-[32px] font-black text-black leading-none tracking-tighter drop-shadow-sm">
+                  {planetLabel}
+                </span>
+                <span className="text-[7px] sm:text-[12px] font-black text-[#5d4037] leading-none mt-1">
+                  {p.degree}°
+                </span>
+              </motion.div>
+            );
+          })}
         </div>
       </motion.div>
     );
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-[320px] sm:max-w-md mx-auto bg-white/20 border-2 border-[#431407]/60 shadow-xl grid grid-cols-4 grid-rows-4 rounded-xl overflow-hidden backdrop-blur-sm"
-    >
-      {[...Array(16)].map((_, i) => renderCell(i))}
-    </motion.div>
+    <div className="p-4 sm:p-12 bg-[#fef3c7] rounded-xl border-[12px] border-[#5d4037] shadow-[0_40px_80px_rgba(0,0,0,0.4)] w-full max-w-[400px] sm:max-w-4xl mx-auto overflow-hidden relative">
+      {/* Subtle Parchment Texture */}
+      <div className="absolute inset-0 opacity-[0.15] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/parchment.png")' }}></div>
+      
+      {/* Decorative inner border */}
+      <div className="absolute inset-3 border-2 border-[#5d4037]/20 rounded-lg pointer-events-none"></div>
+      
+      <div className="grid grid-cols-4 grid-rows-4 border-4 border-[#5d4037] relative z-10 bg-transparent shadow-inner">
+        {[...Array(16)].map((_, i) => renderCell(i))}
+      </div>
+      
+      <div className="mt-10 text-center space-y-3 relative z-10">
+        <h4 className="text-[18px] sm:text-4xl font-black text-[#5d4037] uppercase tracking-[0.5em] drop-shadow-md">{title || t.rasi_kundli || 'Rasi Kundli'}</h4>
+        <div className="h-1.5 w-40 bg-gradient-to-r from-transparent via-[#5d4037]/60 to-transparent mx-auto rounded-full"></div>
+      </div>
+    </div>
   );
+;
 });
 
 export default SouthIndianChart;

@@ -1,0 +1,103 @@
+
+/* Custom Styles for Astro Logic */
+
+.analysis-rich-text h1, 
+.analysis-rich-text h2, 
+.analysis-rich-text h3 {
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.analysis-rich-text p {
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: #f8fafc;
+}
+
+.analysis-rich-text strong {
+  color: #FFD700;
+}
+
+.analysis-rich-text blockquote {
+  border-left: 4px solid #D4AF37;
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.05);
+  padding: 1rem 1.5rem;
+  border-radius: 0 1rem 1rem 0;
+}
+
+/* Scholar View Specific Styles */
+.scholar-view {
+  font-family: 'Lora', serif;
+  background: linear-gradient(to bottom, #ffffff, #fffbeb) !important;
+  color: #1a1a1a !important;
+}
+
+.scholar-view h1,
+.scholar-view h2,
+.scholar-view h3 {
+  color: #451a03 !important;
+  border-bottom-color: rgba(69, 26, 3, 0.2) !important;
+}
+
+.scholar-view p {
+  color: #2d2d2d !important;
+}
+
+.scholar-view strong {
+  color: #7c2d12 !important;
+}
+
+.scholar-view blockquote {
+  color: #7c2d12 !important;
+  border-left-color: #7c2d12 !important;
+  background: rgba(124, 45, 18, 0.05) !important;
+}
+
+/* Eye-catching table styles */
+.birth-details-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 2px solid #D4AF37;
+}
+
+.birth-details-table th {
+  background: #D4AF37;
+  color: #451a03;
+  padding: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 900;
+}
+
+.conclusion-section {
+  background-color: #fffbeb !important;
+  border: 2px solid #d4af37 !important;
+  border-radius: 1.5rem !important;
+  padding: 2rem !important;
+  margin-top: 2rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  color: #451a03 !important;
+}
+
+.conclusion-section h3 {
+  color: #92400e !important;
+  margin-top: 0 !important;
+  border-bottom: 2px solid #d4af37 !important;
+}
+
+.conclusion-section p {
+  color: #451a03 !important;
+  margin-bottom: 0 !important;
+}

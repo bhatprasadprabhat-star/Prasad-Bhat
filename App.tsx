@@ -1,13 +1,28 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stars, Sparkles, Moon, Sun, Compass } from 'lucide-react';
-import { AppTab, Language, UserIntake, MatchingIntake, UserMode, PlanetPosition, CityData } from './types';
+import { Stars, Sparkles, Moon, Sun, Compass, Heart, MessageSquare, HelpCircle, ChevronDown, User } from 'lucide-react';
+import { AppTab, Language, UserIntake, MatchingIntake, UserMode, PlanetPosition, CityData, OnboardingStep } from './types';
 import LiveAstrologer from './components/LiveAstrologer';
 import SearchAssistant from './components/SearchAssistant';
+import SuggestionBox from './components/SuggestionBox';
 import SouthIndianChart from './components/SouthIndianChart';
-import { generateHoroscope, findMuhurtha, matchKundali, generateDailyForecastForRasi, searchCities, generatePrashnaAnalysis } from './services/gemini';
-import { RASIS, TRANSLATIONS, LANGUAGES, COLORS, HOURS, MINUTES, MUHURTA_TYPES } from './constants';
+import DonateSection from './components/DonateSection';
+import ContactAstrologer from './components/ContactAstrologer';
+import Panchanga from './components/Panchanga';
+import TimelineDashboard from './components/TimelineDashboard';
+import DailyPanchangaWidget from './components/DailyPanchangaWidget';
+import PrashnaEngine from './components/PrashnaEngine';
+import MuhurthaLiveFeed from './components/MuhurthaLiveFeed';
+import ShadbalaChart from './components/ShadbalaChart';
+import SadvargaChart from './components/SadvargaChart';
+import VedicRemedyGenerator from './components/VedicRemedyGenerator';
+import BlogSection from './components/BlogSection';
+import DailyWisdom from './components/DailyWisdom';
+import UserProfile from './components/UserProfile';
+import { AshtakavargaTable, VimshottariTable, GrahaMaitriTable, BhavaPhala, BirthDetailsTable } from './components/AstroTables';
+import { generateHoroscope, findMuhurtha, matchKundali, generateDailyForecastForRasi, searchCities, generatePrashnaAnalysis, generateMuhurthaImage } from './services/gemini';
+import { RASIS, TRANSLATIONS, LANGUAGES, COLORS, HOURS, MINUTES, MUHURTA_TYPES, JYOTISH_QUOTES } from './constants';
 
 const MandalaBackground = React.memo(() => (
   <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -15,35 +30,26 @@ const MandalaBackground = React.memo(() => (
     <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#020617]"></div>
     
     {/* Animated Stars */}
-    <div className="absolute inset-0 opacity-30">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
+    <div className="absolute inset-0 opacity-20">
+      {[...Array(20)].map((_, i) => (
+        <div
           key={i}
-          className="absolute w-1 h-1 bg-white rounded-full"
-          initial={{ 
-            x: Math.random() * 100 + 'vw', 
-            y: Math.random() * 100 + 'vh',
-            opacity: Math.random(),
-            scale: Math.random() * 0.5 + 0.5
-          }}
-          animate={{ 
-            opacity: [0.2, 0.8, 0.2],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{ 
-            duration: Math.random() * 3 + 2, 
-            repeat: Infinity,
-            ease: "easeInOut"
+          className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+          style={{ 
+            left: Math.random() * 100 + '%', 
+            top: Math.random() * 100 + '%',
+            animationDelay: Math.random() * 5 + 's',
+            opacity: Math.random() * 0.5 + 0.2
           }}
         />
       ))}
     </div>
 
     {/* Rotating Mandala */}
-    <div className="absolute inset-0 flex items-center justify-center opacity-[0.05]">
+    <div className="absolute inset-0 flex items-center justify-center opacity-[0.08]">
       <motion.svg 
         viewBox="0 0 200 200" 
-        className="w-[180vmax] h-[180vmax] text-[#D4AF37]"
+        className="w-[150vmax] sm:w-[180vmax] h-[150vmax] sm:h-[180vmax] text-[#D4AF37]"
         animate={{ rotate: 360 }}
         transition={{ duration: 400, repeat: Infinity, ease: "linear" }}
       >
@@ -58,16 +64,15 @@ const MandalaBackground = React.memo(() => (
       </motion.svg>
     </div>
 
-    {/* Subtle Nebula Clouds */}
-    <div className="absolute inset-0 opacity-20 mix-blend-screen">
-      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#431407] blur-[150px] rounded-full animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#1e1b4b] blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-    </div>
+      <div className="absolute inset-0 opacity-20 mix-blend-screen">
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#92400e] blur-[150px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#1e1b4b] blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
   </div>
 ));
 
 const FantasticLogo = React.memo(({ className = "" }: { className?: string }) => (
-  <div className={`relative w-36 h-36 sm:w-56 md:w-80 group cursor-default perspective-1000 ${className}`}>
+  <div className={`relative w-28 h-28 sm:w-48 md:w-64 group cursor-default perspective-1000 ${className}`}>
     <div className="absolute inset-[-10px] sm:inset-[-25px] border-2 border-[#D4AF37]/50 rounded-full animate-[spin_100s_linear_infinite]"></div>
     <div className="absolute inset-0 animate-[spin_70s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity duration-1000">
       <svg viewBox="0 0 100 100" className="w-full h-full fill-[#D4AF37]">
@@ -79,15 +84,15 @@ const FantasticLogo = React.memo(({ className = "" }: { className?: string }) =>
         ))}
       </svg>
     </div>
-    <div className="absolute inset-8 sm:inset-12 md:inset-16 bg-gradient-to-tr from-[#D4AF37]/40 via-[#FFD700]/30 to-transparent rounded-full blur-[30px] sm:blur-[70px] transition-all duration-1000 animate-pulse"></div>
+    <div className="absolute inset-8 sm:inset-12 md:inset-16 bg-gradient-to-tr from-[#D4AF37]/40 via-[#B8860B]/30 to-transparent rounded-full blur-[30px] sm:blur-[70px] transition-all duration-1000 animate-pulse"></div>
     <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 md:p-8">
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_50px_rgba(212,175,55,0.7)]">
         <g className="animate-[pulse_4s_easeInOut_infinite]">
           {[...Array(48)].map((_, i) => (
-            <path key={i} d="M50 5 L51.5 35 L48.5 35 Z" fill={i % 2 === 0 ? "#D4AF37" : "#FFD700"} transform={`rotate(${i * 7.5} 50 50)`} />
+            <path key={i} d="M50 5 L51.5 35 L48.5 35 Z" fill={i % 2 === 0 ? "#D4AF37" : "#B8860B"} transform={`rotate(${i * 7.5} 50 50)`} />
           ))}
         </g>
-        <circle cx="50" cy="50" r="22" fill="#431407" className="stroke-[#D4AF37] stroke-[1.5]" />
+        <circle cx="50" cy="50" r="22" fill="#451a03" className="stroke-[#D4AF37] stroke-[1.5]" />
         <text x="50" y="55" fontSize="14" textAnchor="middle" fill="#D4AF37" className="astrological-font font-bold">ॐ</text>
       </svg>
     </div>
@@ -99,20 +104,20 @@ const TimePicker = ({ time, ampm, onChange }: { time: string, ampm: string, onCh
   return (
     <div className="flex gap-1.5 w-full">
       <div className="flex-1 relative">
-        <select value={h} onChange={e => onChange(`${e.target.value}:${m}`, ampm)} className="details-input text-center appearance-none cursor-pointer w-full bg-white font-bold text-[#431407]">
+        <select value={h} onChange={e => onChange(`${e.target.value}:${m}`, ampm)} className="details-input text-center appearance-none cursor-pointer w-full bg-white font-bold text-[#451a03]">
           {HOURS.map(hour => <option key={hour} value={hour}>{hour}</option>)}
         </select>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#431407] text-[10px]">▼</div>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#451a03] text-[10px]">▼</div>
       </div>
-      <span className="flex items-center font-black text-[#431407] text-lg">:</span>
+      <span className="flex items-center font-black text-[#451a03] text-lg">:</span>
       <div className="flex-1 relative">
-        <select value={m} onChange={e => onChange(`${h}:${e.target.value}`, ampm)} className="details-input text-center appearance-none cursor-pointer w-full bg-white font-bold text-[#431407]">
+        <select value={m} onChange={e => onChange(`${h}:${e.target.value}`, ampm)} className="details-input text-center appearance-none cursor-pointer w-full bg-white font-bold text-[#451a03]">
           {MINUTES.map(min => <option key={min} value={min}>{min}</option>)}
         </select>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#431407] text-[10px]">▼</div>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#451a03] text-[10px]">▼</div>
       </div>
       <div className="w-18 sm:w-24 relative">
-        <select value={ampm} onChange={e => onChange(time, e.target.value)} className="details-input text-center appearance-none cursor-pointer w-full bg-[#431407] text-[#D4AF37] font-black">
+        <select value={ampm} onChange={e => onChange(time, e.target.value)} className="details-input text-center appearance-none cursor-pointer w-full bg-[#451a03] text-[#D4AF37] font-black">
           <option value="AM">AM</option>
           <option value="PM">PM</option>
         </select>
@@ -121,22 +126,19 @@ const TimePicker = ({ time, ampm, onChange }: { time: string, ampm: string, onCh
   );
 };
 
-const CitySearch = ({ value, onChange }: { value: string, onChange: (v: CityData) => void }) => {
+const CitySearch = ({ value, onChange, placeholder }: { value: string, onChange: (v: CityData) => void, placeholder?: string }) => {
   const [suggestions, setSuggestions] = useState<CityData[]>([]);
   const [show, setShow] = useState(false);
   const timer = useRef<any>(null);
 
   const fetchSuggestions = async (val: string) => {
-    if (val.length < 3) return;
+    if (val.length < 1) return;
     const cities = await searchCities(val);
     setSuggestions(cities);
     setShow(true);
   };
 
   const handleInput = (val: string) => {
-    // We only update the string value for typing, but we need to handle the selection separately
-    // This is a bit tricky with the current structure, but let's try to keep it simple
-    // We'll pass a dummy CityData if it's just typing
     onChange({ name: val, lat: '', lon: '', tz: '' });
     clearTimeout(timer.current);
     timer.current = setTimeout(() => fetchSuggestions(val), 300);
@@ -144,13 +146,16 @@ const CitySearch = ({ value, onChange }: { value: string, onChange: (v: CityData
 
   return (
     <div className="relative w-full">
-      <input value={value} onChange={e => handleInput(e.target.value)} placeholder="Search City..." className="details-input w-full pl-4 pr-8 font-bold text-[#431407]" onFocus={() => setShow(suggestions.length > 0)} onBlur={() => setTimeout(() => setShow(false), 250)} />
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-md text-[#431407]">📍</div>
+      <input value={value} onChange={e => handleInput(e.target.value)} placeholder={placeholder || "Search City..."} className="details-input w-full pl-4 pr-8 font-bold text-[#451a03]" onFocus={() => setShow(suggestions.length > 0)} onBlur={() => setTimeout(() => setShow(false), 250)} />
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-md text-[#451a03]">📍</div>
       {show && suggestions.length > 0 && (
         <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border-2 border-[#D4AF37] rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto backdrop-blur-xl">
           {suggestions.map((city, i) => (
-            <button key={i} onMouseDown={() => { onChange(city); setShow(false); }} className="w-full px-4 py-3 text-left text-sm font-bold text-[#431407] hover:bg-[#431407] hover:text-[#D4AF37] transition-all border-b border-slate-200 last:border-0">
-              {city.name} ({city.lat}, {city.lon})
+            <button key={i} onMouseDown={() => { onChange(city); setShow(false); }} className="w-full px-4 py-3 text-left text-sm font-bold text-[#92400e] hover:bg-[#92400e] hover:text-[#D4AF37] transition-all border-b border-slate-200 last:border-0">
+              <div className="flex flex-col">
+                <span>{city.name}</span>
+                <span className="text-[10px] opacity-70">PIN: {city.pincode} • TZ: {city.tz}</span>
+              </div>
             </button>
           ))}
         </div>
@@ -159,34 +164,136 @@ const CitySearch = ({ value, onChange }: { value: string, onChange: (v: CityData
   );
 };
 
+const BirthSummary = ({ details, lang }: { details: any[], lang: Language }) => {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  const name = details.find(d => d.label.toLowerCase().includes('name'))?.value || '';
+  const date = details.find(d => d.label.toLowerCase().includes('date'))?.value || '';
+  const time = details.find(d => d.label.toLowerCase().includes('time'))?.value || '';
+  const nakshatra = details.find(d => d.label.toLowerCase().includes('nakshatra'))?.value || '';
+
+  return (
+    <div className="mb-8 text-left space-y-3 p-6 bg-[#fdf2d0]/60 backdrop-blur-sm rounded-3xl border-2 border-[#5d4037]/20 shadow-inner max-w-2xl mx-auto">
+      <div className="flex items-center justify-between border-b border-[#5d4037]/10 pb-2">
+        <span className="text-xs font-black text-[#5d4037]/60 uppercase tracking-[0.2em]">{t.name || 'Name'} :</span>
+        <span className="text-lg font-black text-[#5d4037]">{name}</span>
+      </div>
+      <div className="flex items-center justify-between border-b border-[#5d4037]/10 pb-2">
+        <span className="text-xs font-black text-[#5d4037]/60 uppercase tracking-[0.2em]">{t.date || 'Date'} :</span>
+        <span className="text-base font-bold text-[#5d4037]">{date} <span className="text-sm opacity-60 ml-2">{time}</span></span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-black text-[#5d4037]/60 uppercase tracking-[0.2em]">{t.nakshatra || 'Nakshatra'} :</span>
+        <span className="text-lg font-black text-[#5d4037]">{nakshatra}</span>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
-  const [mode, setMode] = useState<UserMode | null>(null);
+  const [lang, setLang] = useState<Language>(() => {
+    const saved = localStorage.getItem('astro_logic_lang');
+    return (saved as Language) || 'en';
+  });
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(() => {
+    const onboardingDone = localStorage.getItem('astro_logic_onboarding_v1');
+    const savedMode = localStorage.getItem('astro_logic_mode_v1');
+    if (onboardingDone && savedMode) return OnboardingStep.COMPLETED;
+    
+    // Start with Mode Selection as requested
+    return OnboardingStep.MODE_SELECT;
+  });
+  const [mode, setMode] = useState<UserMode | null>(() => {
+    const saved = localStorage.getItem('astro_logic_mode_v1');
+    return saved as UserMode || null;
+  });
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.DASHBOARD);
-  const [lang, setLang] = useState<Language>('en');
+  const [tabHistory, setTabHistory] = useState<AppTab[]>([AppTab.DASHBOARD]);
   const [horoscopeState, setHoroscopeState] = useState<'INPUT' | 'MENU' | 'ANALYSIS'>('INPUT');
   const [currentSection, setCurrentSection] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [muhurthaImage, setMuhurthaImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [chartData, setChartData] = useState<PlanetPosition[] | null>(null);
+  const [structuredData, setStructuredData] = useState<any>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isChatOverlayOpen, setIsChatOverlayOpen] = useState(false);
+  const [showRemedyContact, setShowRemedyContact] = useState(false);
   const [cache, setCache] = useState<Record<string, string>>({});
   
-  const [intake, setIntake] = useState<UserIntake & { lat: string, lon: string, tz: string }>({ 
-    name: '', dob: '2026-02-10', tob: '06:30', ampm: 'AM', pob: 'UDUPI,KAR,IND', gender: 'Male', lat: "13° 20' N", lon: "74° 45' E", tz: "+ 5:30"
+  const [intake, setIntake] = useState<UserIntake & { lat: string, lon: string, tz: string }>(() => {
+    const saved = localStorage.getItem('astro_user_intake');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved intake", e);
+      }
+    }
+    const now = new Date();
+    const dob = now.toISOString().split('T')[0];
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const tob = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    return { 
+      name: '', dob, tob, ampm, pob: 'UDUPI,KAR,IND', gender: 'Male', lat: "13° 20' N", lon: "74° 45' E", tz: "+ 5:30"
+    };
   });
   const [savedProfiles, setSavedProfiles] = useState<UserIntake[]>([]);
-  const [prashnaInput, setPrashnaInput] = useState({ question: '', pob: 'UDUPI,KAR,IND' });
+  const [prashnaInput, setPrashnaInput] = useState({ question: '', pob: 'UDUPI,KAR,IND', lat: '', lon: '', tz: '' });
+  const [muhurtaInput, setMuhurtaInput] = useState({ 
+    event: '', 
+    timeframe: '', 
+    pob: 'UDUPI,KAR,IND', 
+    lat: '', 
+    lon: '', 
+    tz: '',
+    performerName: '',
+    performerDob: '',
+    performerTob: '',
+    performerAmpm: 'AM',
+    performerPob: '',
+    performerLat: '',
+    performerLon: '',
+    performerTz: ''
+  });
+  const [muhurtaSearch, setMuhurtaSearch] = useState('');
 
-  const [matchingIntake, setMatchingIntake] = useState<MatchingIntake>({
-    person1: { name: '', dob: '2000-01-01', tob: '10:00', ampm: 'AM', pob: '', gender: 'Male' },
-    person2: { name: '', dob: '2000-01-01', tob: '10:00', ampm: 'AM', pob: '', gender: 'Female' }
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
+  const [matchingIntake, setMatchingIntake] = useState<MatchingIntake>(() => {
+    const now = new Date();
+    const dob = now.toISOString().split('T')[0];
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const tob = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    return {
+      person1: { name: '', dob, tob, ampm, pob: '', gender: 'Male' },
+      person2: { name: '', dob, tob, ampm, pob: '', gender: 'Female' }
+    };
   });
 
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  
+  // Ensure seeker/scholar keys exist with defaults
+  if (!t.seeker) t.seeker = lang === 'kn' ? 'ಸೀಕರ್' : lang === 'hi' ? 'सीकर' : 'Seeker';
+  if (!t.scholar) t.scholar = lang === 'kn' ? 'ಸ್ಕಾಲರ್' : lang === 'hi' ? 'स्कॉलर' : 'Scholar';
+  if (!t.seeker_desc) t.seeker_desc = TRANSLATIONS.en.seeker_desc;
+  if (!t.scholar_desc) t.scholar_desc = TRANSLATIONS.en.scholar_desc;
 
   useEffect(() => {
     const saved = localStorage.getItem('astro_logic_profiles_v4');
-    if (saved) setSavedProfiles(JSON.parse(saved));
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setSavedProfiles(parsed);
+      } catch (e) {
+        console.error("Failed to parse saved profiles", e);
+      }
+    }
   }, []);
 
   const handleSaveProfile = () => {
@@ -200,15 +307,50 @@ const App: React.FC = () => {
     alert("Profile Saved.");
   };
 
+  const saveToHistory = (type: string, summary: string) => {
+    const history = JSON.parse(localStorage.getItem('astro_readings_history') || '[]');
+    const newEntry = {
+      id: Date.now().toString(),
+      type,
+      date: new Date().toLocaleDateString(),
+      summary
+    };
+    const updatedHistory = [newEntry, ...history].slice(0, 10);
+    localStorage.setItem('astro_readings_history', JSON.stringify(updatedHistory));
+  };
+
+  const changeTab = (newTab: AppTab) => {
+    if (newTab !== activeTab) {
+      setTabHistory(prev => [...prev, newTab]);
+      setActiveTab(newTab);
+      setAnalysisResult(null);
+      setHoroscopeState('INPUT');
+    }
+  };
+
   const handleAction = async (type: string, payload?: any) => {
     if (!mode) return;
+
+    // Validation for place selection
+    if (type === 'HOROSCOPE' || type === 'DAILY' || type === 'MUHURTA' || type === 'MATCHING' || type === 'LIFE_PARTNER') {
+      const checkIntake = type === 'MATCHING' ? matchingIntake.person1 : intake;
+      if (!checkIntake.lat || !checkIntake.lon) {
+        setError(t.select_city_warning || 'Please select a city from the list for accurate calculations.');
+        return;
+      }
+      if (type === 'MATCHING' && (!matchingIntake.person2.lat || !matchingIntake.person2.lon)) {
+        setError(t.select_city_warning || 'Please select a city from the list for accurate calculations.');
+        return;
+      }
+    }
     
     const cacheKey = `${type}_${payload}_${lang}_${mode}_${JSON.stringify(intake)}_${JSON.stringify(matchingIntake)}_${JSON.stringify(prashnaInput)}`;
+    
     if (cache[cacheKey]) {
       const res = cache[cacheKey];
       setAnalysisResult(res);
       extractChartData(res);
-      if (type === 'HOROSCOPE' || type === 'DAILY' || type === 'MUHURTA') {
+      if (type === 'HOROSCOPE' || type === 'DAILY' || type === 'MUHURTA' || type === 'LIFE_PARTNER') {
         setHoroscopeState('ANALYSIS');
       }
       setCurrentSection(payload || type);
@@ -217,12 +359,24 @@ const App: React.FC = () => {
 
     setIsProcessing(true);
     setAnalysisResult(null);
+    setMuhurthaImage(null);
+    setError(null);
     setChartData(null);
     try {
       let res = '';
       if (type === 'HOROSCOPE') {
         setCurrentSection(payload);
         res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, payload, lang, mode);
+        setHoroscopeState('ANALYSIS');
+      } else if (type === 'LIFE_PARTNER') {
+        setCurrentSection("Life Partner Analysis");
+        const seedStr = `${intake.dob}${intake.tob}${intake.ampm}${intake.pob}`;
+        let hash = 0;
+        for (let i = 0; i < seedStr.length; i++) {
+          hash = ((hash << 5) - hash) + seedStr.charCodeAt(i);
+          hash |= 0;
+        }
+        res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, "Life Partner", lang, mode, Math.abs(hash));
         setHoroscopeState('ANALYSIS');
       } else if (type === 'DAILY') {
         setCurrentSection(payload + " Forecast");
@@ -233,171 +387,181 @@ const App: React.FC = () => {
         res = await matchKundali(matchingIntake, lang, mode);
       } else if (type === 'MUHURTA') {
         setCurrentSection(payload);
-        res = await findMuhurtha(payload, 'Planetary Alignment', lang, mode);
+        const performerDetails = muhurtaInput.performerName ? {
+          name: muhurtaInput.performerName,
+          dob: muhurtaInput.performerDob,
+          tob: `${muhurtaInput.performerTob} ${muhurtaInput.performerAmpm}`,
+          pob: muhurtaInput.performerPob,
+          lat: muhurtaInput.performerLat,
+          lon: muhurtaInput.performerLon,
+          tz: muhurtaInput.performerTz
+        } : undefined;
+        res = await findMuhurtha(payload, muhurtaInput.timeframe, lang, mode, muhurtaInput.pob, muhurtaInput.lat, muhurtaInput.lon, muhurtaInput.tz, performerDetails);
         setHoroscopeState('ANALYSIS');
+        
+        // Generate image for Muhurta
+        try {
+          const img = await generateMuhurthaImage(payload, muhurtaInput.pob);
+          if (img) setMuhurthaImage(img);
+        } catch (err) {
+          console.error("Failed to generate muhurtha image", err);
+        }
       } else if (type === 'PRASHNA') {
         setCurrentSection('Prashna Analysis');
-        res = await generatePrashnaAnalysis(prashnaInput.question, prashnaInput.pob, lang, mode);
+        res = await generatePrashnaAnalysis(prashnaInput.question, prashnaInput.pob, lang, mode, prashnaInput.lat, prashnaInput.lon, prashnaInput.tz);
       }
+      
+      if (!res) throw new Error("The stars are silent. Please try again.");
+      
       setAnalysisResult(res);
+      saveToHistory(type, `Celestial analysis for ${type === 'MATCHING' ? matchingIntake.person1.name + ' & ' + matchingIntake.person2.name : intake.name}`);
       extractChartData(res);
       setCache(prev => ({ ...prev, [cacheKey]: res }));
-    } catch (err) { console.error(err); } finally { setIsProcessing(false); }
+    } catch (err: any) { 
+      console.error(err); 
+      setError(err.message || "Celestial connection failed.");
+    } finally { 
+      setIsProcessing(false); 
+    }
   };
 
   const extractChartData = (html: string) => {
     try {
-      const match = html.match(/<script type="application\/json" id="chart-data">([\s\S]*?)<\/script>/);
-      if (match && match[1]) {
-        const data = JSON.parse(match[1]);
-        setChartData(data);
+      // Find all application/json script tags
+      const regex = /<script type="application\/json">([\s\S]*?)<\/script>/g;
+      let match;
+      let foundData = null;
+
+      while ((match = regex.exec(html)) !== null) {
+        if (match[1]) {
+          foundData = JSON.parse(match[1]);
+          break; // Take the first one for now
+        }
+      }
+
+      if (foundData) {
+        setStructuredData(foundData);
+        
+        let finalChartData = null;
+        if (Array.isArray(foundData)) {
+          finalChartData = foundData;
+        } else if (foundData && typeof foundData === 'object') {
+          finalChartData = foundData.planets || foundData.data || foundData.chart || null;
+        }
+        setChartData(Array.isArray(finalChartData) ? finalChartData : null);
       } else {
-        setChartData(null);
+        // Fallback to old id-based method
+        const oldMatch = html.match(/<script type="application\/json" id="chart-data">([\s\S]*?)<\/script>/);
+        if (oldMatch && oldMatch[1]) {
+          const data = JSON.parse(oldMatch[1]);
+          setStructuredData(data);
+          setChartData(Array.isArray(data) ? data : (data.planets || null));
+        } else {
+          setChartData(null);
+          setStructuredData(null);
+        }
       }
     } catch (e) {
       console.error("Failed to parse chart data", e);
       setChartData(null);
+      setStructuredData(null);
     }
   };
 
   const goBack = () => {
-    if (analysisResult) { setAnalysisResult(null); return; }
-    if (horoscopeState === 'MENU') { setHoroscopeState('INPUT'); }
-    else { setActiveTab(AppTab.DASHBOARD); setHoroscopeState('INPUT'); }
+    setError(null);
+    if (analysisResult) { 
+      setAnalysisResult(null); 
+      setMuhurthaImage(null);
+      return; 
+    }
+    if (horoscopeState === 'MENU') { setHoroscopeState('INPUT'); return; }
+    
+    if (tabHistory.length > 1) {
+      const newHistory = [...tabHistory];
+      newHistory.pop(); // remove current
+      const prevTab = newHistory[newHistory.length - 1];
+      setTabHistory(newHistory);
+      setActiveTab(prevTab);
+      setHoroscopeState('INPUT');
+    } else {
+      setActiveTab(AppTab.DASHBOARD);
+      setHoroscopeState('INPUT');
+    }
   };
 
-  if (!mode) {
-    return (
-      <motion.div 
-        key="mode-selection"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="min-h-screen flex flex-col items-center justify-center bg-[#020617] p-6 overflow-hidden relative"
-      >
-        <MandalaBackground />
-        <motion.div 
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="absolute top-6 sm:top-16 opacity-30 pointer-events-none scale-50 sm:scale-75"
-        >
-          <FantasticLogo />
-        </motion.div>
-        
-        <div className="z-10 text-center mb-8 sm:mb-12 mt-16">
-          <motion.h1 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-4xl sm:text-7xl font-black text-[#D4AF37] astrological-font tracking-widest uppercase mb-2 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]"
-          >
-            Astro Logic
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="text-white font-serif italic text-sm sm:text-xl tracking-wide"
-          >
-            Sacred Geometry • Ancient Logic
-          </motion.p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 w-full max-w-5xl z-10">
-          <motion.button 
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.8, type: "spring" }}
-            whileHover={{ scale: 1.02, backgroundColor: "rgba(212, 175, 55, 0.2)" }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setMode('SEEKER')}
-            className="flex-1 group relative flex flex-col items-center justify-center p-8 sm:p-14 transition-all duration-300 bg-white/10 border-2 border-[#D4AF37]/40 rounded-[2rem] sm:rounded-[3rem] shadow-xl overflow-hidden"
-          >
-            <div className="z-10 text-center space-y-4">
-              <span className="text-5xl sm:text-7xl block group-hover:scale-110 transition-transform">🌟</span>
-              <h2 className="text-2xl sm:text-4xl font-black text-[#D4AF37] uppercase tracking-wide astrological-font">Seeker</h2>
-              <p className="text-xs sm:text-sm text-white font-serif leading-relaxed max-w-[240px] mx-auto opacity-90">
-                "Simple life guidance, career flow, and daily energy in clear, accessible language."
-              </p>
-              <div className="pt-2">
-                <span className="inline-block px-6 py-3 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-[10px] font-black tracking-widest group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all">Select Seeker</span>
-              </div>
-            </div>
-          </motion.button>
-
-          <motion.button 
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.8, type: "spring" }}
-            whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 153, 51, 0.2)" }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setMode('SCHOLAR')}
-            className="flex-1 group relative flex flex-col items-center justify-center p-8 sm:p-14 transition-all duration-300 bg-white/10 border-2 border-[#FF9933]/40 rounded-[2rem] sm:rounded-[3rem] shadow-xl overflow-hidden"
-          >
-            <div className="z-10 text-center space-y-4">
-              <span className="text-5xl sm:text-7xl block group-hover:scale-110 transition-transform">📜</span>
-              <h2 className="text-2xl sm:text-4xl font-black text-[#FF9933] uppercase tracking-wide astrological-font">Scholar</h2>
-              <p className="text-xs sm:text-sm text-white font-serif leading-relaxed max-w-[240px] mx-auto opacity-90">
-                "Mathematical precision. Longitudes, classical Shlokas, and deep Siddhantic rules."
-              </p>
-              <div className="pt-2">
-                <span className="inline-block px-6 py-3 border-2 border-[#FF9933] text-[#FF9933] rounded-full uppercase text-[10px] font-black tracking-widest group-hover:bg-[#FF9933] group-hover:text-[#020617] transition-all">Select Scholar</span>
-              </div>
-            </div>
-          </motion.button>
-        </div>
-      </motion.div>
-    );
-  }
+  const ProfileButton = () => (
+    <button 
+      onClick={() => setActiveTab(AppTab.PROFILE)}
+      className="w-8 h-8 sm:w-12 sm:h-12 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-lg border-2 border-[#451a03] hover:scale-110 transition-all mr-3 shrink-0"
+    >
+      {intake.name ? (
+        <span className="text-[#451a03] font-black text-xs sm:text-lg uppercase">{intake.name[0]}</span>
+      ) : (
+        <User className="w-4 h-4 sm:w-6 sm:h-6 text-[#451a03]" />
+      )}
+    </button>
+  );
 
   const renderHoroscopeIntake = () => (
     <div className="min-h-screen parchment-bg flex flex-col animate-in slide-in-from-right duration-500 overflow-x-hidden">
       <MandalaBackground />
-      <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-6 flex items-center shadow-xl sticky top-0 z-20 border-b border-[#D4AF37]/30">
+      <header className="bg-gradient-to-b from-[#92400e] to-[#7c2d12] p-4 sm:p-6 flex items-center shadow-xl sticky top-0 z-20 border-b border-[#D4AF37]/30">
+        <ProfileButton />
         <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
         </button>
         <div className="ml-3">
-          <h2 className="text-lg sm:text-2xl font-black text-[#D4AF37] tracking-widest uppercase astrological-font leading-tight">Sacred Intake</h2>
-          <p className="text-[9px] text-white/50 uppercase font-black tracking-widest">{mode === 'SCHOLAR' ? 'Siddhantic precision' : 'Personal guidance'}</p>
+          <h2 className="text-lg sm:text-2xl font-black text-[#D4AF37] tracking-widest uppercase astrological-font leading-tight">{t.sacred_intake}</h2>
+          <p className="text-[9px] text-white/50 uppercase font-black tracking-widest">{mode === 'SCHOLAR' ? (t.siddhantic_precision || 'Siddhantic precision') : (t.personal_guidance || 'Personal guidance')}</p>
         </div>
       </header>
       <div className="flex-1 p-4 sm:p-8 space-y-8 max-w-3xl mx-auto w-full overflow-y-auto pb-48 z-10">
         <div className="grid gap-6 p-6 sm:p-10 bg-white/80 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#D4AF37]/30 shadow-2xl backdrop-blur-md">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1">Name of Soul</label>
-            <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder="Enter Full Name" className="details-input" />
+            <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
+            <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1">Birth Date</label>
+              <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_date}</label>
               <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input font-bold" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1">Birth Time</label>
+              <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_time}</label>
               <TimePicker time={intake.tob} ampm={intake.ampm || 'AM'} onChange={(t, a) => setIntake({...intake, tob: t, ampm: a})} />
             </div>
           </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1">Birth Location</label>
-              <CitySearch value={intake.pob} onChange={v => setIntake({...intake, pob: v.name, lat: v.lat, lon: v.lon, tz: v.tz})} />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_location}</label>
+            <CitySearch value={intake.pob} onChange={v => setIntake({...intake, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz, pincode: v.pincode})} placeholder={t.search_city_placeholder} />
+            {!intake.lat && intake.pob && (
+              <p className="text-[9px] text-red-600 font-bold animate-pulse ml-1">{t.select_city_warning}</p>
+            )}
+          </div>
             {intake.lat && (
-              <div className="flex gap-4 text-[9px] font-black text-[#7C2D12] uppercase tracking-widest px-2">
-                <span>Lat: {intake.lat}</span>
-                <span>Lon: {intake.lon}</span>
-                <span>TZ: {intake.tz}</span>
+              <div className="flex gap-4 text-[9px] font-black text-[#4338ca] uppercase tracking-widest px-2">
+                <span>{t.latitude || 'Lat'}: {intake.lat}</span>
+                <span>{t.longitude || 'Lon'}: {intake.lon}</span>
+                <span>{t.timezone || 'TZ'}: {intake.tz}</span>
               </div>
             )}
+          <div className="pt-6">
+            <button 
+              onClick={() => setHoroscopeState('MENU')}
+              className="w-full py-6 bg-gradient-to-r from-[#92400e] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-[#D4AF37]/30"
+            >
+              Next: Choose Analysis ➔
+            </button>
+          </div>
         </div>
         
         {savedProfiles.length > 0 && (
           <div className="p-4 sm:p-6 bg-white/50 border border-[#D4AF37]/20 rounded-3xl space-y-3">
-            <h3 className="text-[9px] font-black uppercase text-[#431407] tracking-widest text-center opacity-70">Saved Profiles</h3>
+            <h3 className="text-[9px] font-black uppercase text-[#92400e] tracking-widest text-center opacity-70">{t.saved_profiles_title}</h3>
             <div className="flex flex-wrap gap-2 justify-center">
               {savedProfiles.map((p, i) => (
-                <button key={i} onClick={() => setIntake(p as any)} className="px-4 py-2 bg-white rounded-xl text-[11px] font-bold text-[#431407] border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm transition-all active:scale-95">
+                <button key={i} onClick={() => setIntake(p as any)} className="px-4 py-2 bg-white rounded-xl text-[11px] font-bold text-[#92400e] border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm transition-all active:scale-95">
                   {p.name}
                 </button>
               ))}
@@ -405,32 +569,55 @@ const App: React.FC = () => {
           </div>
         )}
       </div>
-      <div className="bg-[#431407] fixed bottom-0 left-0 right-0 z-20 flex shadow-[0_-10px_30px_rgba(0,0,0,0.5)] border-t border-[#D4AF37]/50">
-        <button onClick={handleSaveProfile} className="flex-1 py-5 sm:py-8 bg-transparent text-[#D4AF37] uppercase text-[10px] font-black tracking-widest border-r border-white/10 active:bg-white/10">💾 Save</button>
-        <button onClick={() => setHoroscopeState('MENU')} className="flex-[2] py-5 sm:py-8 bg-gradient-to-r from-yellow-600 to-yellow-500 text-[#431407] uppercase text-[11px] sm:text-xs font-black tracking-[0.2em] active:brightness-90 transition-all">Continue ➔</button>
+      <div className="bg-[#312e81] fixed bottom-0 left-0 right-0 z-[60] flex shadow-[0_-10px_30px_rgba(0,0,0,0.5)] border-t border-[#D4AF37]/50">
+        <button onClick={handleSaveProfile} className="flex-1 py-5 sm:py-8 bg-transparent text-[#D4AF37] uppercase text-[10px] font-black tracking-widest border-r border-white/10 active:bg-white/10">💾 {t.save_info}</button>
+        <button onClick={() => setHoroscopeState('MENU')} className="flex-[2] py-5 sm:py-8 bg-gradient-to-r from-amber-600 to-amber-500 text-[#312e81] uppercase text-[11px] sm:text-xs font-black tracking-[0.2em] active:brightness-90 transition-all">{t.next_page} ➔</button>
       </div>
     </div>
   );
 
   const renderTabContent = () => {
     if (analysisResult) {
+      if (analysisResult.trim() === '') {
+        return (
+          <div className="min-h-screen flex items-center justify-center parchment-bg">
+            <div className="text-center p-8 bg-white/80 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
+              <p className="text-[#312e81] font-bold mb-4">{t.stars_obscured || 'The stars are obscured by clouds. Please try again.'}</p>
+              <button onClick={() => setAnalysisResult(null)} className="astro-btn-maroon px-6 py-2 rounded-full">{t.go_back || 'Go Back'}</button>
+            </div>
+          </div>
+        );
+      }
       return (
         <motion.div 
           key="analysis"
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          exit={{ opacity: 0, scale: 1.02 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
         >
           <MandalaBackground />
-          <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-6 flex items-center shadow-2xl sticky top-0 z-30 border-b border-[#D4AF37]/40">
-            <button onClick={() => setAnalysisResult(null)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
-              <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+          <header className="bg-gradient-to-b from-[#451a03] to-[#7c2d12] p-4 sm:p-6 flex items-center justify-between shadow-2xl sticky top-0 z-30 border-b border-[#D4AF37]/40">
+            <div className="flex items-center">
+              <ProfileButton />
+              <button onClick={() => setAnalysisResult(null)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <h2 className="ml-3 text-lg sm:text-xl font-black text-[#D4AF37] truncate astrological-font uppercase tracking-widest">{currentSection}</h2>
+            </div>
+            <button onClick={() => { setAnalysisResult(null); setActiveTab(AppTab.DASHBOARD); }} className="p-2 text-[#D4AF37] hover:bg-white/10 rounded-full transition-all">
+              <Compass className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
-            <h2 className="ml-3 text-lg sm:text-xl font-black text-[#D4AF37] truncate astrological-font uppercase tracking-widest">{currentSection}</h2>
           </header>
           <div className="flex-1 p-4 sm:p-10 md:p-16 overflow-y-auto max-w-6xl mx-auto w-full pb-48 z-10">
+            {error && (
+              <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-2xl text-red-800 text-center font-bold">
+                <span className="text-2xl block mb-2">⚠️</span>
+                {error}
+                <button onClick={() => setError(null)} className="block mx-auto mt-4 text-sm underline">{t.dismiss || 'Dismiss'}</button>
+              </div>
+            )}
             {chartData && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -438,17 +625,163 @@ const App: React.FC = () => {
                 transition={{ delay: 0.3 }}
                 className="mb-10"
               >
-                <h3 className="text-center text-[#431407] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">Celestial Map (Rasi)</h3>
-                <SouthIndianChart data={chartData} />
+                {structuredData && structuredData.type === 'birth_details' && structuredData.details && (
+                  <BirthSummary details={structuredData.details} lang={lang} />
+                )}
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.celestial_map}</h3>
+                <SouthIndianChart data={chartData} lang={lang} title={t.menu_rasi || 'Rasi Kundli'} />
               </motion.div>
             )}
+
+            {structuredData && structuredData.type === 'birth_details' && structuredData.details && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.menu_details || 'Jataka Birth Details'}</h3>
+                <BirthDetailsTable details={structuredData.details} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'navamsha' && structuredData.planets && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.menu_navamsha || 'Navamsha D9'}</h3>
+                <SouthIndianChart data={structuredData.planets} lang={lang} title={t.menu_navamsha || 'Navamsha D9'} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'ashtakavarga' && structuredData.table && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#312e81] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.ashtakavarga || 'Ashtakavarga'}</h3>
+                <AshtakavargaTable data={structuredData.table} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'vimshottari' && structuredData.dashas && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.vimshottari || 'Vimshottari Dasha'}</h3>
+                <VimshottariTable dashas={structuredData.dashas} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'grahamaitri' && structuredData.matrix && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.menu_maitri || 'Panchadha Graha Maitri'}</h3>
+                <GrahaMaitriTable matrix={structuredData.matrix} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'bhavaphala' && structuredData.houses && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.menu_bhava_analysis || '12 Houses Analysis'}</h3>
+                <BhavaPhala houses={structuredData.houses} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'shadvarga' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10 space-y-12"
+              >
+                <SadvargaChart vargas={structuredData.vargas} lords={structuredData.lords} lang={lang} />
+              </motion.div>
+            )}
+
+            {structuredData && structuredData.type === 'shadbala' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10 space-y-12"
+              >
+                <ShadbalaChart lang={lang} shadbalaData={structuredData.shadbala} />
+              </motion.div>
+            )}
+
+            {activeTab === AppTab.MUHURTHA && muhurthaImage && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-10 overflow-hidden rounded-[2rem] sm:rounded-[3rem] border-4 border-[#D4AF37]/30 shadow-2xl"
+              >
+                <img 
+                  src={muhurthaImage} 
+                  alt="Muhurtha Ritual" 
+                  className="w-full h-auto object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </motion.div>
+            )}
+
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className={`analysis-rich-text detailed-view p-6 sm:p-12 md:p-16 bg-white/95 border-2 border-[#D4AF37]/20 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
+              className={`analysis-rich-text detailed-view p-4 sm:p-12 md:p-16 bg-white/95 border-2 border-[#D4AF37]/20 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-x-auto ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
               dangerouslySetInnerHTML={{ __html: analysisResult }} 
             />
+
+            {mode === 'SEEKER' && (
+              <div className="mt-12 p-8 sm:p-12 bg-white/40 border-4 border-[#D4AF37]/20 rounded-[2rem] sm:rounded-[3rem] text-center">
+                <p className="text-xl sm:text-4xl font-black text-[#451a03] uppercase tracking-tighter leading-tight drop-shadow-sm">
+                  {t.disclaimer || 'Astrological predictions are based on planetary calculations and indicate possibilities, not guaranteed outcomes.'}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-8">
+              <button 
+                onClick={() => setShowRemedyContact(true)}
+                className="w-full py-6 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-[2rem] font-black uppercase tracking-[0.3em] text-sm shadow-2xl hover:scale-[1.02] active:scale-95 transition-all border-2 border-[#D4AF37]/30 flex items-center justify-center gap-4"
+              >
+                <span className="text-2xl">🍃</span>
+                {t.tambula_offering || 'Offer Tambula'}
+              </button>
+            </div>
+
+            {showRemedyContact && (
+              <ContactAstrologer lang={lang} initialStep="FORM" onClose={() => setShowRemedyContact(false)} />
+            )}
+            <div className="mt-12 text-center space-y-8">
+              <SuggestionBox lang={lang} />
+              
+              <button 
+                onClick={() => setIsDonateOpen(true)}
+                className="group inline-flex items-center gap-3 px-10 py-5 bg-[#D4AF37] text-[#92400e] rounded-full text-lg font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl"
+              >
+                <Heart className="w-6 h-6 fill-current" />
+                {t.support_guruji}
+              </button>
+            </div>
           </div>
         </motion.div>
       );
@@ -458,45 +791,95 @@ const App: React.FC = () => {
         return (
           <motion.div 
             key="dashboard"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen flex flex-col parchment-bg overflow-x-hidden relative"
           >
             <MandalaBackground />
+            {error && (
+              <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[70] w-[90%] max-w-md p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-800 text-center font-bold shadow-2xl animate-in slide-in-from-top-4">
+                {error}
+                <button onClick={() => setError(null)} className="ml-4 text-xs underline">✕</button>
+              </div>
+            )}
             <nav className="w-full px-4 sm:px-8 py-5 sm:py-10 flex justify-between items-center z-20">
               <div className="flex items-center gap-3">
                 <button 
+                  onClick={() => setActiveTab(AppTab.PROFILE)}
+                  className="w-10 h-10 sm:w-16 sm:h-16 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-xl border-2 border-[#451a03] hover:scale-110 transition-all z-30"
+                >
+                  {intake.name ? (
+                    <span className="text-[#451a03] font-black text-lg sm:text-2xl uppercase">{intake.name[0]}</span>
+                  ) : (
+                    <User className="w-6 h-6 sm:w-10 sm:h-10 text-[#451a03]" />
+                  )}
+                </button>
+                <button 
                   onClick={() => setMode(null)}
-                  className="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-[#431407] to-[#1a0803] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl border-2 border-[#D4AF37]/40 rotate-1 transition-all"
+                  className="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-[#451a03] to-[#7c2d12] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl border-2 border-[#D4AF37]/40 rotate-1 transition-all"
                 >
                    <span className="text-white text-xl sm:text-3xl">☀️</span>
                 </button>
                 <div className="flex flex-col -gap-1">
-                  <span className="text-xl sm:text-4xl font-black text-[#431407] tracking-tighter uppercase astrological-font leading-none">Astro Logic</span>
-                  <span className="text-[8px] sm:text-[11px] font-black text-[#7C2D12] uppercase tracking-[0.3em] ml-0.5">{mode === 'SCHOLAR' ? 'Siddhantic' : 'Seeker Path'}</span>
+                  <span className="text-lg sm:text-4xl font-black text-[#451a03] tracking-tighter uppercase astrological-font leading-none">{t.brand_name || 'Astrologic'}</span>
+                  <span className="text-[8px] sm:text-[11px] font-black text-[#7C2D12] uppercase tracking-[0.3em] ml-0.5">{mode === 'SCHOLAR' ? (t.siddhantic_precision || 'Siddhantic Precision') : (t.personal_guidance || 'Personal Guidance')}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <div className="relative group">
+                  <select 
+                    value={lang} 
+                    onChange={(e) => setLang(e.target.value as Language)} 
+                    className="bg-white/50 backdrop-blur-md border-2 border-[#D4AF37]/40 text-[#451a03] text-[10px] sm:text-[12px] font-black rounded-full px-4 py-2 appearance-none cursor-pointer shadow-md tracking-widest hover:border-[#D4AF37] transition-all outline-none"
+                  >
+                    {LANGUAGES.map(l => (
+                      <option key={l.code} value={l.code} className="bg-white text-[#451a03] font-bold">{l.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <button 
                   onClick={() => setMode(null)}
-                  className="hidden sm:flex items-center gap-2 px-5 py-2.5 border-2 border-[#431407] bg-[#431407] rounded-full text-[10px] font-black uppercase text-[#D4AF37] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md group"
+                  className="hidden sm:flex items-center gap-2 px-5 py-2.5 border-2 border-[#D4AF37] bg-[#D4AF37] rounded-full text-[10px] font-black uppercase text-[#451a03] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md group"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-                  Path
+                  {t.path || 'Path'}
                 </button>
-                <select value={lang} onChange={(e) => setLang(e.target.value as Language)} className="bg-white border-2 border-[#D4AF37]/40 text-[#431407] text-[11px] font-black rounded-full px-5 py-2 appearance-none cursor-pointer shadow-lg uppercase tracking-wider">
-                  {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-                </select>
               </div>
             </nav>
+
+            {/* Planetary Transit Ticker */}
+            <div className="w-full bg-black/5 backdrop-blur-sm border-y border-[#D4AF37]/10 py-2 overflow-hidden mb-8 z-10">
+              <motion.div 
+                animate={{ x: ["100%", "-100%"] }}
+                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                className="flex items-center gap-12 whitespace-nowrap"
+              >
+                {[
+                  { p: t.planet_sun || 'Sun', r: t.rasi_kumbha || 'Kumbha', d: '18°' },
+                  { p: t.planet_moon || 'Moon', r: t.rasi_kanya || 'Kanya', d: '04°' },
+                  { p: t.planet_mars || 'Mars', r: t.rasi_mithuna || 'Mithuna', d: '22°' },
+                  { p: t.planet_jupiter || 'Jupiter', r: t.rasi_mesha || 'Mesha', d: '12°' },
+                  { p: t.planet_saturn || 'Saturn', r: t.rasi_kumbha || 'Kumbha', d: '09°' },
+                  { p: t.planet_venus || 'Venus', r: t.rasi_meena || 'Meena', d: '27°' }
+                ].map((tr, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest">{tr.p}</span>
+                    <span className="text-[10px] font-bold text-[#451a03]/60 uppercase tracking-widest">{t.planetary_transit_in || 'in'}</span>
+                    <span className="text-[10px] font-black text-[#451a03] uppercase tracking-widest">{tr.r}</span>
+                    <span className="text-[10px] font-bold text-[#D4AF37]">{tr.d}</span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
 
             <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-16 text-center max-w-7xl mx-auto w-full relative z-10">
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="mb-8 sm:mb-12 scale-75 sm:scale-100"
+                className="mb-12 sm:mb-20 scale-75 sm:scale-100"
               >
                 <FantasticLogo />
               </motion.div>
@@ -504,73 +887,114 @@ const App: React.FC = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-4xl sm:text-7xl md:text-9xl font-black text-[#431407] mb-4 sm:mb-8 tracking-tighter astrological-font leading-tight drop-shadow-lg"
+                className="text-3xl sm:text-7xl md:text-9xl font-black text-[#D4AF37] mb-4 sm:mb-8 tracking-tighter astrological-font leading-tight drop-shadow-lg"
               >
-                Astro Logic
+                {t.brand_name || 'Astro Logic'}
               </motion.h1>
               <motion.p 
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-sm sm:text-2xl md:text-3xl font-serif italic text-[#7C2D12] max-w-4xl mx-auto opacity-95 mb-10 sm:mb-20 leading-relaxed px-4 italic"
+                className="text-sm sm:text-2xl md:text-3xl font-serif italic text-[#4338ca] max-w-4xl mx-auto opacity-95 mb-10 sm:mb-20 leading-relaxed px-4 italic"
               >
                 "{t.tagline}"
               </motion.p>
 
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6 w-full px-2">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 w-full px-2 mb-12">
                 {[
-                  { id: AppTab.HOROSCOPE, label: t.horoscope, icon: '📜', desc: mode === 'SCHOLAR' ? 'Precision' : 'Journey' },
-                  { id: AppTab.DAILY_PREDICTION, label: t.daily, icon: '📅', desc: mode === 'SCHOLAR' ? 'Transits' : 'Energy' },
-                  { id: AppTab.MATCHING, label: t.matching, icon: '💑', desc: mode === 'SCHOLAR' ? 'Synergy' : 'Love' },
-                  { id: AppTab.MUHURTHA, label: t.muhurta, icon: '⏰', desc: mode === 'SCHOLAR' ? 'Kala' : 'Lucky' },
-                  { id: AppTab.PRASHNA, label: 'Prashna', icon: '❓', desc: mode === 'SCHOLAR' ? 'Horary' : 'Oracle' }
+                  { id: AppTab.HOROSCOPE, label: t.horoscope, icon: '📜', desc: mode === 'SCHOLAR' ? (t.shastriya || 'Shastriya') : (t.life_path || 'Life Path') },
+                  { id: AppTab.DAILY_PREDICTION, label: t.daily, icon: '📅', desc: mode === 'SCHOLAR' ? (t.timeline || 'Timeline') : (t.daily_title || 'Daily') },
+                  { id: AppTab.PANCHANGA, label: t.panchanga_title, icon: '🕉️', desc: mode === 'SCHOLAR' ? (t.siddhantic || 'Siddhantic') : (t.today_panchanga || 'Today') },
+                  { id: AppTab.TIMELINE, label: t.timeline_title, icon: '📈', desc: mode === 'SCHOLAR' ? (t.life_phase || 'Life Phase') : (t.life_path || 'Progress') },
+                  { id: AppTab.MATCHING, label: t.matching, icon: '💑', desc: mode === 'SCHOLAR' ? (t.matching_title || 'Matching') : (t.matching || 'Love') },
+                  { id: AppTab.PRASHNA, label: lang === 'kn' ? 'ಪ್ರಶ್ನ ಶಾಸ್ತ್ರ' : 'Prashna', icon: '❓', desc: 'Instant Oracle' },
+                  { id: AppTab.LIFE_PARTNER, label: t.life_partner || 'Life Partner', icon: '💍', desc: 'Possible Traits' },
+                  { id: AppTab.MUHURTHA, label: t.muhurta, icon: '⏰', desc: mode === 'SCHOLAR' ? (t.muhurta_title || 'Muhurta') : (t.muhurta || 'Lucky') },
+                  { id: AppTab.PROFILE, label: t.profile || 'Profile', icon: '👤', desc: 'Soul Details' },
+                  { id: AppTab.BLOG, label: lang === 'kn' ? 'ಜ್ಞಾನ ಭಂಡಾರ' : lang === 'tcy' ? 'ಜ್ಞಾನದ ಬಂಡಾರ' : 'Blog', icon: '📚', desc: 'Siddhanta & Hora' }
                 ].map((item, idx) => (
                   <motion.button 
                     key={item.id} 
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5 + idx * 0.1 }}
-                    onClick={() => setActiveTab(item.id)} 
+                    onClick={() => changeTab(item.id)} 
                     className="group relative bg-white/70 border-2 border-[#D4AF37]/20 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 transition-all duration-300 hover:bg-white hover:-translate-y-1.5 hover:shadow-2xl flex flex-col items-center gap-2 sm:gap-4 shadow-xl backdrop-blur-md overflow-hidden"
                   >
-                    <span className="text-4xl sm:text-6xl group-hover:scale-110 transition-all drop-shadow-md">{item.icon}</span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="text-4xl sm:text-6xl group-hover:scale-110 group-hover:rotate-6 transition-all drop-shadow-md">{item.icon}</span>
                     <div className="space-y-0.5">
-                      <h3 className="text-[10px] sm:text-sm md:text-lg font-black uppercase tracking-wider text-[#431407] whitespace-nowrap">{item.label}</h3>
-                      <p className="text-[8px] sm:text-[10px] text-[#7C2D12]/70 uppercase font-black tracking-widest">{item.desc}</p>
+                      <h3 className="text-[10px] sm:text-sm md:text-lg font-black uppercase tracking-wider text-[#451a03]">{item.label}</h3>
+                      <p className="text-[8px] sm:text-[10px] text-[#451a03]/50 uppercase font-black tracking-widest">{item.desc}</p>
                     </div>
                   </motion.button>
                 ))}
               </div>
+
+              <div className="w-full max-w-6xl mx-auto px-4 space-y-12 mb-20">
+                <DailyWisdom lang={lang} />
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <MuhurthaLiveFeed lang={lang} />
+                  {mode !== 'SCHOLAR' && <VedicRemedyGenerator lang={lang} />}
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <ContactAstrologer lang={lang} />
+                  <SuggestionBox lang={lang} />
+                </div>
+              </div>
+
+              <motion.div 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                className="mt-12 mb-4"
+              >
+                <button 
+                  onClick={() => setIsDonateOpen(true)}
+                  className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] rounded-full text-[10px] font-black uppercase text-[#451a03] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(212,175,55,0.3)] border-2 border-[#451a03]/10"
+                >
+                  <Heart className="w-4 h-4 fill-current animate-pulse" />
+                  Donate & Support
+                </button>
+              </motion.div>
             </section>
             
-            <footer className="w-full py-8 text-center text-[8px] sm:text-[10px] text-[#431407]/40 font-black uppercase tracking-[0.8em] z-10 px-4">Divine Order • Celestial Alignment • Deep Knowledge</footer>
+            <footer className="w-full py-8 text-center text-[8px] sm:text-[10px] text-[#451a03]/40 font-black uppercase tracking-[0.8em] z-10 px-4">{t.footer_text}</footer>
           </motion.div>
         );
       case AppTab.HOROSCOPE:
         return horoscopeState === 'MENU' ? (
           <motion.div 
             key="horoscope-menu"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
           >
             <MandalaBackground />
-            <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+            <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+              <ProfileButton />
               <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
                 <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">Analysis</h2>
+              <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">{t.analysis_tab_title || 'Analysis'}</h2>
             </header>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 p-6 sm:p-12 flex-1 overflow-y-auto max-w-6xl mx-auto w-full pb-48 z-10">
               {[ 
-                { id: 'menu_details', label: mode === 'SCHOLAR' ? 'Birth Analysis' : 'My Character' }, 
-                { id: 'menu_timeline', label: mode === 'SCHOLAR' ? 'Timeline' : 'Life Path' },
-                { id: 'menu_hora', label: mode === 'SCHOLAR' ? 'Shastriya' : 'Wealth & Health' },
-                { id: 'menu_rasi', label: mode === 'SCHOLAR' ? 'Rasi Kundli' : 'The Soul Map' }, 
-                { id: 'menu_dasha', label: mode === 'SCHOLAR' ? 'Vimshottari' : 'Life Phase' }, 
-                { id: 'menu_ashtaka', label: mode === 'SCHOLAR' ? 'Ashtakavarga' : 'Power Score' } 
+                { id: 'menu_details', label: mode === 'SCHOLAR' ? (t.birth_analysis || 'Birth Analysis') : (t.my_character || 'My Character') }, 
+                { id: 'menu_timeline', label: mode === 'SCHOLAR' ? (t.timeline || 'Timeline') : (t.life_path || 'Life Path') },
+                { id: 'menu_hora', label: mode === 'SCHOLAR' ? (t.shastriya || 'Shastriya') : (t.wealth_health || 'Wealth & Health') },
+                { id: 'menu_rasi', label: mode === 'SCHOLAR' ? (t.rasi_kundli || 'Rasi Kundli') : (t.soul_map || 'The Soul Map') }, 
+                { id: 'menu_navamsha', label: mode === 'SCHOLAR' ? (t.menu_navamsha || 'Navamsha D9') : (t.menu_navamsha || 'Navamsha') },
+                { id: 'menu_bhava_analysis', label: mode === 'SCHOLAR' ? (t.menu_bhava_analysis || '12 Houses Analysis') : (t.menu_bhava_analysis || 'House Power') },
+                { id: 'menu_yogas', label: mode === 'SCHOLAR' ? (t.menu_yogas || 'Yoga Analysis') : (t.menu_yogas || 'Yogas') },
+                { id: 'menu_maitri', label: mode === 'SCHOLAR' ? (t.menu_maitri || 'Panchadha Graha Maitri') : (t.menu_maitri || 'Friendship') },
+                { id: 'menu_dasha', label: mode === 'SCHOLAR' ? (t.vimshottari || 'Vimshottari') : (t.life_phase || 'Life Phase') }, 
+                { id: 'menu_shadvarga', label: mode === 'SCHOLAR' ? (t.shadvarga_strengths || 'Shadvarga') : (t.planetary_power || 'Planetary Power') },
+                { id: 'menu_shadbala', label: mode === 'SCHOLAR' ? (t.shadbala_analysis || 'Shadbala') : (t.energy_strength || 'Energy Strength') },
+                { id: 'menu_ashtaka', label: mode === 'SCHOLAR' ? (t.ashtakavarga || 'Ashtakavarga') : (t.power_score || 'Power Score') } 
               ].map((item, idx) => (
                 <motion.button 
                   key={item.id} 
@@ -579,10 +1003,10 @@ const App: React.FC = () => {
                   transition={{ delay: idx * 0.05 }}
                   whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => handleAction('HOROSCOPE', item.label)} 
+                  onClick={() => handleAction('HOROSCOPE', item.id)} 
                   className="menu-button-parchment group p-8 sm:p-12 border-2 rounded-[2rem] sm:rounded-[3rem] shadow-xl transition-all"
                 >
-                  <span className="text-sm sm:text-lg md:text-xl font-black text-[#431407] group-hover:text-[#7C2D12] transition-colors uppercase tracking-widest">{item.label}</span>
+                  <span className="text-sm sm:text-lg md:text-xl font-black text-[#92400e] group-hover:text-[#ea580c] transition-colors uppercase tracking-widest">{item.label}</span>
                 </motion.button>
               ))}
             </div>
@@ -603,14 +1027,15 @@ const App: React.FC = () => {
         return (
           <motion.div 
             key="daily"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
           >
              <MandalaBackground />
-             <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+             <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+                <ProfileButton />
                 <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
                   <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                 </button>
@@ -629,7 +1054,7 @@ const App: React.FC = () => {
                     className="menu-button-parchment aspect-square flex flex-col items-center justify-center gap-2 sm:gap-5 group rounded-[1.5rem] sm:rounded-[2.5rem] shadow-lg"
                   >
                     <span className="text-4xl sm:text-7xl group-hover:rotate-6 transition-all drop-shadow-lg">{rasi.icon}</span>
-                    <span className="text-[10px] sm:text-sm md:text-lg font-black uppercase tracking-widest text-[#431407]">{rasi.name}</span>
+                    <span className="text-[10px] sm:text-sm md:text-lg font-black uppercase tracking-widest text-[#92400e]">{t[rasi.label_key] || rasi.name}</span>
                   </motion.button>
                 ))}
              </div>
@@ -639,32 +1064,48 @@ const App: React.FC = () => {
         return (
           <motion.div 
             key="matching"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
           >
              <MandalaBackground />
-             <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+             <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+                <ProfileButton />
                 <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
                   <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] tracking-tight uppercase astrological-font">Matching</h2>
+                <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] tracking-tight uppercase astrological-font">{t.matching_tab_title || 'Matching'}</h2>
              </header>
-             <div className="p-4 sm:p-10 md:p-16 max-w-5xl mx-auto w-full space-y-8 sm:space-y-16 pb-48 z-10">
+             <div className="p-4 sm:p-10 md:p-16 max-w-5xl mx-auto w-full space-y-12 sm:space-y-20 pb-48 z-10">
                 <motion.div 
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="p-6 sm:p-12 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-6 shadow-2xl relative backdrop-blur-md"
+                  className="p-8 sm:p-14 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2.5rem] sm:rounded-[3.5rem] space-y-8 shadow-2xl relative backdrop-blur-md"
                 >
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-[#431407] text-[#D4AF37] rounded-full text-[9px] sm:text-xs font-black uppercase tracking-widest shadow-xl">Partner One</div>
-                  <div className="grid gap-4 sm:gap-6">
-                    <input value={matchingIntake.person1.name} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, name: e.target.value}})} placeholder="First Name" className="details-input" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                      <input type="date" value={matchingIntake.person1.dob} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, dob: e.target.value}})} className="details-input font-bold" />
-                      <TimePicker time={matchingIntake.person1.tob} ampm={matchingIntake.person1.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, tob: t, ampm: a}})} />
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-8 py-2 bg-[#92400e] text-[#D4AF37] rounded-full text-[10px] sm:text-sm font-black uppercase tracking-widest shadow-xl border border-[#D4AF37]/30">{t.partner_one} (Bride)</div>
+                  <div className="grid gap-6 sm:gap-8 pt-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Full Name</label>
+                      <input value={matchingIntake.person1.name} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, name: e.target.value}})} placeholder={t.first_name} className="details-input" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Date</label>
+                        <input type="date" value={matchingIntake.person1.dob} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, dob: e.target.value}})} className="details-input font-bold" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Time</label>
+                        <TimePicker time={matchingIntake.person1.tob} ampm={matchingIntake.person1.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, tob: t, ampm: a}})} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-200/50">
+                      <label className="text-[11px] font-black text-[#92400e] uppercase tracking-widest ml-1 flex items-center gap-2">
+                        <span className="text-lg">📍</span> {t.birth_location}
+                      </label>
+                      <CitySearch value={matchingIntake.person1.pob} onChange={v => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz}})} placeholder={t.search_city_placeholder} />
                     </div>
                   </div>
                 </motion.div>
@@ -672,14 +1113,29 @@ const App: React.FC = () => {
                   initial={{ x: 50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="p-6 sm:p-12 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-6 shadow-2xl relative backdrop-blur-md"
+                  className="p-8 sm:p-14 bg-white/80 border-2 border-[#D4AF37]/30 rounded-[2.5rem] sm:rounded-[3.5rem] space-y-8 shadow-2xl relative backdrop-blur-md"
                 >
-                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-[#D4AF37] text-[#431407] rounded-full text-[9px] sm:text-xs font-black uppercase tracking-widest shadow-xl">Partner Two</div>
-                  <div className="grid gap-4 sm:gap-6">
-                    <input value={matchingIntake.person2.name} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, name: e.target.value}})} placeholder="Second Name" className="details-input" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                      <input type="date" value={matchingIntake.person2.dob} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, dob: e.target.value}})} className="details-input font-bold" />
-                      <TimePicker time={matchingIntake.person2.tob} ampm={matchingIntake.person2.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, tob: t, ampm: a}})} />
+                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-8 py-2 bg-[#D4AF37] text-[#92400e] rounded-full text-[10px] sm:text-sm font-black uppercase tracking-widest shadow-xl border border-[#92400e]/30">{t.partner_two} (Groom)</div>
+                  <div className="grid gap-6 sm:gap-8 pt-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Full Name</label>
+                      <input value={matchingIntake.person2.name} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, name: e.target.value}})} placeholder={t.second_name} className="details-input" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Date</label>
+                        <input type="date" value={matchingIntake.person2.dob} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, dob: e.target.value}})} className="details-input font-bold" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Time</label>
+                        <TimePicker time={matchingIntake.person2.tob} ampm={matchingIntake.person2.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, tob: t, ampm: a}})} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-200/50">
+                      <label className="text-[11px] font-black text-[#92400e] uppercase tracking-widest ml-1 flex items-center gap-2">
+                        <span className="text-lg">📍</span> {t.birth_location}
+                      </label>
+                      <CitySearch value={matchingIntake.person2.pob} onChange={v => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz}})} placeholder={t.search_city_placeholder} />
                     </div>
                   </div>
                 </motion.div>
@@ -692,7 +1148,7 @@ const App: React.FC = () => {
                   onClick={() => handleAction('MATCHING')} 
                   className="astro-btn-maroon py-5 sm:py-9 text-lg sm:text-2xl font-black rounded-full shadow-2xl"
                 >
-                  Get Verdict
+                  {t.get_verdict || 'Get Verdict'}
                 </motion.button>
              </div>
           </motion.div>
@@ -701,35 +1157,111 @@ const App: React.FC = () => {
         return (
           <motion.div 
             key="muhurta"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
           >
              <MandalaBackground />
-             <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+             <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+                <ProfileButton />
                 <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
                   <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">Muhurta</h2>
+                <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] tracking-tight uppercase astrological-font">{t.muhurta_tab_title || 'Muhurta'}</h2>
              </header>
-             <div className="p-4 sm:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto w-full pb-48 z-10">
-                {MUHURTA_TYPES.map((m, idx) => (
-                  <motion.button 
-                    key={m.id} 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.02 }}
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(67, 20, 7, 1)", color: "rgba(212, 175, 55, 1)" }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleAction('MUHURTA', m.label)} 
-                    className="group bg-white/80 border-2 border-[#D4AF37]/20 p-6 sm:p-10 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-300 flex flex-col items-center gap-3 sm:gap-5 shadow-xl backdrop-blur-md"
-                  >
-                    <span className="text-3xl sm:text-5xl group-hover:scale-110 transition-all drop-shadow-md">✨</span>
-                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wide text-[#431407] group-hover:text-[#D4AF37] text-center transition-colors px-2 leading-relaxed">{m.label}</span>
-                  </motion.button>
-                ))}
+             <div className="p-4 sm:p-10 max-w-7xl mx-auto w-full z-10">
+                <div className="mb-8 space-y-6 bg-white/60 p-6 sm:p-10 rounded-3xl border border-[#D4AF37]/20 backdrop-blur-sm shadow-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.location}</label>
+                      <CitySearch value={muhurtaInput.pob} onChange={v => setMuhurtaInput({...muhurtaInput, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz})} placeholder={t.search_city_placeholder} />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.timeframe}</label>
+                      <input 
+                        type="text" 
+                        placeholder={t.timeframe_placeholder} 
+                        value={muhurtaInput.timeframe}
+                        onChange={(e) => setMuhurtaInput({...muhurtaInput, timeframe: e.target.value})}
+                        className="details-input"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.quick_search}</label>
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder={t.muhurta_search_placeholder} 
+                          value={muhurtaSearch}
+                          onChange={(e) => setMuhurtaSearch(e.target.value)}
+                          className="details-input pl-10"
+                        />
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#92400e]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-[#D4AF37]/10">
+                    <h3 className="text-[11px] font-black text-[#92400e] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                      <span className="text-lg">👤</span> Performer Details (For Taranukula Calculation)
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-70">Name</label>
+                        <input value={muhurtaInput.performerName} onChange={e => setMuhurtaInput({...muhurtaInput, performerName: e.target.value})} placeholder="Performer Name" className="details-input" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-70">Birth Date</label>
+                        <input type="date" value={muhurtaInput.performerDob} onChange={e => setMuhurtaInput({...muhurtaInput, performerDob: e.target.value})} className="details-input font-bold" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-70">Birth Time</label>
+                        <TimePicker time={muhurtaInput.performerTob} ampm={muhurtaInput.performerAmpm || 'AM'} onChange={(t, a) => setMuhurtaInput({...muhurtaInput, performerTob: t, performerAmpm: a})} />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-70">Birth Place</label>
+                        <CitySearch value={muhurtaInput.performerPob} onChange={v => setMuhurtaInput({...muhurtaInput, performerPob: v.pincode ? `${v.name} (${v.pincode})` : v.name, performerLat: v.lat, performerLon: v.lon, performerTz: v.tz})} placeholder={t.search_city_placeholder} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative max-w-2xl mx-auto mb-12">
+                  <input 
+                    type="text" 
+                    value={muhurtaSearch} 
+                    onChange={(e) => setMuhurtaSearch(e.target.value)} 
+                    placeholder={t.search_muhurta || 'Search Muhurta...'} 
+                    className="w-full bg-white/80 border-2 border-[#D4AF37]/30 rounded-full py-4 px-8 pl-14 text-[#451a03] font-bold shadow-xl focus:border-[#D4AF37] outline-none transition-all"
+                  />
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#D4AF37]">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pb-48">
+                  {MUHURTA_TYPES.filter(m => (t[m.label_key] || m.label).toLowerCase().includes(muhurtaSearch.toLowerCase())).map((m, idx) => (
+                    <motion.button 
+                      key={m.id} 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.02 }}
+                      whileHover={{ scale: 1.05, backgroundColor: "rgba(67, 20, 7, 1)", color: "rgba(212, 175, 55, 1)" }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleAction('MUHURTA', m.label)} 
+                      className="group bg-white/80 border-2 border-[#D4AF37]/20 p-6 sm:p-10 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-300 flex flex-col items-center gap-3 sm:gap-5 shadow-xl backdrop-blur-md"
+                    >
+                      <span className="text-3xl sm:text-5xl group-hover:scale-110 transition-all drop-shadow-md">✨</span>
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-wide text-[#92400e] group-hover:text-[#D4AF37] text-center transition-colors px-2 leading-relaxed">{t[m.label_key] || m.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
              </div>
           </motion.div>
         );
@@ -737,116 +1269,678 @@ const App: React.FC = () => {
         return (
           <motion.div 
             key="prashna"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
+          >
+            <MandalaBackground />
+             <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
+              <ProfileButton />
+              <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">{t.oracle}</h2>
+            </header>
+            <div className="p-4 sm:p-10 md:p-16 max-w-5xl mx-auto w-full z-10 pb-48">
+              <PrashnaEngine lang={lang} mode={mode} />
+            </div>
+          </motion.div>
+        );
+      case AppTab.PANCHANGA:
+        return (
+          <motion.div 
+            key="panchanga"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="min-h-screen"
+          >
+            <Panchanga lang={lang} mode={mode!} goBack={goBack} />
+          </motion.div>
+        );
+      case AppTab.TIMELINE:
+        if (horoscopeState === 'INPUT') {
+          return (
+            <motion.div 
+              key="timeline-input"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="min-h-screen parchment-bg flex flex-col"
+            >
+              <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-6 flex items-center shadow-2xl border-b border-[#D4AF37]/40">
+                <ProfileButton />
+                <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h2 className="ml-3 text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">{t.timeline_title}</h2>
+              </header>
+              <main className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full">
+                <div className="bg-white/80 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[3rem] p-8 shadow-2xl">
+                  <h3 className="text-xl font-black text-[#451a03] uppercase tracking-widest text-center mb-8">{t.sacred_intake}</h3>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
+                      <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input w-full px-4 font-bold text-[#451a03]" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_date}</label>
+                        <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input w-full px-4 font-bold text-[#451a03]" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_time}</label>
+                        <input type="time" value={intake.tob} onChange={e => setIntake({...intake, tob: e.target.value})} className="details-input w-full px-4 font-bold text-[#451a03]" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_location}</label>
+                      <CitySearch value={intake.pob} onChange={city => setIntake({...intake, pob: city.name, lat: city.lat, lon: city.lon, tz: city.tz})} placeholder={t.search_city_placeholder} />
+                    </div>
+                    <button 
+                      onClick={() => setHoroscopeState('RESULT')}
+                      disabled={!intake.name || !intake.dob || !intake.lat}
+                      className="w-full py-5 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      {t.submit}
+                    </button>
+                  </div>
+                </div>
+              </main>
+            </motion.div>
+          );
+        }
+        return <TimelineDashboard intake={intake} lang={lang} goBack={() => setHoroscopeState('INPUT')} />;
+      case AppTab.BLOG:
+        return (
+          <motion.div 
+            key="blog"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="min-h-screen parchment-bg flex flex-col"
+          >
+            <header className="bg-gradient-to-b from-[#451a03] to-[#7c2d12] p-6 flex items-center shadow-2xl border-b border-[#D4AF37]/40">
+              <ProfileButton />
+              <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <h2 className="ml-3 text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">
+                {lang === 'kn' ? 'ಜ್ಞಾನ ಭಂಡಾರ' : lang === 'tcy' ? 'ಜ್ಞಾನದ ಬಂಡಾರ' : 'Celestial Wisdom'}
+              </h2>
+            </header>
+            <main className="flex-1">
+              <BlogSection lang={lang} />
+            </main>
+          </motion.div>
+        );
+      case AppTab.LIFE_PARTNER:
+        return horoscopeState === 'ANALYSIS' ? null : (
+          <motion.div 
+            key="life-partner-intake"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
           >
             <MandalaBackground />
-            <header className="bg-gradient-to-b from-[#431407] to-[#1a0803] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40">
-              <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
+            <header className="bg-gradient-to-b from-[#451a03] to-[#7c2d12] p-4 sm:p-6 flex items-center shadow-xl sticky top-0 z-20 border-b border-[#D4AF37]/30">
+              <ProfileButton />
+              <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
                 <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">Oracle</h2>
+              <div className="ml-3">
+                <h2 className="text-lg sm:text-2xl font-black text-[#D4AF37] tracking-widest uppercase astrological-font leading-tight">Life Partner Analysis</h2>
+                <p className="text-[9px] text-white/50 uppercase font-black tracking-widest">Classical Predictions</p>
+              </div>
             </header>
-            <div className="p-4 sm:p-10 md:p-16 max-w-4xl mx-auto w-full space-y-10 sm:space-y-16 pb-48 z-10">
-              <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="p-8 sm:p-14 bg-white/85 border-2 border-[#D4AF37]/30 rounded-[2rem] sm:rounded-[3rem] space-y-10 text-center shadow-2xl backdrop-blur-md"
-              >
-                <span className="text-7xl sm:text-9xl mb-2 block drop-shadow-xl animate-pulse">🕉️</span>
-                <h3 className="text-2xl sm:text-4xl font-black text-[#431407] uppercase tracking-widest">Ask Guruji</h3>
-                <div className="space-y-8 text-left">
+            <div className="flex-1 p-4 sm:p-8 space-y-8 max-w-3xl mx-auto w-full overflow-y-auto pb-48 z-10">
+              <div className="grid gap-6 p-6 sm:p-10 bg-white/80 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#D4AF37]/30 shadow-2xl backdrop-blur-md">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
+                  <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1 opacity-80">Deep Inquiry</label>
-                    <textarea value={prashnaInput.question} onChange={e => setPrashnaInput({...prashnaInput, question: e.target.value})} placeholder="What is your deep question for the stars?" className="details-input min-h-[140px] sm:min-h-[260px] resize-none font-bold text-base sm:text-xl" />
+                    <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_date}</label>
+                    <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input font-bold" />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#431407] uppercase tracking-widest ml-1 opacity-80">Location</label>
-                    <CitySearch value={prashnaInput.pob} onChange={v => setPrashnaInput({...prashnaInput, pob: v.name})} />
+                    <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_time}</label>
+                    <TimePicker time={intake.tob} ampm={intake.ampm || 'AM'} onChange={(t, a) => setIntake({...intake, tob: t, ampm: a})} />
                   </div>
                 </div>
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={!prashnaInput.question} 
-                  onClick={() => handleAction('PRASHNA')} 
-                  className="astro-btn-maroon py-5 sm:py-8 text-xl sm:text-3xl font-black rounded-full disabled:opacity-50"
-                >
-                  Seek Answer
-                </motion.button>
-              </motion.div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_location}</label>
+                  <CitySearch value={intake.pob} onChange={v => setIntake({...intake, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz, pincode: v.pincode})} placeholder={t.search_city_placeholder} />
+                </div>
+                <div className="pt-6">
+                  <button 
+                    onClick={() => handleAction('LIFE_PARTNER')}
+                    className="w-full py-6 bg-gradient-to-r from-[#92400e] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-[#D4AF37]/30"
+                  >
+                    Analyze Life Partner ➔
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         );
-      default: return null;
+      case AppTab.PROFILE:
+        return (
+          <motion.div 
+            key="profile"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden p-6 sm:p-12"
+          >
+            <MandalaBackground />
+            <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-7 flex items-center shadow-2xl sticky top-0 z-20 border-b border-[#D4AF37]/40 rounded-3xl mb-12">
+              <ProfileButton />
+              <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">Soul Profile</h2>
+            </header>
+            <div className="z-10">
+              <UserProfile lang={lang} intake={intake} onUpdateIntake={setIntake} />
+            </div>
+          </motion.div>
+        );
+      default: 
+        return (
+          <div className="min-h-screen flex items-center justify-center parchment-bg">
+            <div className="text-center p-8 bg-white/80 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
+              <p className="text-[#92400e] font-bold mb-4">{t.under_construction || 'This celestial path is under construction.'}</p>
+              <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="astro-btn-maroon px-6 py-2 rounded-full">{t.return_home || 'Return Home'}</button>
+            </div>
+          </div>
+        );
     }
   };
 
-  return (
-    <div className="min-h-screen text-[#431407] selection:bg-yellow-500/30 font-serif overflow-x-hidden">
-      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-[60] pointer-events-none">
-        <button onClick={() => setIsChatOverlayOpen(!isChatOverlayOpen)} className="pointer-events-auto w-16 h-16 sm:w-24 sm:h-24 bg-[#431407] rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-4 sm:border-8 border-[#D4AF37] flex flex-col items-center justify-center hover:scale-105 active:scale-95 transition-all group">
-          <span className="text-2xl sm:text-5xl drop-shadow-lg group-hover:rotate-6 transition-transform">{isChatOverlayOpen ? '✕' : '🙏'}</span>
-          {!isChatOverlayOpen && <span className="hidden sm:block text-[9px] font-black uppercase text-[#D4AF37] tracking-widest mt-0.5 text-center">Ask Help for Guruji</span>}
-        </button>
-        
-        {isChatOverlayOpen && (
-          <div className="pointer-events-auto absolute bottom-20 right-0 w-[92vw] sm:w-[440px] h-[75vh] sm:max-h-[800px] bg-white rounded-[2rem] sm:rounded-[3.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.7)] border-4 border-[#D4AF37]/50 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 flex flex-col z-[100]">
-            <div className="bg-[#431407] p-5 sm:p-8 text-[#D4AF37] flex justify-between items-center shadow-2xl relative">
-               <div className="flex items-center gap-3 z-10">
-                  <span className="text-2xl sm:text-3xl">🕉️</span>
-                  <div className="flex flex-col">
-                    <span className="font-black uppercase tracking-widest text-sm sm:text-xl astrological-font leading-tight">Ask Help for Guruji</span>
-                    <span className="text-[8px] sm:text-[10px] uppercase tracking-widest opacity-60">Sacred Conversation</span>
-                  </div>
-               </div>
-               <button onClick={() => setIsChatOverlayOpen(false)} className="hover:opacity-70 text-2xl sm:text-3xl font-bold z-10">✕</button>
+  const renderBottomNav = () => {
+    if (onboardingStep !== OnboardingStep.COMPLETED) return null;
+    if (!mode || analysisResult || (activeTab === AppTab.HOROSCOPE && horoscopeState === 'INPUT')) return null;
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-[#f59e0b] border-t border-[#451a03]/30 z-[50] flex justify-around items-center py-2 sm:py-4 px-2 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        {[
+          { id: AppTab.DASHBOARD, icon: <Compass />, label: t.home || 'Home' },
+          { id: AppTab.HOROSCOPE, icon: <Stars />, label: t.horoscope || 'Horoscope' },
+          { id: AppTab.DAILY_PREDICTION, icon: <Sun />, label: t.daily_nav || 'Daily' },
+          { id: AppTab.MATCHING, icon: <Sparkles />, label: t.matching || 'Matching' },
+          { id: AppTab.LIFE_PARTNER, icon: <Heart />, label: t.life_partner || 'Partner' },
+          { id: AppTab.MUHURTHA, icon: <Moon />, label: t.muhurta || 'Muhurta' },
+          { id: AppTab.PROFILE, icon: <User />, label: t.profile || 'Profile' }
+        ].map((item) => (
+          <button 
+            key={item.id}
+            onClick={() => {
+              changeTab(item.id);
+            }}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-[#451a03] scale-110' : 'text-[#451a03]/60 hover:text-[#451a03]'}`}
+          >
+            <div className="w-6 h-6 sm:w-8 sm:h-8">
+              {item.icon}
             </div>
-            <div className="flex-1 overflow-hidden p-3 sm:p-6 bg-[#FDF5E6]/60">
-               <LiveAstrologer />
-            </div>
-          </div>
-        )}
+            <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+          </button>
+        ))}
       </div>
+    );
+  };
 
-      {isProcessing && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-           <div className="relative mb-10">
-             <div className="w-24 h-24 sm:w-48 sm:h-48 border-6 sm:border-[14px] border-[#D4AF37]/10 border-t-[#D4AF37] rounded-full animate-spin"></div>
-             <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-6xl animate-pulse">☀️</div>
-           </div>
-           <p className="text-[#D4AF37] font-black uppercase tracking-[0.5em] sm:tracking-[1em] animate-pulse text-[11px] sm:text-xl ml-[0.5em] sm:ml-[1em] drop-shadow-lg">Calculating Heavens...</p>
-        </div>
+  return (
+    <div className="min-h-screen text-[#451a03] selection:bg-amber-500/30 font-serif overflow-x-hidden break-words">
+      <AnimatePresence mode="wait">
+        {onboardingStep === OnboardingStep.SPLASH && (
+          <motion.div
+            key="splash"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center p-8 text-center"
+          >
+            <MandalaBackground />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="flex flex-col items-center"
+            >
+              <FantasticLogo className="mb-12" />
+              <motion.h1 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 1 }}
+                className="text-5xl sm:text-8xl font-black text-[#D4AF37] uppercase tracking-[0.3em] astrological-font mb-6 drop-shadow-[0_0_30px_rgba(212,175,55,0.5)]"
+              >
+                {t.brand_name || 'Astrologic'}
+              </motion.h1>
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 1 }}
+                className="text-[#D4AF37]/60 text-sm sm:text-xl uppercase tracking-[0.5em] mb-16 max-w-2xl leading-relaxed"
+              >
+                {t.tagline || 'The Ancient Science of Light & Time'}
+              </motion.p>
+              <motion.button
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.5 }}
+                onClick={() => setOnboardingStep(OnboardingStep.QUICK_LOGIN)}
+                className="px-12 py-6 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#451a03] rounded-full font-black uppercase tracking-[0.4em] text-sm sm:text-lg shadow-[0_20px_50px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95 transition-all"
+              >
+                {t.begin_journey || 'Begin Journey'}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {onboardingStep === OnboardingStep.LANG_SELECT && (
+          <motion.div
+            key="lang_select"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 z-[100] bg-[#fffbeb] overflow-y-auto p-6 sm:p-12"
+          >
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl sm:text-6xl font-black text-[#451a03] uppercase tracking-widest astrological-font text-center mb-16">
+                {t.lang_select || 'Select Your Language'}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => {
+                      setLang(l.code as Language);
+                      localStorage.setItem('astro_logic_lang', l.code);
+                      setOnboardingStep(OnboardingStep.QUICK_LOGIN);
+                    }}
+                    className="group relative h-48 sm:h-64 rounded-[2.5rem] overflow-hidden shadow-2xl hover:scale-[1.02] transition-all active:scale-95 border-4 border-transparent hover:border-[#D4AF37]"
+                  >
+                    <img 
+                      src={l.image} 
+                      alt={l.name} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-3xl sm:text-5xl font-black text-white drop-shadow-2xl uppercase tracking-widest">{l.name}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {onboardingStep === OnboardingStep.QUICK_LOGIN && (
+          <motion.div
+            key="quick_login"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="fixed inset-0 z-[100] bg-[#fffbeb] flex items-center justify-center p-6"
+          >
+            <div className="w-full max-w-2xl bg-white rounded-[3.5rem] p-8 sm:p-16 shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-4 border-[#D4AF37]/20 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl" />
+              <div className="relative z-10">
+                <h2 className="text-3xl sm:text-5xl font-black text-[#451a03] uppercase tracking-widest astrological-font text-center mb-4">
+                  {t.quick_profile || 'Quick Profile'}
+                </h2>
+                <p className="text-center text-[#92400e] font-bold uppercase tracking-widest text-xs mb-12 opacity-60">
+                  {t.enter_details_wisdom || 'Enter details for personalized wisdom'}
+                </p>
+                
+                <div className="space-y-6">
+                  <input 
+                    type="text" 
+                    placeholder={t.name_of_soul || 'Your Name'} 
+                    className="details-input"
+                    value={intake.name}
+                    onChange={e => setIntake(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input 
+                      type="date" 
+                      className="details-input"
+                      value={intake.dob}
+                      onChange={e => setIntake(prev => ({ ...prev, dob: e.target.value }))}
+                    />
+                    <TimePicker 
+                      time={intake.tob} 
+                      ampm={intake.ampm || 'AM'} 
+                      onChange={(t, a) => setIntake(prev => ({ ...prev, tob: t, ampm: a }))} 
+                    />
+                  </div>
+                  <CitySearch 
+                    value={intake.pob} 
+                    onChange={city => setIntake(prev => ({ ...prev, pob: city.name, lat: city.lat, lon: city.lon, tz: city.tz }))} 
+                    placeholder={t.birth_location || 'Place of Birth'}
+                  />
+                  
+                  <div className="pt-8 flex flex-col gap-4">
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('astro_user_intake', JSON.stringify(intake));
+                        setOnboardingStep(OnboardingStep.COMPLETED);
+                        localStorage.setItem('astro_logic_onboarding_v1', 'true');
+                      }}
+                      className="w-full py-6 bg-[#451a03] text-[#D4AF37] rounded-[2rem] font-black uppercase tracking-[0.4em] text-sm shadow-xl hover:bg-black transition-all"
+                    >
+                      {t.save_continue || 'Save & Continue'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('astro_user_intake_skipped', 'true');
+                        setOnboardingStep(OnboardingStep.COMPLETED);
+                        localStorage.setItem('astro_logic_onboarding_v1', 'true');
+                      }}
+                      className="w-full py-4 text-[#451a03]/40 font-black uppercase tracking-[0.3em] text-xs hover:text-[#451a03] transition-colors"
+                    >
+                      {t.skip_for_now || 'Skip for now'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {onboardingStep === OnboardingStep.MODE_SELECT && (
+          <motion.div
+            key="mode_select"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center p-6 overflow-hidden"
+          >
+            <MandalaBackground />
+            
+            <div className="absolute top-6 right-6 z-50">
+              <div className="relative group">
+                <select 
+                  value={lang} 
+                  onChange={(e) => setLang(e.target.value as Language)} 
+                  className="bg-white/10 backdrop-blur-md border-2 border-[#D4AF37]/40 text-[#D4AF37] text-[13px] font-black rounded-full px-6 py-2.5 appearance-none cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] tracking-widest hover:border-[#D4AF37] transition-all outline-none"
+                >
+                  {LANGUAGES.map(l => <option key={l.code} value={l.code} className="bg-[#020617] text-white">{l.name}</option>)}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#D4AF37]/60">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
+            </div>
+
+            <motion.div 
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="absolute top-6 sm:top-16 opacity-40 pointer-events-none scale-50 sm:scale-75"
+            >
+              <FantasticLogo />
+            </motion.div>
+            
+            <div className="z-10 text-center mb-8 sm:mb-12 mt-32 sm:mt-48">
+                <motion.h1 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-3xl sm:text-8xl font-black text-[#D4AF37] astrological-font tracking-widest uppercase mb-2 drop-shadow-[0_0_20px_rgba(212,175,55,0.7)] leading-tight"
+                >
+                  {t.brand_name || 'Astro Logic'}
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-white/80 font-serif italic text-sm sm:text-2xl tracking-widest"
+                >
+                  {t.tagline || 'Sacred Geometry • Ancient Logic'}
+                </motion.p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 w-full max-w-6xl z-10">
+              <motion.button 
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8, type: "spring" }}
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(212, 175, 55, 0.15)", borderColor: "#D4AF37" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setMode('SEEKER');
+                  localStorage.setItem('astro_logic_mode_v1', 'SEEKER');
+                  setOnboardingStep(OnboardingStep.LANG_SELECT);
+                }}
+                className="flex-1 group relative flex flex-col items-center justify-center p-10 sm:p-16 transition-all duration-500 bg-white/5 backdrop-blur-sm border-4 border-[#D4AF37]/20 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="z-10 text-center space-y-6">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mx-auto group-hover:bg-[#D4AF37]/20 transition-all shadow-inner">
+                    <span className="text-6xl sm:text-8xl block group-hover:rotate-12 transition-transform drop-shadow-lg">🌟</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-3xl sm:text-5xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font">{t.seeker || 'Seeker'}</h2>
+                    <div className="h-1 w-12 bg-[#D4AF37] mx-auto rounded-full opacity-40 group-hover:w-24 transition-all" />
+                  </div>
+                  <p className="text-sm sm:text-base text-white/70 font-serif leading-relaxed max-w-[280px] mx-auto italic">
+                    "{t.seeker_desc || 'Simple life guidance, career flow, and daily energy in clear, accessible language.'}"
+                  </p>
+                  <div className="pt-4">
+                    <span className="inline-block px-10 py-4 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-xs font-black tracking-[0.2em] group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">{t.select_seeker}</span>
+                  </div>
+                </div>
+              </motion.button>
+
+              <motion.button 
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8, type: "spring" }}
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(212, 175, 55, 0.15)", borderColor: "#D4AF37" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setMode('SCHOLAR');
+                  localStorage.setItem('astro_logic_mode_v1', 'SCHOLAR');
+                  setOnboardingStep(OnboardingStep.LANG_SELECT);
+                }}
+                className="flex-1 group relative flex flex-col items-center justify-center p-10 sm:p-16 transition-all duration-500 bg-white/5 backdrop-blur-sm border-4 border-[#D4AF37]/20 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="z-10 text-center space-y-6">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mx-auto group-hover:bg-[#D4AF37]/20 transition-all shadow-inner">
+                    <span className="text-6xl sm:text-8xl block group-hover:-rotate-12 transition-transform drop-shadow-lg">📜</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-3xl sm:text-5xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font">{t.scholar || 'Scholar'}</h2>
+                    <div className="h-1 w-12 bg-[#D4AF37] mx-auto rounded-full opacity-40 group-hover:w-24 transition-all" />
+                  </div>
+                  <p className="text-sm sm:text-base text-white/70 font-serif leading-relaxed max-w-[280px] mx-auto italic">
+                    "{t.scholar_desc || 'Mathematical precision. Longitudes, classical Shlokas, and deep Siddhantic rules.'}"
+                  </p>
+                  <div className="pt-4">
+                    <span className="inline-block px-10 py-4 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-xs font-black tracking-[0.2em] group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">{t.select_scholar}</span>
+                  </div>
+                </div>
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {onboardingStep === OnboardingStep.COMPLETED && (
+        <>
+          <div className="fixed bottom-20 right-6 sm:bottom-24 sm:right-10 z-[60] pointer-events-none">
+            <button onClick={() => setIsHelpOpen(true)} className="pointer-events-auto w-14 h-14 sm:w-20 sm:h-20 bg-[#D4AF37] rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.6)] border-4 sm:border-6 border-[#451a03] flex flex-col items-center justify-center hover:scale-105 active:scale-95 transition-all group">
+              <span className="text-xl sm:text-3xl drop-shadow-lg group-hover:rotate-6 transition-transform">🙏</span>
+              <span className="hidden sm:block text-[8px] font-black uppercase text-[#451a03] tracking-widest mt-0.5 text-center">{t.help}</span>
+            </button>
+            
+            <AnimatePresence>
+              {isHelpOpen && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto"
+                >
+                  <motion.div 
+                    initial={{ scale: 0.9, y: 20 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.9, y: 20 }}
+                    className="bg-[#fffbeb] w-full max-w-2xl rounded-[3rem] border-4 border-[#D4AF37] shadow-[0_0_100px_rgba(212,175,55,0.3)] overflow-hidden flex flex-col max-h-[90vh]"
+                  >
+                    <div className="bg-[#D4AF37] p-6 sm:p-10 text-[#451a03] flex justify-between items-center relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                      <div className="flex items-center gap-6 z-10">
+                        <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full border-4 border-[#451a03] overflow-hidden shadow-2xl">
+                          <img 
+                            src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=200&auto=format&fit=crop" 
+                            alt="Ancient Guruji" 
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-widest astrological-font leading-none">Sacred Guide</h2>
+                          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] font-bold mt-2 opacity-80">Wisdom from the Ancient Masters</p>
+                        </div>
+                      </div>
+                      <button onClick={() => setIsHelpOpen(false)} className="text-3xl hover:scale-110 transition-transform z-10">✕</button>
+                    </div>
+                    <div className="p-6 sm:p-12 overflow-y-auto space-y-10 text-[#451a03]">
+                      <section className="relative">
+                        <div className="absolute -left-6 top-0 w-1 h-full bg-[#D4AF37] rounded-full"></div>
+                        <h3 className="font-black uppercase tracking-[0.2em] text-sm sm:text-base mb-4 flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-xs">01</span>
+                          Choose Your Path
+                        </h3>
+                        <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">Select <b>Seeker</b> for simple, easy-to-understand life guidance. Select <b>Scholar</b> for deep technical details, Sanskrit shlokas, and mathematical precision based on <i>Brihat Jataka</i> and <i>Phaladeepika</i>.</p>
+                      </section>
+                      <section className="relative">
+                        <div className="absolute -left-6 top-0 w-1 h-full bg-[#D4AF37] rounded-full"></div>
+                        <h3 className="font-black uppercase tracking-[0.2em] text-sm sm:text-base mb-4 flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-xs">02</span>
+                          Enter Birth Details
+                        </h3>
+                        <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">Provide your exact Date, Time, and Place of birth. For the best accuracy, search for your city and select it from the list to get precise coordinates and timezone data.</p>
+                      </section>
+                      <section className="relative">
+                        <div className="absolute -left-6 top-0 w-1 h-full bg-[#D4AF37] rounded-full"></div>
+                        <h3 className="font-black uppercase tracking-[0.2em] text-sm sm:text-base mb-4 flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-xs">03</span>
+                          Explore Analysis
+                        </h3>
+                        <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">Navigate through <b>Horoscope</b> for birth analysis, <b>Daily</b> for your transit forecast, and <b>Matching</b> for relationship compatibility.</p>
+                      </section>
+                      <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button 
+                          onClick={() => { setIsHelpOpen(false); setIsChatOverlayOpen(true); }}
+                          className="w-full bg-[#451a03] text-[#D4AF37] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm hover:bg-black transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] active:scale-[0.98] flex items-center justify-center gap-3"
+                        >
+                          <MessageSquare size={20} />
+                          Write to Guruji
+                        </button>
+                        <button 
+                          onClick={() => { setIsHelpOpen(false); setIsChatOverlayOpen(true); }}
+                          className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#451a03] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm hover:scale-105 transition-all shadow-[0_20px_40px_rgba(212,175,55,0.3)] active:scale-[0.98] flex items-center justify-center gap-3"
+                        >
+                          <Sparkles size={20} className="animate-pulse" />
+                          Speak to Guruji
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {isChatOverlayOpen && (
+              <div className="pointer-events-auto absolute bottom-20 right-0 w-[92vw] sm:w-[440px] h-[75vh] sm:max-h-[800px] bg-white rounded-[2rem] sm:rounded-[3.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.7)] border-4 border-[#D4AF37]/50 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 flex flex-col z-[100]">
+                <div className="bg-[#D4AF37] p-5 sm:p-8 text-[#451a03] flex justify-between items-center shadow-2xl relative">
+                   <div className="flex items-center gap-4 z-10">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-[#451a03] overflow-hidden">
+                        <img 
+                          src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=100&auto=format&fit=crop" 
+                          alt="Guruji" 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-black uppercase tracking-widest text-sm sm:text-xl astrological-font leading-tight">{t.ask_help_guruji}</span>
+                        <span className="text-[8px] sm:text-[10px] uppercase tracking-widest opacity-60">{t.sacred_conversation}</span>
+                      </div>
+                   </div>
+                   <button onClick={() => setIsChatOverlayOpen(false)} className="hover:opacity-70 text-2xl sm:text-3xl font-bold z-10">✕</button>
+                </div>
+                <div className="flex-1 overflow-hidden p-3 sm:p-6 bg-[#fffbeb]">
+                   <LiveAstrologer lang={lang} mode={mode || 'SEEKER'} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {isProcessing && (
+            <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+               <div className="relative mb-10">
+                 <div className="w-24 h-24 sm:w-48 sm:h-48 border-6 sm:border-[14px] border-[#D4AF37]/10 border-t-[#D4AF37] rounded-full animate-spin"></div>
+                 <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-6xl animate-pulse">☀️</div>
+               </div>
+               <p className="text-[#D4AF37] font-black uppercase tracking-[0.5em] sm:tracking-[1em] animate-pulse text-[11px] sm:text-xl ml-[0.5em] sm:ml-[1em] drop-shadow-lg mb-8">{t.calculating_heavens || 'Calculating Heavens...'}</p>
+               <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="max-w-2xl"
+                >
+                  <p className="text-white/80 font-serif italic text-sm sm:text-xl leading-relaxed">
+                    {JYOTISH_QUOTES[Math.floor(Date.now() / 5000) % JYOTISH_QUOTES.length][lang] || JYOTISH_QUOTES[0][lang]}
+                  </p>
+                </motion.div>
+            </div>
+          )}
+          
+          <main className="pb-24">
+            <AnimatePresence mode="wait">
+              {renderTabContent()}
+            </AnimatePresence>
+          </main>
+
+          {renderBottomNav()}
+
+          <DonateSection isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} lang={lang} />
+        </>
       )}
-      
-      <main>
-        <AnimatePresence mode="wait">
-          {renderTabContent()}
-        </AnimatePresence>
-      </main>
 
       <style>{`
-        .parchment-bg { background: #FDF5E6; background-image: radial-gradient(circle at 50% 50%, #FDF5E6 0%, #F5E6D3 100%); position: relative; }
-        .details-input { width: 100%; background: #ffffff !important; border: 2.5px solid #E2D1B3; border-radius: 1.25rem; padding: 1rem 1.5rem; color: #431407 !important; font-family: 'Lora', serif; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1rem; }
-        .details-input:focus { outline: none; border-color: #431407; box-shadow: 0 0 20px rgba(67, 20, 7, 0.1); }
-        .menu-button-parchment { background: #ffffff; border: 2.5px solid #E2D1B3; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(67, 20, 7, 0.05); text-align: center; }
-        .astro-btn-maroon { width: 100%; font-weight: 900; color: #D4AF37 !important; text-transform: uppercase; letter-spacing: 0.3em; background: #431407 !important; border: 2.5px solid #D4AF37; transition: all 0.4s ease; }
-        .astro-btn-maroon:hover:not(:disabled) { background: #5a1c0b !important; border-color: #f3d782; }
+        .parchment-bg { background: #fffbeb; background-image: radial-gradient(circle at 50% 50%, #fffbeb 0%, #fef3c7 100%); position: relative; }
+        .details-input { width: 100%; background: #ffffff !important; border: 2.5px solid #fde68a; border-radius: 1.25rem; padding: 1rem 1.5rem; color: #451a03 !important; font-family: 'Lora', serif; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1rem; }
+        .details-input:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); }
+        .menu-button-parchment { background: #ffffff; border: 2.5px solid #fde68a; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.05); text-align: center; }
+        .astro-btn-maroon { width: 100%; font-weight: 900; color: #451a03 !important; text-transform: uppercase; letter-spacing: 0.3em; background: #D4AF37 !important; border: 2.5px solid #451a03; transition: all 0.4s ease; }
+        .astro-btn-maroon:hover:not(:disabled) { background: #B8860B !important; border-color: #000; }
         
-        .analysis-rich-text h3 { color: #431407; font-size: 1.85rem; sm:font-size: 3rem; font-family: 'Cinzel', serif; margin: 3.5rem 0 2rem; border-bottom: 4px solid #D4AF37; padding-bottom: 1rem; text-align: center; text-transform: uppercase; font-weight: 900; line-height: 1.2; }
-        .analysis-rich-text h4 { color: #7C2D12; font-size: 1.4rem; sm:font-size: 2rem; font-family: 'Cinzel', serif; margin: 2.5rem 0 1.25rem; border-left: 10px sm:border-left-[15px] solid #431407; padding: 0.8rem 0 0.8rem 1.25rem; sm:padding: 1.25rem 0 1.25rem 2rem; font-weight: 800; background: linear-gradient(to right, rgba(67, 20, 7, 0.08), transparent); border-radius: 0 1.5rem 1.5rem 0; }
-        .analysis-rich-text p { margin-bottom: 2rem; line-height: 1.9; sm:line-height: 2.5; font-size: 1rem; sm:font-size: 1.4rem; text-align: justify; color: #431407; font-weight: 500; }
-        .analysis-rich-text li { margin-bottom: 1.75rem; font-size: 1rem; sm:font-size: 1.4rem; color: #431407; padding: 2rem 2.5rem; sm:padding: 3rem 4.5rem; background: #ffffff; border-radius: 1.75rem sm:border-radius: 3rem; border-left: 12px sm:border-left-[20px] solid #D4AF37; box-shadow: 0 12px 30px rgba(0,0,0,0.06); font-weight: 500; }
+        .analysis-rich-text h3 { color: #451a03; font-size: 1.85rem; sm:font-size: 3rem; font-family: 'Cinzel', serif; margin: 3.5rem 0 2rem; border-bottom: 4px solid #D4AF37; padding-bottom: 1rem; text-align: center; text-transform: uppercase; font-weight: 900; line-height: 1.2; }
+        .analysis-rich-text h4 { color: #b45309; font-size: 1.4rem; sm:font-size: 2rem; font-family: 'Cinzel', serif; margin: 2.5rem 0 1.25rem; border-left: 10px sm:border-left-[15px] solid #D4AF37; padding: 0.8rem 0 0.8rem 1.25rem; sm:padding: 1.25rem 0 1.25rem 2rem; font-weight: 800; background: linear-gradient(to right, rgba(212, 175, 55, 0.08), transparent); border-radius: 0 1.5rem 1.5rem 0; }
+        .analysis-rich-text p { margin-bottom: 2rem; line-height: 1.9; sm:line-height: 2.5; font-size: 1rem; sm:font-size: 1.4rem; text-align: justify; color: #451a03; font-weight: 500; }
+        .analysis-rich-text li { margin-bottom: 1.75rem; font-size: 1rem; sm:font-size: 1.4rem; color: #451a03; padding: 2rem 2.5rem; sm:padding: 3rem 4.5rem; background: #ffffff; border-radius: 1.75rem sm:border-radius: 3rem; border-left: 12px sm:border-left-[20px] solid #D4AF37; box-shadow: 0 12px 30px rgba(0,0,0,0.06); font-weight: 500; }
         
         .shadow-glow { box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); }
         
-        .scholar-view h3 { border-bottom-color: #431407; color: #431407; }
-        .scholar-view li { border-left-color: #431407; background: #fffcf8; }
-        .seeker-view h3 { color: #7C2D12; border-bottom-color: #D4AF37; }
+        .scholar-view h3 { border-bottom-color: #D4AF37; color: #451a03; }
+        .scholar-view li { border-left-color: #D4AF37; background: #fffbeb; }
+        .seeker-view h3 { color: #b45309; border-bottom-color: #D4AF37; }
         .seeker-view li { border-left-color: #D4AF37; background: #fffcfb; }
       `}</style>
     </div>

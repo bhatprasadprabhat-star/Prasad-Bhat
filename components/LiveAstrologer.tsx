@@ -3,10 +3,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GoogleGenAI, Modality, Blob, LiveServerMessage } from '@google/genai';
 import { encode, decode, decodeAudioData } from '../services/gemini';
+import { Language, UserMode } from '../types';
+import { TRANSLATIONS } from '../constants';
 
-const LiveAstrologer: React.FC = () => {
+interface LiveAstrologerProps {
+  lang: Language;
+  mode: UserMode;
+}
+
+const LiveAstrologer: React.FC<LiveAstrologerProps> = ({ lang, mode }) => {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const [isActive, setIsActive] = useState(false);
-  const [status, setStatus] = useState('Pranama');
+  const [status, setStatus] = useState(t.pranama || 'Pranama');
   const [transcription, setTranscription] = useState<string[]>([]);
   
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -30,13 +38,13 @@ const LiveAstrologer: React.FC = () => {
       outAudioContextRef.current = null;
     }
     setIsActive(false);
-    setStatus('Dhanyavaada');
+    setStatus(t.dhanyavaada || 'Dhanyavaada');
   };
 
   const startSession = async () => {
     try {
-      setStatus('Connecting...');
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      setStatus(t.connecting || 'Connecting...');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
       
       const inCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       const outCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -46,10 +54,10 @@ const LiveAstrologer: React.FC = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
         callbacks: {
           onopen: () => {
-            setStatus('Guruji is listening...');
+            setStatus(t.guruji_listening || 'Guruji is listening...');
             const source = inCtx.createMediaStreamSource(stream);
             const scriptProcessor = inCtx.createScriptProcessor(4096, 1, 1);
             
@@ -64,7 +72,7 @@ const LiveAstrologer: React.FC = () => {
                 data: encode(new Uint8Array(int16.buffer)),
                 mimeType: 'audio/pcm;rate=16000',
               };
-              sessionPromise.then(s => s.sendRealtimeInput({ media: pcmBlob }));
+              sessionRef.current?.sendRealtimeInput({ media: pcmBlob });
             };
             source.connect(scriptProcessor);
             scriptProcessor.connect(inCtx.destination);
@@ -76,7 +84,9 @@ const LiveAstrologer: React.FC = () => {
             }
 
             if (message.serverContent?.turnComplete) {
-              setTranscription(prev => [...prev, "Guruji: " + currentTranscriptionRef.current]);
+              if (currentTranscriptionRef.current.trim()) {
+                setTranscription(prev => [...prev, (t.guruji || "Guruji") + ": " + currentTranscriptionRef.current]);
+              }
               currentTranscriptionRef.current = '';
             }
 
@@ -102,10 +112,11 @@ const LiveAstrologer: React.FC = () => {
           },
           onerror: (e) => {
             console.error('Session Error', e);
-            setStatus('Error occurred');
+            setStatus(t.connection_interrupted || 'Connection Interrupted');
+            setIsActive(false);
           },
           onclose: () => {
-            setStatus('Disconnected');
+            setStatus(t.disconnected || 'Disconnected');
             setIsActive(false);
           }
         },
@@ -115,7 +126,10 @@ const LiveAstrologer: React.FC = () => {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
           },
-          systemInstruction: 'You are Guruji, a wise and warm Vedic astrologer. You offer simple but deep guidance. Talk to the user as if you are in a sacred space. Keep answers concise and spiritual.'
+          systemInstruction: `You are Guruji, a wise Vedic astrologer. 
+            Respond EXCLUSIVELY in ${lang} language. This is mandatory.
+            Keep answers very concise, spiritual, and practical. 
+            MODE: ${mode}. ${mode === 'SCHOLAR' ? 'Use technical Vedic terms.' : 'Be empathetic.'}`
         }
       });
 
@@ -130,10 +144,10 @@ const LiveAstrologer: React.FC = () => {
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-8 p-4 sm:p-10 h-full overflow-y-auto">
       <div className="relative">
-        <div className={`w-20 h-20 sm:w-36 sm:h-36 rounded-full border-4 sm:border-8 flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden ${isActive ? 'border-[#431407] scale-105' : 'border-slate-300'}`}>
+        <div className={`w-20 h-20 sm:w-36 sm:h-36 rounded-full border-4 sm:border-8 flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden ${isActive ? 'border-[#451a03] scale-105' : 'border-slate-300'}`}>
           <img 
-            src="https://picsum.photos/seed/sanyasi/200/200" 
-            alt="Ancient Sanyasi" 
+            src="https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?q=80&w=400&auto=format&fit=crop" 
+            alt="Ancient Guruji" 
             referrerPolicy="no-referrer"
             className={`w-full h-full object-cover transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-60 grayscale'}`}
           />
@@ -142,14 +156,14 @@ const LiveAstrologer: React.FC = () => {
           <motion.div 
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute -inset-2 border-4 border-[#D4AF37] rounded-full pointer-events-none"
+            className="absolute -inset-2 border-4 border-[#f59e0b] rounded-full pointer-events-none"
           />
         )}
       </div>
       
       <div className="text-center">
-        <h3 className="text-xl sm:text-3xl font-black text-[#431407] uppercase tracking-[0.1em] astrological-font leading-tight">Ask Help for Guruji</h3>
-        <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#431407] text-[#D4AF37] text-[10px] sm:text-[11px] font-black uppercase tracking-widest shadow-md">
+        <h3 className="text-xl sm:text-3xl font-black text-[#451a03] uppercase tracking-[0.1em] astrological-font leading-tight">Consult the Daivajna</h3>
+        <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#451a03] text-[#f59e0b] text-[10px] sm:text-[11px] font-black uppercase tracking-widest shadow-md">
           <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-slate-400'}`}></span>
           {status}
         </div>
@@ -157,41 +171,43 @@ const LiveAstrologer: React.FC = () => {
 
       <div className="w-full">
         {!isActive ? (
-          <button onClick={startSession} className="w-full py-4.5 bg-[#431407] text-[#D4AF37] font-black rounded-3xl shadow-2xl uppercase tracking-[0.15em] text-xs sm:text-sm active:brightness-125 transition-all">Invoke Guruji</button>
+          <button onClick={startSession} className="w-full py-4.5 bg-[#451a03] text-[#f59e0b] font-black rounded-3xl shadow-2xl uppercase tracking-[0.15em] text-xs sm:text-sm active:brightness-125 transition-all">Invoke Daivajna</button>
         ) : (
-          <button onClick={stopSession} className="w-full py-4.5 bg-white border-2 border-[#431407] text-[#431407] font-black rounded-3xl shadow-md uppercase tracking-[0.15em] text-xs sm:text-sm active:bg-slate-50 transition-all">Pranama (End)</button>
+          <button onClick={stopSession} className="w-full py-4.5 bg-white border-2 border-[#451a03] text-[#451a03] font-black rounded-3xl shadow-md uppercase tracking-[0.15em] text-xs sm:text-sm active:bg-slate-50 transition-all">{t.pranama_end || 'Pranama (End)'}</button>
         )}
       </div>
 
       <div className="w-full flex flex-wrap gap-2 justify-center">
-        {['Career Guidance', 'Love & Marriage', 'Health & Energy', 'Spiritual Path'].map((topic) => (
+        {[
+          { id: 'career_guidance', label: t.career_guidance || 'Career Guidance' },
+          { id: 'love_marriage', label: t.love_marriage || 'Love & Marriage' },
+          { id: 'health_energy', label: t.health_energy || 'Health & Energy' },
+          { id: 'spiritual_path', label: t.spiritual_path || 'Spiritual Path' }
+        ].map((topic) => (
           <button 
-            key={topic}
+            key={topic.id}
             onClick={() => {
               if (isActive && sessionRef.current) {
-                // In a real scenario, we might send this as text if the API supports it, 
-                // or just encourage the user to speak it.
-                // For now, we'll just show a toast or a hint.
-                setTranscription(prev => [...prev, "You (Hint): I want help with " + topic]);
+                setTranscription(prev => [...prev, (t.you_hint || "You (Hint): I want help with ") + topic.label]);
               } else if (!isActive) {
                 startSession();
               }
             }}
-            className="px-3 py-1.5 bg-white/50 border border-[#431407]/20 rounded-full text-[10px] sm:text-xs font-bold text-[#431407] hover:bg-[#431407] hover:text-[#D4AF37] transition-all shadow-sm"
+            className="px-3 py-1.5 bg-white/50 border border-[#451a03]/20 rounded-full text-[10px] sm:text-xs font-bold text-[#451a03] hover:bg-[#451a03] hover:text-[#f59e0b] transition-all shadow-sm"
           >
-            {topic}
+            {topic.label}
           </button>
         ))}
       </div>
 
-      <div className="w-full flex-1 min-h-[160px] overflow-y-auto bg-white/70 border-2 border-[#431407]/10 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-inner flex flex-col gap-4">
+      <div className="w-full flex-1 min-h-[160px] overflow-y-auto bg-white/70 border-2 border-[#451a03]/10 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-inner flex flex-col gap-4">
         {transcription.length === 0 && (
-          <div className="h-full flex items-center justify-center opacity-60 italic text-sm sm:text-lg text-[#431407] px-4 text-center leading-relaxed font-serif">
-            "Seek wisdom and the stars shall answer through Guruji."
+          <div className="h-full flex items-center justify-center opacity-60 italic text-sm sm:text-lg text-[#451a03] px-4 text-center leading-relaxed font-serif">
+            "{t.seek_wisdom_message || 'Seek wisdom and the stars shall answer through Guruji.'}"
           </div>
         )}
         {transcription.map((t, i) => (
-          <div key={i} className="text-xs sm:text-base border-l-4 border-[#D4AF37] pl-4 py-3 font-serif text-[#431407] bg-white border border-[#431407]/5 rounded-r-xl shadow-md leading-relaxed font-bold">
+          <div key={i} className="text-xs sm:text-base border-l-4 border-[#f59e0b] pl-4 py-3 font-serif text-[#451a03] bg-white border border-[#451a03]/5 rounded-r-xl shadow-md leading-relaxed font-bold">
             {t}
           </div>
         ))}
