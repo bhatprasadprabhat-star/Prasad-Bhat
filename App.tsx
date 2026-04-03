@@ -3,12 +3,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Stars, Sparkles, Moon, Sun, Compass, Heart, MessageSquare, HelpCircle, ChevronDown, User } from 'lucide-react';
 import { AppTab, Language, UserIntake, MatchingIntake, UserMode, PlanetPosition, CityData, OnboardingStep } from './types';
-import LiveAstrologer from './components/LiveAstrologer';
 import SearchAssistant from './components/SearchAssistant';
-import SuggestionBox from './components/SuggestionBox';
 import SouthIndianChart from './components/SouthIndianChart';
-import DonateSection from './components/DonateSection';
-import ContactAstrologer from './components/ContactAstrologer';
 import Panchanga from './components/Panchanga';
 import TimelineDashboard from './components/TimelineDashboard';
 import DailyPanchangaWidget from './components/DailyPanchangaWidget';
@@ -197,9 +193,11 @@ const App: React.FC = () => {
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(() => {
     const onboardingDone = localStorage.getItem('astro_logic_onboarding_v1');
     const savedMode = localStorage.getItem('astro_logic_mode_v1');
+    
+    // If we have a mode but onboarding isn't "done" (profile filled), we might still want to show mode select
+    // but the user wants it at the VERY beginning.
     if (onboardingDone && savedMode) return OnboardingStep.COMPLETED;
     
-    // Start with Mode Selection as requested
     return OnboardingStep.MODE_SELECT;
   });
   const [mode, setMode] = useState<UserMode | null>(() => {
@@ -218,7 +216,6 @@ const App: React.FC = () => {
   const [structuredData, setStructuredData] = useState<any>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isChatOverlayOpen, setIsChatOverlayOpen] = useState(false);
-  const [showRemedyContact, setShowRemedyContact] = useState(false);
   const [cache, setCache] = useState<Record<string, string>>({});
   
   const [intake, setIntake] = useState<UserIntake & { lat: string, lon: string, tz: string }>(() => {
@@ -261,7 +258,6 @@ const App: React.FC = () => {
   });
   const [muhurtaSearch, setMuhurtaSearch] = useState('');
 
-  const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [matchingIntake, setMatchingIntake] = useState<MatchingIntake>(() => {
     const now = new Date();
     const dob = now.toISOString().split('T')[0];
@@ -640,7 +636,7 @@ const App: React.FC = () => {
                 transition={{ delay: 0.3 }}
                 className="mb-10"
               >
-                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.menu_details || 'Jataka Birth Details'}</h3>
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{currentSection === 'menu_basic_details' ? (t.menu_basic_details || 'Basic Birth Details') : (t.menu_details || 'Jataka Birth Details')}</h3>
                 <BirthDetailsTable details={structuredData.details} />
               </motion.div>
             )}
@@ -758,29 +754,8 @@ const App: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-8">
-              <button 
-                onClick={() => setShowRemedyContact(true)}
-                className="w-full py-6 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-[2rem] font-black uppercase tracking-[0.3em] text-sm shadow-2xl hover:scale-[1.02] active:scale-95 transition-all border-2 border-[#D4AF37]/30 flex items-center justify-center gap-4"
-              >
-                <span className="text-2xl">🍃</span>
-                {t.tambula_offering || 'Offer Tambula'}
-              </button>
-            </div>
-
-            {showRemedyContact && (
-              <ContactAstrologer lang={lang} initialStep="FORM" onClose={() => setShowRemedyContact(false)} />
-            )}
             <div className="mt-12 text-center space-y-8">
-              <SuggestionBox lang={lang} />
-              
-              <button 
-                onClick={() => setIsDonateOpen(true)}
-                className="group inline-flex items-center gap-3 px-10 py-5 bg-[#D4AF37] text-[#92400e] rounded-full text-lg font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl"
-              >
-                <Heart className="w-6 h-6 fill-current" />
-                {t.support_guruji}
-              </button>
+              {/* Support features removed */}
             </div>
           </div>
         </motion.div>
@@ -795,9 +770,10 @@ const App: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="min-h-screen flex flex-col parchment-bg overflow-x-hidden relative"
+            className={`min-h-screen flex flex-col overflow-x-hidden relative ${mode === 'SCHOLAR' ? 'scholar-theme' : 'seeker-theme'}`}
           >
             <MandalaBackground />
+            <div className={`fixed inset-0 pointer-events-none z-0 opacity-20 ${mode === 'SCHOLAR' ? 'bg-[#0f172a]' : 'bg-[#fff7ed]'}`}></div>
             {error && (
               <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[70] w-[90%] max-w-md p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-800 text-center font-bold shadow-2xl animate-in slide-in-from-top-4">
                 {error}
@@ -816,15 +792,13 @@ const App: React.FC = () => {
                     <User className="w-6 h-6 sm:w-10 sm:h-10 text-[#451a03]" />
                   )}
                 </button>
-                <button 
-                  onClick={() => setMode(null)}
-                  className="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-[#451a03] to-[#7c2d12] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl border-2 border-[#D4AF37]/40 rotate-1 transition-all"
-                >
-                   <span className="text-white text-xl sm:text-3xl">☀️</span>
-                </button>
                 <div className="flex flex-col -gap-1">
                   <span className="text-lg sm:text-4xl font-black text-[#451a03] tracking-tighter uppercase astrological-font leading-none">{t.brand_name || 'Astrologic'}</span>
-                  <span className="text-[8px] sm:text-[11px] font-black text-[#7C2D12] uppercase tracking-[0.3em] ml-0.5">{mode === 'SCHOLAR' ? (t.siddhantic_precision || 'Siddhantic Precision') : (t.personal_guidance || 'Personal Guidance')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[8px] sm:text-[11px] font-black uppercase tracking-[0.3em] px-2 py-0.5 rounded-full ${mode === 'SCHOLAR' ? 'bg-[#D4AF37] text-[#451a03]' : 'bg-[#451a03] text-[#D4AF37]'}`}>
+                      {mode === 'SCHOLAR' ? (t.siddhantic_precision || 'Scholar Section') : (t.personal_guidance || 'Seeker Section')}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -839,13 +813,6 @@ const App: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                <button 
-                  onClick={() => setMode(null)}
-                  className="hidden sm:flex items-center gap-2 px-5 py-2.5 border-2 border-[#D4AF37] bg-[#D4AF37] rounded-full text-[10px] font-black uppercase text-[#451a03] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md group"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-                  {t.path || 'Path'}
-                </button>
               </div>
             </nav>
 
@@ -934,30 +901,32 @@ const App: React.FC = () => {
               <div className="w-full max-w-6xl mx-auto px-4 space-y-12 mb-20">
                 <DailyWisdom lang={lang} />
 
+                {mode === 'SCHOLAR' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-8 border-2 border-[#D4AF37]/30 rounded-[2rem] bg-black/20 backdrop-blur-md text-center space-y-4"
+                  >
+                    <h3 className="text-[#D4AF37] font-black uppercase tracking-[0.3em] text-sm">Classical Source Authority</h3>
+                    <div className="flex flex-wrap justify-center gap-4 sm:gap-8 opacity-70">
+                      {['Brihat Parashara Hora Shastra', 'Brihat Jataka', 'Prashna Marga', 'Phaladeepika', 'Jataka Parijata', 'Saravali'].map(book => (
+                        <span key={book} className="text-[#D4AF37] text-[10px] sm:text-xs font-serif italic border-b border-[#D4AF37]/20 pb-1">{book}</span>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <MuhurthaLiveFeed lang={lang} />
                   {mode !== 'SCHOLAR' && <VedicRemedyGenerator lang={lang} />}
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <ContactAstrologer lang={lang} />
-                  <SuggestionBox lang={lang} />
+                  {/* Support features removed */}
                 </div>
               </div>
 
-              <motion.div 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                className="mt-12 mb-4"
-              >
-                <button 
-                  onClick={() => setIsDonateOpen(true)}
-                  className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] rounded-full text-[10px] font-black uppercase text-[#451a03] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(212,175,55,0.3)] border-2 border-[#451a03]/10"
-                >
-                  <Heart className="w-4 h-4 fill-current animate-pulse" />
-                  Donate & Support
-                </button>
-              </motion.div>
+              {/* Support features removed */}
             </section>
             
             <footer className="w-full py-8 text-center text-[8px] sm:text-[10px] text-[#451a03]/40 font-black uppercase tracking-[0.8em] z-10 px-4">{t.footer_text}</footer>
@@ -982,20 +951,28 @@ const App: React.FC = () => {
               <h2 className="ml-3 text-lg sm:text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">{t.analysis_tab_title || 'Analysis'}</h2>
             </header>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 p-6 sm:p-12 flex-1 overflow-y-auto max-w-6xl mx-auto w-full pb-48 z-10">
-              {[ 
-                { id: 'menu_details', label: mode === 'SCHOLAR' ? (t.birth_analysis || 'Birth Analysis') : (t.my_character || 'My Character') }, 
-                { id: 'menu_timeline', label: mode === 'SCHOLAR' ? (t.timeline || 'Timeline') : (t.life_path || 'Life Path') },
-                { id: 'menu_hora', label: mode === 'SCHOLAR' ? (t.shastriya || 'Shastriya') : (t.wealth_health || 'Wealth & Health') },
-                { id: 'menu_rasi', label: mode === 'SCHOLAR' ? (t.rasi_kundli || 'Rasi Kundli') : (t.soul_map || 'The Soul Map') }, 
-                { id: 'menu_navamsha', label: mode === 'SCHOLAR' ? (t.menu_navamsha || 'Navamsha D9') : (t.menu_navamsha || 'Navamsha') },
-                { id: 'menu_bhava_analysis', label: mode === 'SCHOLAR' ? (t.menu_bhava_analysis || '12 Houses Analysis') : (t.menu_bhava_analysis || 'House Power') },
-                { id: 'menu_yogas', label: mode === 'SCHOLAR' ? (t.menu_yogas || 'Yoga Analysis') : (t.menu_yogas || 'Yogas') },
-                { id: 'menu_maitri', label: mode === 'SCHOLAR' ? (t.menu_maitri || 'Panchadha Graha Maitri') : (t.menu_maitri || 'Friendship') },
-                { id: 'menu_dasha', label: mode === 'SCHOLAR' ? (t.vimshottari || 'Vimshottari') : (t.life_phase || 'Life Phase') }, 
-                { id: 'menu_shadvarga', label: mode === 'SCHOLAR' ? (t.shadvarga_strengths || 'Shadvarga') : (t.planetary_power || 'Planetary Power') },
-                { id: 'menu_shadbala', label: mode === 'SCHOLAR' ? (t.shadbala_analysis || 'Shadbala') : (t.energy_strength || 'Energy Strength') },
-                { id: 'menu_ashtaka', label: mode === 'SCHOLAR' ? (t.ashtakavarga || 'Ashtakavarga') : (t.power_score || 'Power Score') } 
-              ].map((item, idx) => (
+              {(mode === 'SEEKER' ? [
+                { id: 'menu_basic_details', label: t.menu_basic_details || 'Basic Birth Details' },
+                { id: 'menu_yoga', label: t.menu_yoga || 'Yoga Analysis' },
+                { id: 'menu_career', label: t.menu_career || 'Career' },
+                { id: 'menu_health', label: t.menu_health || 'Health' },
+                { id: 'menu_money', label: t.menu_money || 'Money' },
+                { id: 'menu_transit', label: t.menu_transit || 'Transit' },
+                { id: 'menu_dasha_effect', label: t.menu_dasha_effect || 'Dasha Effect' }
+              ] : [ 
+                { id: 'menu_details', label: t.birth_analysis || 'Birth Analysis' }, 
+                { id: 'menu_timeline', label: t.timeline || 'Timeline' },
+                { id: 'menu_hora', label: t.shastriya || 'Shastriya' },
+                { id: 'menu_rasi', label: t.rasi_kundli || 'Rasi Kundli' }, 
+                { id: 'menu_navamsha', label: t.menu_navamsha || 'Navamsha D9' },
+                { id: 'menu_bhava_analysis', label: t.menu_bhava_analysis || '12 Houses Analysis' },
+                { id: 'menu_yogas', label: t.menu_yogas || 'Yoga Analysis' },
+                { id: 'menu_maitri', label: t.menu_maitri || 'Panchadha Graha Maitri' },
+                { id: 'menu_dasha', label: t.vimshottari || 'Vimshottari' }, 
+                { id: 'menu_shadvarga', label: t.shadvarga_strengths || 'Shadvarga' },
+                { id: 'menu_shadbala', label: t.shadbala_analysis || 'Shadbala' },
+                { id: 'menu_ashtaka', label: t.ashtakavarga || 'Ashtakavarga' } 
+              ]).map((item, idx) => (
                 <motion.button 
                   key={item.id} 
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -1501,90 +1478,8 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen text-[#451a03] selection:bg-amber-500/30 font-serif overflow-x-hidden break-words">
       <AnimatePresence mode="wait">
-        {onboardingStep === OnboardingStep.SPLASH && (
-          <motion.div
-            key="splash"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center p-8 text-center"
-          >
-            <MandalaBackground />
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="flex flex-col items-center"
-            >
-              <FantasticLogo className="mb-12" />
-              <motion.h1 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 1 }}
-                className="text-5xl sm:text-8xl font-black text-[#D4AF37] uppercase tracking-[0.3em] astrological-font mb-6 drop-shadow-[0_0_30px_rgba(212,175,55,0.5)]"
-              >
-                {t.brand_name || 'Astrologic'}
-              </motion.h1>
-              <motion.p 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 1 }}
-                className="text-[#D4AF37]/60 text-sm sm:text-xl uppercase tracking-[0.5em] mb-16 max-w-2xl leading-relaxed"
-              >
-                {t.tagline || 'The Ancient Science of Light & Time'}
-              </motion.p>
-              <motion.button
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1.2, duration: 0.5 }}
-                onClick={() => setOnboardingStep(OnboardingStep.QUICK_LOGIN)}
-                className="px-12 py-6 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#451a03] rounded-full font-black uppercase tracking-[0.4em] text-sm sm:text-lg shadow-[0_20px_50px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95 transition-all"
-              >
-                {t.begin_journey || 'Begin Journey'}
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        )}
 
-        {onboardingStep === OnboardingStep.LANG_SELECT && (
-          <motion.div
-            key="lang_select"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[100] bg-[#fffbeb] overflow-y-auto p-6 sm:p-12"
-          >
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl sm:text-6xl font-black text-[#451a03] uppercase tracking-widest astrological-font text-center mb-16">
-                {t.lang_select || 'Select Your Language'}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
-                {LANGUAGES.map((l) => (
-                  <button
-                    key={l.code}
-                    onClick={() => {
-                      setLang(l.code as Language);
-                      localStorage.setItem('astro_logic_lang', l.code);
-                      setOnboardingStep(OnboardingStep.QUICK_LOGIN);
-                    }}
-                    className="group relative h-48 sm:h-64 rounded-[2.5rem] overflow-hidden shadow-2xl hover:scale-[1.02] transition-all active:scale-95 border-4 border-transparent hover:border-[#D4AF37]"
-                  >
-                    <img 
-                      src={l.image} 
-                      alt={l.name} 
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-3xl sm:text-5xl font-black text-white drop-shadow-2xl uppercase tracking-widest">{l.name}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
+
 
         {onboardingStep === OnboardingStep.QUICK_LOGIN && (
           <motion.div
@@ -1722,7 +1617,8 @@ const App: React.FC = () => {
                 onClick={() => {
                   setMode('SEEKER');
                   localStorage.setItem('astro_logic_mode_v1', 'SEEKER');
-                  setOnboardingStep(OnboardingStep.LANG_SELECT);
+                  setOnboardingStep(OnboardingStep.COMPLETED);
+                  localStorage.setItem('astro_logic_onboarding_v1', 'true');
                 }}
                 className="flex-1 group relative flex flex-col items-center justify-center p-10 sm:p-16 transition-all duration-500 bg-white/5 backdrop-blur-sm border-4 border-[#D4AF37]/20 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
               >
@@ -1753,7 +1649,8 @@ const App: React.FC = () => {
                 onClick={() => {
                   setMode('SCHOLAR');
                   localStorage.setItem('astro_logic_mode_v1', 'SCHOLAR');
-                  setOnboardingStep(OnboardingStep.LANG_SELECT);
+                  setOnboardingStep(OnboardingStep.COMPLETED);
+                  localStorage.setItem('astro_logic_onboarding_v1', 'true');
                 }}
                 className="flex-1 group relative flex flex-col items-center justify-center p-10 sm:p-16 transition-all duration-500 bg-white/5 backdrop-blur-sm border-4 border-[#D4AF37]/20 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
               >
@@ -1886,7 +1783,6 @@ const App: React.FC = () => {
                    <button onClick={() => setIsChatOverlayOpen(false)} className="hover:opacity-70 text-2xl sm:text-3xl font-bold z-10">✕</button>
                 </div>
                 <div className="flex-1 overflow-hidden p-3 sm:p-6 bg-[#fffbeb]">
-                   <LiveAstrologer lang={lang} mode={mode || 'SEEKER'} />
                 </div>
               </div>
             )}
@@ -1919,7 +1815,7 @@ const App: React.FC = () => {
 
           {renderBottomNav()}
 
-          <DonateSection isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} lang={lang} />
+          {/* DonateSection removed */}
         </>
       )}
 

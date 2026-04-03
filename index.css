@@ -33,12 +33,24 @@
   padding: 1rem 1.5rem;
   border-radius: 0 1rem 1rem 0;
 }
+/* Scholar Theme */
+.scholar-theme {
+  background-color: #0f172a;
+  background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+}
 
-/* Scholar View Specific Styles */
-.scholar-view {
-  font-family: 'Lora', serif;
-  background: linear-gradient(to bottom, #ffffff, #fffbeb) !important;
-  color: #1a1a1a !important;
+.scholar-theme .astrological-font {
+  color: #D4AF37 !important;
+}
+
+/* Seeker Theme */
+.seeker-theme {
+  background-color: #fff7ed;
+  background-image: radial-gradient(circle at 50% 50%, #fffbeb 0%, #fff7ed 100%);
+}
+
+.seeker-theme .astrological-font {
+  color: #451a03 !important;
 }
 
 .scholar-view h1,

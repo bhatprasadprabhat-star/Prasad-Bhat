@@ -9,8 +9,11 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
   
   const scholarInstructions = `
     1. EXTREME MATHEMATICAL PRECISION: You MUST calculate planetary positions (Sphuta) with absolute accuracy using Lahiri Ayanamsa. Use the provided Latitude, Longitude, and Timezone for exact calculations.
-    2. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area. DO NOT repeat basic birth details, Shadbala, or Shadvarga in other sections unless it is the specific section for that analysis.
-    3. JATAKA BIRTH DETAILS: If the focus area is "Birth Analysis" or "menu_details", you MUST start with a comprehensive "Jataka Birth Details" section containing:
+    2. DEEP SHASTRIYA KNOWLEDGE: This section is for professional astrologers. Provide an EXHAUSTIVE and high-density technical analysis. Use terms like "Adhipati", "Uchcha", "Neecha", "Vargottama", "Digbala", "Sthana Bala", "Drishti", etc., with deep explanation of their combined effects.
+    3. CLASSICAL TEXTS: Base all analysis EXCLUSIVELY on Brihat Parashara Hora Shastra (BPHS), Brihat Jataka, Prashna Marga, and Phaladeepika. Cite the specific chapter (Adhyaya) and verse (Shloka) numbers for EVERY major observation.
+    4. SANSKRIT SHLOKAS: Provide extensive Sanskrit Shlokas (at least 10-12 major ones) in Devanagari script. For each shloka, provide a word-by-word grammatical breakdown (Anvaya), a literal translation, and then a multi-paragraph deep technical interpretation.
+    5. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area, but that information must be presented with MAXIMUM DEPTH.
+    6. JATAKA BIRTH DETAILS: If the focus area is "Birth Analysis" or "menu_details", you MUST start with a comprehensive "Jataka Birth Details" section containing:
         - Name of the Jataka holder, Date of Birth, Time, Place of Birth.
         - Latitude and Longitude.
         - Kalidina (number of days since Kali Yuga start).
@@ -21,62 +24,47 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
         - Panchanga: Tithi, Vara, Nakshatra, Yoga, Karana.
         - Nakshatra Gata.
         - Janma Shista Varsha (Balance of Dasha at birth).
-        - DO NOT include Bhava analysis, Shadvarga, or Shadbala here.
+        - Provide a multi-page equivalent of technical data.
         - Provide the data in a JSON script tag: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Basic"}, {"label": "Tithi", "value": "...", "category": "Panchanga"}]}</script>
-    4. 12 HOUSES (BHAVAS) ANALYSIS: If the focus area is "12 Houses (Bhava) Analysis" or "menu_bhava_analysis", provide an EXHAUSTIVE evaluation of all 12 Houses.
-        - For EACH house, explain its power/strength in this specific Jataka.
-        - Include a relevant Sanskrit Shloka from classical texts (BPHS, Brihat Jataka, or Phaladeepika).
-        - Detailed explanation of the house's significance and its strength based on the house lord, aspects, and occupants.
-        - DO NOT include birth details, Shadvarga, or Shadbala tables here.
+    7. 12 HOUSES (BHAVAS) ANALYSIS: If the focus area is "12 Houses (Bhava) Analysis" or "menu_bhava_analysis", provide an EXHAUSTIVE evaluation of all 12 Houses.
+        - For EACH house, provide at least 3-4 paragraphs of analysis.
+        - Include a relevant Sanskrit Shloka from classical texts for EACH house.
+        - Detailed explanation of the house's significance, its lord's placement, aspects received, and the strength of its occupants.
         - Provide the data in a JSON script tag: <script type="application/json">{"type": "bhavaphala", "houses": [{"number": 1, "title": "...", "description": "...", "shloka": "...", "strength": "..."}]}</script>
-    5. SHADVARGA: If the focus area is "Shadvarga Strengths" or "menu_shadvarga", provide the planetary positions for D1, D2, D3, D9, D12, and D30 charts.
-        - For EACH chart, identify the "Adhipati" (Lord of the Lagna) and discuss their power/strength in that specific divisional chart.
-        - DO NOT include Shadbala tables or birth details here.
-        - Provide the data in a JSON script tag: <script type="application/json">{"type": "shadvarga", "vargas": {"D1": [...], "D9": [...]}, "lords": {"D1": {"planet": "...", "power": "..."}, "D9": {"planet": "...", "power": "..."}}}</script>
-    6. SHADBALA: If the focus area is "Shadbala Analysis" or "menu_shadbala", provide a detailed breakdown of Shadbala (Sthana, Dig, Kaala, Chesta, Naisargika, and Drig bala) using *Brihat Jataka* as the source.
-        - Analyze the total strength (Shadbala Pinda) for all 7 planets.
-        - DO NOT include divisional charts (Vargas) or birth details here.
-        - Provide the data in a JSON script tag: <script type="application/json">{"type": "shadbala", "shadbala": [{"planet": "Sun", "sthana": 120, "dig": 50, ...}]}</script>
-    6. EXACT RASHI & NAKSHATRA: Provide the exact Rasi (sign), Nakshatra (constellation), and Pada (quarter) for each planet, especially the Moon (Janma Rasi/Nakshatra).
-    7. CLASSICAL TEXTS: Base all analysis EXCLUSIVELY on Brihat Parashara Hora Shastra (BPHS) as the primary authority, supplemented by Brihat Jataka, Prashna Marga, Phaladeepika, and Jataka Phala Saroddhara.
-    8. SHLOKA MATRIX: Provide extensive Sanskrit Shlokas (at least 6-8 major ones) in Devanagari script from the referenced texts, prioritizing BPHS. For each shloka, provide a word-by-word grammatical breakdown (Anvaya) and then a deep philosophical and technical interpretation.
-    9. CITATIONS: Explicitly cite Brihat Parashara Hora Shastra (BPHS), Brihat Jataka, Prashna Marga, Phaladeepika, and Jataka Phala Saroddhara. Mention the specific chapter (Adhyaya) and verse (Shloka) numbers.
-    9. MATHEMATICAL RIGOR: Discuss the specific longitude (Sphuta) of planets down to seconds of arc. Analyze Varga strengths (Shad-varga, Sapta-varga, Dasha-varga). Discuss Bhava Madhya and Bhava Sandhi impacts on planetary results.
-    7. CATEGORICAL DETAIL: Provide exhaustive details for Health (Sharira), Wealth (Dhana), Career (Karma), Spirituality (Moksha), and Longevity (Ayus). Use Jaimini Sutras for cross-verification of longevity and career.
-    8. YOGA ANALYSIS: Identify and explain at least 7-10 specific Yogas (e.g., Raja Yoga, Dhana Yoga, Parivartana Yoga) with their classical definitions and expected results in this specific chart.
-    9. UNIQUENESS: Every analysis must be 100% unique to the native's exact degrees. Never provide generic descriptions.
+    8. SHADVARGA: If the focus area is "Shadvarga Strengths" or "menu_shadvarga", provide the planetary positions for D1, D2, D3, D9, D12, and D30 charts.
+        - For EACH chart, provide a deep technical analysis of the Lagna Lord and planetary placements.
+    9. SHADBALA: If the focus area is "Shadbala Analysis" or "menu_shadbala", provide a detailed breakdown of Shadbala (Sthana, Dig, Kaala, Chesta, Naisargika, and Drig bala).
+        - Analyze the total strength (Shadbala Pinda) for all 7 planets with multi-paragraph commentary on each planet's functional capability.
+    10. YOGA ANALYSIS: Identify and explain at least 25-30 specific Yogas. For each, provide the classical definition, the shloka, and a detailed analysis of how it manifests in this native's life.
+    11. UNIQUENESS: Every analysis must be 100% unique to the native's exact degrees. Never provide generic descriptions. The total output should be extremely long and detailed (at least 2000-3000 words if the section allows).
   `;
 
   const seekerInstructions = `
     1. EASY TO UNDERSTAND: Use simple, clear language. Avoid difficult astrological terms. Instead of "Malefic", say "Challenging". Instead of "Benefic", say "Helpful".
     2. ACCURATE SOUL MAP: Even for seekers, the Rasi and Nakshatra MUST be mathematically correct.
-    3. IMMERSIVE LIFE GUIDANCE: Provide a massive, detailed breakdown of their personality and path in a way that feels like a friendly conversation.
+    3. IMMERSIVE LIFE GUIDANCE: Provide a MASSIVE, multi-page detailed breakdown of their personality and path. It should feel like a deep, 1-on-1 coaching session with a wise mentor.
     4. CELESTIAL SCORES: Give a "Celestial Score" out of 100 for different areas: Career Success, Financial Growth, Love Harmony, and Emotional Peace.
-    5. DIVINE THEME: Include ONE beautifully explained central Shloka in Devanagari from Brihat Parashara Hora Shastra (BPHS), Phaladeepika, or Brihat Jataka. Explain it as a guiding light for their soul in very simple terms.
-    6. RITUALS & HABITS: Provide 3 simple, actionable daily rituals (Pariharas) like specific prayers, colors to wear, or small acts of kindness to align with their stars.
-    7. CATEGORICAL DEPTH: Dedicate large sections to: 1. Your Unique Strengths, 2. Overcoming Current Hurdles, 3. The Path to Financial Abundance, 4. Finding True Love.
-    8. LIFE PARTNER: If the focus area is "My Character" or "Life Path" or "Love & Marriage" or "Life Partner", you MUST include a detailed "Life Partner" section.
-        - Provide ONLY NECESSARY and HIGHLY PERSONALIZED information.
-        - Analysis MUST be specific to this particular Jataka (Kundli).
-        - Do NOT show generic information.
-        - Focus on:
-            - Nature and characteristics of the spouse based on the 7th house and its lord.
-            - Navamsha (D9) chart significance for marriage.
-            - Timing of marriage.
-            - Direction and distance of the partner's birthplace.
-            - Potential professions and background of the spouse.
-        - Ensure consistency: the same Jataka should always receive the same core analysis.
-        - DISCLAIMER: At the end of this section, add this line in a big bold letter: "Astrological predictions are based on planetary calculations and indicate possibilities, not guaranteed outcomes."
-    9. DAILY FORECAST: If the focus area is "Daily Prediction" or "menu_daily", you MUST provide a long, detailed forecast based on Samhita and Hora.
-        - Include sections for: General Outlook, Career & Finance, Health & Wellness, Relationships, Lucky Colors & Numbers, and a specific "Remedy of the Day".
-        - The forecast should be at least 400-500 words long.
-    10. PANCHANGA: If the focus area is "Panchanga" or "menu_panchanga", you MUST provide a clear HTML table of the day's elements (Tithi, Vara, Nakshatra, Yoga, Karana, Rahu Kala, Gulika Kala, Yamaganda) first, followed by a detailed scholarly explanation.
-    11. LIFE TIMELINE: If the focus area is "Life Timeline" or "menu_timeline", ensure the timeline is mathematically accurate and consistent for the same Kundli. Provide a clear dashboard of life phases with scores.
-    12. MATCHING: If the focus area is "Matching Analysis" or "menu_matching", include the names of both individuals. Ensure proper spacing and visibility for location selection. The final conclusion MUST have a distinct background color and professional styling.
+    5. DIVINE THEME: Include at least 3 beautifully explained central Shlokas in Devanagari. Explain them as guiding lights for their soul in very simple, inspiring terms.
+    6. RITUALS & HABITS: Provide 5-7 simple, actionable daily rituals (Pariharas).
+    7. CATEGORICAL DEPTH: Dedicate LARGE, multi-paragraph sections to: 1. Your Unique Strengths, 2. Overcoming Current Hurdles, 3. The Path to Financial Abundance, 4. Finding True Love, 5. Your Spiritual Purpose.
+    8. LIFE PARTNER: If relevant, include a detailed "Life Partner" section with at least 500 words of personalized analysis.
+    9. DAILY FORECAST: If the focus area is "Daily Prediction" or "menu_daily", you MUST provide a long, detailed forecast (at least 800-1000 words).
+    10. PANCHANGA: If the focus area is "Panchanga" or "menu_panchanga", provide a clear HTML table followed by a 1000-word detailed explanation.
+    11. LIFE TIMELINE: Provide a clear dashboard of life phases with scores and at least 2-3 paragraphs of description for each major phase.
+    12. MATCHING: Provide an exhaustive compatibility analysis (at least 1500 words).
     13. PERSONALIZED: Ensure the advice feels deeply personal and specific to their birth chart, not generic.
-    14. MANGALA DOSHA: Always include a specific section analyzing Mangala Dosha (Mars Affliction). Explain if it exists, its intensity, and simple remedies if needed.
-    15. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area. DO NOT repeat basic birth details in other sections.
-    16. CONCLUSION: End the entire analysis with a clear, one-line bold conclusion summarizing the core message of the heavens for the native.
+    14. MANGALA DOSHA: Always include a specific section analyzing Mangala Dosha (Mars Affliction) with at least 300 words of explanation.
+    15. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area, but with MAXIMUM EXPLANATORY DEPTH.
+    16. SECTION SPECIFIC GUIDANCE (SEEKER):
+        - "Basic Birth Details" (menu_basic_details): Provide a massive, warm summary (at least 600 words) of their birth chart (Rasi, Nakshatra, Lagna) and what it means for their soul's purpose.
+        - "Yoga Analysis" (menu_yoga): Identify 5-7 most powerful Yogas. Explain them as "Celestial Blessings" with at least 2 paragraphs each.
+        - "Career & Success" (menu_career): Provide a 1000-word deep dive into their professional path.
+        - "Health & Vitality" (menu_health): Provide a 1000-word deep dive into their physical and mental well-being.
+        - "Wealth & Finance" (menu_money): Provide a 1000-word deep dive into their financial potential.
+        - "Planetary Transits" (menu_transit): Provide a 1000-word deep dive into how current transits are affecting them.
+        - "Dasha Effects" (menu_dasha_effect): Provide a 1000-word deep dive into their current life period.
+    17. CONCLUSION: End the entire analysis with a clear, one-line bold conclusion.
+    18. LENGTH REQUIREMENT: Every section response MUST be at least 1500-2000 words long to ensure maximum detail.
   `;
 
   const prompt = `Perform an EXHAUSTIVE, high-resolution Vedic analysis in ${lang} for ${intake.name}.
