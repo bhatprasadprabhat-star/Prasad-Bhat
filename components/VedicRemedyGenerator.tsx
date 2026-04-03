@@ -12,11 +12,14 @@ const VedicRemedyGenerator: React.FC<VedicRemedyGeneratorProps> = ({ lang }) => 
   const [activeRemedy, setActiveRemedy] = useState<number | null>(null);
 
   const remedies = [
-    { id: 1, title: 'Surya Arghya', icon: <Sun />, desc: 'Offer water to the rising sun to boost confidence and health.', color: 'from-orange-400 to-red-500' },
-    { id: 2, title: 'Chandra Shanti', icon: <Moon />, desc: 'Drink water from a silver glass to calm the mind and emotions.', color: 'from-blue-200 to-indigo-300' },
-    { id: 3, title: 'Hanuman Chalisa', icon: <Shield />, desc: 'Recite daily to overcome fear and gain inner strength.', color: 'from-red-600 to-orange-700' },
-    { id: 4, title: 'Mantra Jaap', icon: <Zap />, desc: 'Chant "Om Namah Shivaya" 108 times for spiritual protection.', color: 'from-purple-500 to-indigo-600' },
-    { id: 5, title: 'Daan (Charity)', icon: <Heart />, desc: 'Donate food on Saturdays to mitigate Saturnian delays.', color: 'from-emerald-400 to-teal-600' }
+    { id: 1, title: 'Surya Arghya', icon: <Sun />, desc: 'Offer water to the rising sun to boost confidence, leadership, and health. Best performed within 1 hour of sunrise.', color: 'from-orange-400 to-red-500' },
+    { id: 2, title: 'Chandra Shanti', icon: <Moon />, desc: 'Drink water from a silver glass to calm the mind, improve emotional stability, and enhance intuition.', color: 'from-blue-200 to-indigo-300' },
+    { id: 3, title: 'Hanuman Chalisa', icon: <Shield />, desc: 'Recite daily to overcome fear, gain inner strength, and protect against negative planetary influences.', color: 'from-red-600 to-orange-700' },
+    { id: 4, title: 'Mantra Jaap', icon: <Zap />, desc: 'Chant "Om Namah Shivaya" 108 times for spiritual protection and to dissolve karmic blockages.', color: 'from-purple-500 to-indigo-600' },
+    { id: 5, title: 'Daan (Charity)', icon: <Heart />, desc: 'Donate black sesame seeds or food on Saturdays to mitigate Saturnian delays and bring stability.', color: 'from-emerald-400 to-teal-600' },
+    { id: 6, title: 'Ganesh Atharvashirsha', icon: <Sparkles />, desc: 'Recite to remove obstacles in career and education. Best for Mercury (Budha) related issues.', color: 'from-yellow-400 to-amber-600' },
+    { id: 7, title: 'Tulsi Seva', icon: <Heart />, desc: 'Watering and circumambulating the Tulsi plant daily brings peace to the household and strengthens Venus.', color: 'from-green-400 to-emerald-700' },
+    { id: 8, title: 'Gayatri Mantra', icon: <Sun />, desc: 'Chanting at dawn, noon, and dusk purifies the intellect and aligns you with the solar energy.', color: 'from-amber-300 to-orange-500' }
   ];
 
   return (

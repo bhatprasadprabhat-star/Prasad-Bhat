@@ -31,6 +31,21 @@ const DailyWisdom: React.FC<DailyWisdomProps> = ({ lang }) => {
       en: "The universe speaks in the language of geometry and light. Astrology is the translation of that divine speech.",
       kn: "ಬ್ರಹ್ಮಾಂಡವು ಜ್ಯಾಮಿತಿ ಮತ್ತು ಬೆಳಕಿನ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡುತ್ತದೆ. ಜ್ಯೋತಿಷ್ಯವು ಆ ದೈವಿಕ ಭಾಷಣದ ಅನುವಾದವಾಗಿದೆ.",
       hi: "ब्रह्मांड ज्यामिति और प्रकाश की भाषा में बोलता है। ज्योतिष उस दिव्य वाणी का अनुवाद है।"
+    },
+    {
+      en: "Each planet is a mirror reflecting a part of your own soul. To know the stars is to know yourself.",
+      kn: "ಪ್ರತಿ ಗ್ರಹವು ನಿಮ್ಮ ಸ್ವಂತ ಆತ್ಮದ ಒಂದು ಭಾಗವನ್ನು ಪ್ರತಿಬಿಂಬಿಸುವ ಕನ್ನಡಿಯಾಗಿದೆ. ನಕ್ಷತ್ರಗಳನ್ನು ತಿಳಿದುಕೊಳ್ಳುವುದು ಎಂದರೆ ನಿಮ್ಮನ್ನು ನೀವು ತಿಳಿದುಕೊಳ್ಳುವುದು.",
+      hi: "प्रत्येक ग्रह आपके अपने आत्मा के एक हिस्से को प्रतिबिंबित करने वाला दर्पण है। सितारों को जानना स्वयं को जानना है।"
+    },
+    {
+      en: "Your birth chart is the blueprint of your destiny, but your actions are the construction workers.",
+      kn: "ನಿಮ್ಮ ಜನ್ಮ ಪಟ್ಟಿಯು ನಿಮ್ಮ ಹಣೆಬರಹದ ನೀಲನಕ್ಷೆಯಾಗಿದೆ, ಆದರೆ ನಿಮ್ಮ ಕ್ರಿಯೆಗಳೇ ನಿರ್ಮಾಣ ಕಾರ್ಮಿಕರು.",
+      hi: "आपकी जन्म कुंडली आपके भाग्य का खाका है, लेकिन आपके कार्य निर्माण श्रमिक हैं।"
+    },
+    {
+      en: "The Moon rules the mind, and the Sun rules the soul. Balance both to find true enlightenment.",
+      kn: "ಚಂದ್ರನು ಮನಸ್ಸನ್ನು ಆಳುತ್ತಾನೆ ಮತ್ತು ಸೂರ್ಯನು ಆತ್ಮವನ್ನು ಆಳುತ್ತಾನೆ. ನಿಜವಾದ ಜ್ಞಾನೋದಯವನ್ನು ಪಡೆಯಲು ಎರಡನ್ನೂ ಸಮತೋಲನಗೊಳಿಸಿ.",
+      hi: "चंद्रमा मन पर शासन करता है, और सूर्य आत्मा पर। सच्ची आत्मज्ञान पाने के लिए दोनों को संतुलित करें।"
     }
   ];
 

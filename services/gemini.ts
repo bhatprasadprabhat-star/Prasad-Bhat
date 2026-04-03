@@ -13,19 +13,33 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
     3. CLASSICAL TEXTS: Base all analysis EXCLUSIVELY on Brihat Parashara Hora Shastra (BPHS), Brihat Jataka, Prashna Marga, and Phaladeepika. Cite the specific chapter (Adhyaya) and verse (Shloka) numbers for EVERY major observation.
     4. SANSKRIT SHLOKAS: Provide extensive Sanskrit Shlokas (at least 10-12 major ones) in Devanagari script. For each shloka, provide a word-by-word grammatical breakdown (Anvaya), a literal translation, and then a multi-paragraph deep technical interpretation.
     5. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area, but that information must be presented with MAXIMUM DEPTH.
-    6. JATAKA BIRTH DETAILS: If the focus area is "Birth Analysis" or "menu_details", you MUST start with a comprehensive "Jataka Birth Details" section containing:
-        - Name of the Jataka holder, Date of Birth, Time, Place of Birth.
-        - Latitude and Longitude.
-        - Kalidina (number of days since Kali Yuga start).
-        - Sunrise and Sunset times for the day of birth.
-        - Samvatsara, Ayana, Ruthu.
-        - Masa (both Soura and Chandra Masa), current day of the month, and days remaining to complete the Masa.
-        - Udayadi Ghati.
-        - Panchanga: Tithi, Vara, Nakshatra, Yoga, Karana.
-        - Nakshatra Gata.
-        - Janma Shista Varsha (Balance of Dasha at birth).
-        - Provide a multi-page equivalent of technical data.
-        - Provide the data in a JSON script tag: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Basic"}, {"label": "Tithi", "value": "...", "category": "Panchanga"}]}</script>
+    6. JATAKA BIRTH DETAILS: If the focus area is "Birth Analysis" or "menu_details", you MUST start with a comprehensive "Jataka Birth Details" section.
+        You MUST include a JSON script tag with type "birth_details" containing EXACTLY these fields in these categories:
+        Category "Personal Details":
+        - Name
+        - Date
+        - Time
+        - Birth Place
+        - Birth Star (Nakshatra)
+        - Birth Rashi
+        Category "Panchanga & Time Details":
+        - Sooryodaya (Sunrise)
+        - Sooryasta (Sunset)
+        - Yoga
+        - Karana
+        - Masa (Chandra/Soorya)
+        - Paksha
+        - Ayana
+        - Samvatsara
+        - Year
+        Example: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Personal Details"}, {"label": "Sooryodaya", "value": "...", "category": "Panchanga & Time Details"}]}</script>
+        Additionally, provide a multi-page equivalent of technical data including Kalidina, Ruthu, Masa details, Udayadi Ghati, Nakshatra Gata, and Janma Shista Varsha.
+        - "Character & Personality" (menu_character): Provide an EXHAUSTIVE analysis of the native's character based on Hora Shastra.
+            - Identify their "Character Type" (e.g., Satvic, Rajasic, Tamasic) and explain it deeply.
+            - Analyze the influence of the Lagna Lord, Moon, and Sun on their personality.
+            - Discuss their hidden strengths, weaknesses, and core motivations.
+            - Cite specific Shlokas from BPHS or Saravali regarding their physical and mental traits.
+            - Total output should be at least 2000 words.
     7. 12 HOUSES (BHAVAS) ANALYSIS: If the focus area is "12 Houses (Bhava) Analysis" or "menu_bhava_analysis", provide an EXHAUSTIVE evaluation of all 12 Houses.
         - For EACH house, provide at least 3-4 paragraphs of analysis.
         - Include a relevant Sanskrit Shloka from classical texts for EACH house.
@@ -57,14 +71,46 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
     15. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area, but with MAXIMUM EXPLANATORY DEPTH.
     16. SECTION SPECIFIC GUIDANCE (SEEKER):
         - "Basic Birth Details" (menu_basic_details): Provide a massive, warm summary (at least 600 words) of their birth chart (Rasi, Nakshatra, Lagna) and what it means for their soul's purpose.
+          You MUST include a JSON script tag with type "birth_details" containing EXACTLY these fields in these categories:
+          Category "Personal Details":
+          - Name
+          - Date
+          - Time
+          - Birth Place
+          - Birth Star (Nakshatra)
+          - Birth Rashi
+          Category "Panchanga & Time Details":
+          - Sooryodaya (Sunrise)
+          - Sooryasta (Sunset)
+          - Yoga
+          - Karana
+          - Masa (Chandra/Soorya)
+          - Paksha
+          - Ayana
+          - Samvatsara
+          - Year
+          Example: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Personal Details"}, {"label": "Sooryodaya", "value": "...", "category": "Panchanga & Time Details"}]}</script>
         - "Yoga Analysis" (menu_yoga): Identify 5-7 most powerful Yogas. Explain them as "Celestial Blessings" with at least 2 paragraphs each.
         - "Career & Success" (menu_career): Provide a 1000-word deep dive into their professional path.
         - "Health & Vitality" (menu_health): Provide a 1000-word deep dive into their physical and mental well-being.
         - "Wealth & Finance" (menu_money): Provide a 1000-word deep dive into their financial potential.
         - "Planetary Transits" (menu_transit): Provide a 1000-word deep dive into how current transits are affecting them.
         - "Dasha Effects" (menu_dasha_effect): Provide a 1000-word deep dive into their current life period.
-    17. CONCLUSION: End the entire analysis with a clear, one-line bold conclusion.
-    18. LENGTH REQUIREMENT: Every section response MUST be at least 1500-2000 words long to ensure maximum detail.
+        - "Sade Sati Analysis" (menu_sade_sati): Analyze the current position of Saturn relative to their Moon. Explain the 7.5-year cycle, which phase they are in (Rising, Peak, or Setting), and provide specific emotional and practical management strategies.
+        - "Gemstones & Rudraksha" (menu_gemstones): Recommend specific gemstones (Ratna) and Rudraksha beads based on their Lagna and planetary strengths. Explain the benefits, how to wear them, and the best day/time for activation.
+        - "Nakshatra Secrets" (menu_nakshatra): Deep dive into their Janma Nakshatra. Explain its deity, symbol, animal, and "hidden" personality traits that most people don't know.
+        - "Dosha Check" (menu_doshas): Analyze for Kalsarp Dosha, Pitra Dosha, and other major ancestral or karmic blocks. Provide simple, non-scary explanations and practical remedies.
+        - "Character & Personality" (menu_character): Provide a deep, warm analysis of their character.
+            - Identify their "Soul Archetype" and "Character Type" (Satvic, Rajasic, or Tamasic).
+            - Explain how their personality is shaped by the stars and the elements.
+            - Provide "Celestial Life Hacks" for their personality type.
+            - Total output should be at least 1500 words.
+    17. COMPETITIVE EDGE: To compete with top astrology apps, you MUST include:
+        - "Celestial Life Hacks": 3-5 unconventional tips based on their chart (e.g., "Best time of day to make big decisions", "Type of food that aligns with your energy").
+        - "Soul Archetype": Give them a unique, catchy name for their personality type (e.g., "The Visionary Architect", "The Compassionate Healer").
+        - "Hidden Talents": Identify 2-3 skills they might have but haven't fully explored yet.
+    18. CONCLUSION: End the entire analysis with a clear, one-line bold conclusion.
+    19. LENGTH REQUIREMENT: Every section response MUST be at least 1500-2000 words long to ensure maximum detail.
   `;
 
   const prompt = `Perform an EXHAUSTIVE, high-resolution Vedic analysis in ${lang} for ${intake.name}.

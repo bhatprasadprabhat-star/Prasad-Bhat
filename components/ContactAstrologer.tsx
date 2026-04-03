@@ -131,7 +131,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
         whileHover={{ scale: 1.02, y: -8 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setStep('FORM')}
-        className="w-full bg-gradient-to-br from-white via-[#fffbeb] to-amber-50/50 backdrop-blur-xl border-4 border-[#D4AF37] rounded-[4rem] p-10 sm:p-16 shadow-[0_30px_60px_rgba(212,175,55,0.25)] mb-16 flex flex-col sm:flex-row items-center justify-between group relative overflow-hidden text-center sm:text-left"
+        className="w-full bg-gradient-to-br from-white via-[#fffbeb] to-amber-50/50 backdrop-blur-xl border-4 border-[#D4AF37] rounded-[4rem] p-10 sm:p-16 shadow-[0_30px_60px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between group relative overflow-hidden text-center sm:text-left h-full"
       >
         <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-15 transition-all duration-700">
           <Sparkles size={160} className="text-[#D4AF37] animate-pulse" />
@@ -463,23 +463,12 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                       <CreditCard className="text-[#D4AF37]" size={48} />
                     </div>
 
-                    <button 
-                      disabled={isProcessing}
+                    <motion.a 
+                      href={`upi://pay?pa=prabhatprasadbhat@oksbi&pn=Prabhat%20Prasad%20Bhat&am=${tiers.find(t => t.id === selectedTier)?.amount || 0}&cu=INR&tn=${encodeURIComponent('TambulaOffering')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       onClick={() => {
-                        const tier = tiers.find(t => t.id === selectedTier);
-                        const amount = tier?.amount || 0;
-                        const note = encodeURIComponent('TambulaOffering');
-                        const upiLink = `upi://pay?pa=prabhatprasadbhat@oksbi&am=${amount}&cu=INR&tn=${note}`;
-                        
                         setIsProcessing(true);
-                        
-                        // Try multiple methods to open the UPI app
-                        try {
-                          window.location.assign(upiLink);
-                        } catch (e) {
-                          window.open(upiLink, '_blank');
-                        }
-
                         // Automatically proceed to success after a short delay to simulate booking
                         setTimeout(async () => {
                           const appointment = {
@@ -531,7 +520,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                           setIsProcessing(false);
                         }, 4000);
                       }}
-                      className={`w-full py-6 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl transition-all border-2 border-[#D4AF37]/30 ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
+                      className={`w-full py-6 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl transition-all border-2 border-[#D4AF37]/30 flex items-center justify-center gap-3 no-underline ${isProcessing ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'hover:scale-[1.02] active:scale-95'}`}
                     >
                       {isProcessing ? (
                         <div className="flex items-center justify-center gap-3">
@@ -541,7 +530,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                       ) : (
                         'Pay via UPI App ➔'
                       )}
-                    </button>
+                    </motion.a>
                     
                     <button 
                       onClick={() => {
@@ -550,7 +539,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                       }}
                       className="w-full py-3 bg-white border-2 border-[#451a03]/10 text-[#451a03]/60 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-[#451a03]/5 transition-all"
                     >
-                      Copy UPI ID: prabhatprasadbhat@oksbi
+                      Copy UPI ID
                     </button>
                   </div>
                   

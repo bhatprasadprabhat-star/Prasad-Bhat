@@ -201,25 +201,73 @@ export const BirthDetailsTable: React.FC<BirthDetailsProps> = ({ details }) => {
   // Group details by category if available
   const categories = Array.from(new Set(details.map(d => d.category || 'General')));
 
+  const getIcon = (label: string) => {
+    const l = label.toLowerCase();
+    if (l.includes('name')) return '👤';
+    if (l.includes('date')) return '📅';
+    if (l.includes('time')) return '⏰';
+    if (l.includes('place')) return '📍';
+    if (l.includes('star') || l.includes('nakshatra')) return '⭐';
+    if (l.includes('rashi')) return '🌙';
+    if (l.includes('sooryodaya') || l.includes('sunrise')) return '🌅';
+    if (l.includes('sooryasta') || l.includes('sunset')) return '🌇';
+    if (l.includes('yoga')) return '🧘';
+    if (l.includes('karana')) return '⚙️';
+    if (l.includes('masa')) return '🌑';
+    if (l.includes('paksha')) return '🌗';
+    if (l.includes('ayana')) return '🧭';
+    if (l.includes('samvatsara')) return '📜';
+    if (l.includes('year')) return '🗓️';
+    return '✨';
+  };
+
   return (
-    <div className="my-8 space-y-8 px-2 sm:px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {categories.map(cat => (
-          <div key={cat} className="bg-white/95 rounded-[2rem] border-2 border-[#FFD700]/30 shadow-xl overflow-hidden">
-            <div className="bg-[#FFD700]/10 p-4 border-b border-[#FFD700]/20">
-              <h4 className="text-[#451a03] font-black uppercase tracking-widest text-xs text-center">{cat}</h4>
-            </div>
-            <div className="p-4 space-y-3">
-              {details.filter(d => (d.category || 'General') === cat).map((d, i) => (
-                <div key={i} className="flex justify-between items-center gap-4 border-b border-slate-50 pb-2 last:border-0">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{d.label}</span>
-                  <span className="text-sm font-bold text-[#451a03] text-right">{d.value}</span>
-                </div>
-              ))}
-            </div>
+    <div className="my-12 space-y-12 px-2 sm:px-4">
+      {categories.map(cat => (
+        <motion.div 
+          key={cat} 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white/95 rounded-[2.5rem] border-4 border-[#FFD700]/40 shadow-2xl overflow-hidden relative"
+        >
+          <div className="bg-gradient-to-r from-[#451a03] to-[#7c2d12] p-6 border-b-4 border-[#FFD700]/30">
+            <h4 className="text-[#FFD700] font-black uppercase tracking-[0.4em] text-sm sm:text-base text-center drop-shadow-md flex items-center justify-center gap-4">
+              <span className="opacity-50">✦</span>
+              {cat}
+              <span className="opacity-50">✦</span>
+            </h4>
           </div>
-        ))}
-      </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#FFD700]/10 border-b border-[#FFD700]/20">
+                  <th className="p-5 text-left text-[11px] font-black uppercase tracking-widest text-[#451a03]/60 w-1/2">Attribute</th>
+                  <th className="p-5 text-left text-[11px] font-black uppercase tracking-widest text-[#451a03]/60 w-1/2">Celestial Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {details.filter(d => (d.category || 'General') === cat).map((d, i) => (
+                  <tr key={i} className="border-b border-[#FFD700]/10 hover:bg-[#FFD700]/5 transition-colors group">
+                    <td className="p-5">
+                      <div className="flex items-center gap-4">
+                        <span className="text-2xl group-hover:scale-125 transition-transform duration-300">{getIcon(d.label)}</span>
+                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{d.label}</span>
+                      </div>
+                    </td>
+                    <td className="p-5">
+                      <span className="text-base sm:text-lg font-black text-[#451a03] tracking-tight">{d.value}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Decorative Corner */}
+          <div className="absolute bottom-0 right-0 w-24 h-24 pointer-events-none opacity-5">
+            <span className="text-9xl absolute -bottom-10 -right-10">☸️</span>
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 };

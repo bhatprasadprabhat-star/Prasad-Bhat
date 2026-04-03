@@ -16,6 +16,8 @@ import VedicRemedyGenerator from './components/VedicRemedyGenerator';
 import BlogSection from './components/BlogSection';
 import DailyWisdom from './components/DailyWisdom';
 import UserProfile from './components/UserProfile';
+import ContactAstrologer from './components/ContactAstrologer';
+import CSRBanner from './components/CSRBanner';
 import { AshtakavargaTable, VimshottariTable, GrahaMaitriTable, BhavaPhala, BirthDetailsTable } from './components/AstroTables';
 import { generateHoroscope, findMuhurtha, matchKundali, generateDailyForecastForRasi, searchCities, generatePrashnaAnalysis, generateMuhurthaImage } from './services/gemini';
 import { RASIS, TRANSLATIONS, LANGUAGES, COLORS, HOURS, MINUTES, MUHURTA_TYPES, JYOTISH_QUOTES } from './constants';
@@ -216,7 +218,31 @@ const App: React.FC = () => {
   const [structuredData, setStructuredData] = useState<any>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isChatOverlayOpen, setIsChatOverlayOpen] = useState(false);
-  const [cache, setCache] = useState<Record<string, string>>({});
+  const [cache, setCache] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('astro_logic_cache_v2');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+  
+  useEffect(() => {
+    try {
+      // Limit cache size to avoid localStorage quota issues
+      const keys = Object.keys(cache);
+      if (keys.length > 20) {
+        const limitedCache = Object.fromEntries(
+          Object.entries(cache).slice(-20)
+        );
+        localStorage.setItem('astro_logic_cache_v2', JSON.stringify(limitedCache));
+      } else {
+        localStorage.setItem('astro_logic_cache_v2', JSON.stringify(cache));
+      }
+    } catch (e) {
+      console.warn("Cache persistence failed", e);
+    }
+  }, [cache]);
   
   const [intake, setIntake] = useState<UserIntake & { lat: string, lon: string, tz: string }>(() => {
     const saved = localStorage.getItem('astro_user_intake');
@@ -339,17 +365,25 @@ const App: React.FC = () => {
         return;
       }
     }
+
+    // Determine display section name for consistent state
+    let sectionName = payload || type;
+    if (type === 'LIFE_PARTNER') sectionName = "Life Partner Analysis";
+    if (type === 'DAILY') sectionName = payload + " Forecast";
+    if (type === 'MATCHING') sectionName = t.matching;
+    if (type === 'PRASHNA') sectionName = 'Prashna Analysis';
     
     const cacheKey = `${type}_${payload}_${lang}_${mode}_${JSON.stringify(intake)}_${JSON.stringify(matchingIntake)}_${JSON.stringify(prashnaInput)}`;
     
     if (cache[cacheKey]) {
+      console.log(`%c [Cache Hit] Retrieving ${type} analysis from celestial memory...`, 'color: #D4AF37; font-weight: bold;');
       const res = cache[cacheKey];
       setAnalysisResult(res);
       extractChartData(res);
       if (type === 'HOROSCOPE' || type === 'DAILY' || type === 'MUHURTA' || type === 'LIFE_PARTNER') {
         setHoroscopeState('ANALYSIS');
       }
-      setCurrentSection(payload || type);
+      setCurrentSection(sectionName);
       return;
     }
 
@@ -360,12 +394,12 @@ const App: React.FC = () => {
     setChartData(null);
     try {
       let res = '';
+      setCurrentSection(sectionName);
+
       if (type === 'HOROSCOPE') {
-        setCurrentSection(payload);
         res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, payload, lang, mode);
         setHoroscopeState('ANALYSIS');
       } else if (type === 'LIFE_PARTNER') {
-        setCurrentSection("Life Partner Analysis");
         const seedStr = `${intake.dob}${intake.tob}${intake.ampm}${intake.pob}`;
         let hash = 0;
         for (let i = 0; i < seedStr.length; i++) {
@@ -375,14 +409,11 @@ const App: React.FC = () => {
         res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, "Life Partner", lang, mode, Math.abs(hash));
         setHoroscopeState('ANALYSIS');
       } else if (type === 'DAILY') {
-        setCurrentSection(payload + " Forecast");
         res = await generateDailyForecastForRasi(payload, lang, mode);
         setHoroscopeState('ANALYSIS');
       } else if (type === 'MATCHING') {
-        setCurrentSection(t.matching);
         res = await matchKundali(matchingIntake, lang, mode);
       } else if (type === 'MUHURTA') {
-        setCurrentSection(payload);
         const performerDetails = muhurtaInput.performerName ? {
           name: muhurtaInput.performerName,
           dob: muhurtaInput.performerDob,
@@ -403,7 +434,6 @@ const App: React.FC = () => {
           console.error("Failed to generate muhurtha image", err);
         }
       } else if (type === 'PRASHNA') {
-        setCurrentSection('Prashna Analysis');
         res = await generatePrashnaAnalysis(prashnaInput.question, prashnaInput.pob, lang, mode, prashnaInput.lat, prashnaInput.lon, prashnaInput.tz);
       }
       
@@ -614,6 +644,18 @@ const App: React.FC = () => {
                 <button onClick={() => setError(null)} className="block mx-auto mt-4 text-sm underline">{t.dismiss || 'Dismiss'}</button>
               </div>
             )}
+            {structuredData && structuredData.type === 'birth_details' && structuredData.details && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+              >
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{currentSection === 'menu_basic_details' ? (t.menu_basic_details || 'Basic Birth Details') : (t.menu_details || 'Jataka Birth Details')}</h3>
+                <BirthDetailsTable details={structuredData.details} />
+              </motion.div>
+            )}
+
             {chartData && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -626,18 +668,6 @@ const App: React.FC = () => {
                 )}
                 <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.celestial_map}</h3>
                 <SouthIndianChart data={chartData} lang={lang} title={t.menu_rasi || 'Rasi Kundli'} />
-              </motion.div>
-            )}
-
-            {structuredData && structuredData.type === 'birth_details' && structuredData.details && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mb-10"
-              >
-                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{currentSection === 'menu_basic_details' ? (t.menu_basic_details || 'Basic Birth Details') : (t.menu_details || 'Jataka Birth Details')}</h3>
-                <BirthDetailsTable details={structuredData.details} />
               </motion.div>
             )}
 
@@ -916,13 +946,71 @@ const App: React.FC = () => {
                   </motion.div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <MuhurthaLiveFeed lang={lang} />
                   {mode !== 'SCHOLAR' && <VedicRemedyGenerator lang={lang} />}
+                  {mode !== 'SCHOLAR' && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="bg-white/10 backdrop-blur-xl rounded-[3rem] p-10 border-4 border-[#D4AF37]/30 shadow-2xl flex flex-col justify-center items-center text-center space-y-6"
+                    >
+                      <h3 className="text-xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font">Your Lucky Elements</h3>
+                      <div className="grid grid-cols-2 gap-6 w-full">
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                          <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-1">Lucky Color</p>
+                          <p className="text-lg font-black text-white">Saffron / Gold</p>
+                        </div>
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                          <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-1">Lucky Number</p>
+                          <p className="text-lg font-black text-white">7 & 9</p>
+                        </div>
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                          <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-1">Lucky Direction</p>
+                          <p className="text-lg font-black text-white">North-East</p>
+                        </div>
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                          <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-1">Lucky Gem</p>
+                          <p className="text-lg font-black text-white">Yellow Sapphire</p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-white/30 italic">Based on your Lagna and current planetary positions.</p>
+                    </motion.div>
+                  )}
                 </div>
                 
+                <CSRBanner lang={lang} />
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Support features removed */}
+                  <ContactAstrologer lang={lang} />
+                  
+                  <motion.a 
+                    href="upi://pay?pa=prabhatprasadbhat@oksbi&pn=Prabhat%20Prasad%20Bhat&cu=INR&tn=AstroLogicSupport"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.02, y: -8 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-gradient-to-br from-[#D4AF37] via-[#fcd34d] to-[#fbbf24] border-4 border-[#451a03]/20 rounded-[4rem] p-10 sm:p-14 shadow-[0_30px_60px_rgba(212,175,55,0.3)] flex flex-col items-center justify-center text-center space-y-6 relative overflow-hidden group no-underline h-full z-20"
+                  >
+                    <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:opacity-20 transition-all duration-700">
+                      <Heart size={160} className="text-[#451a03]" />
+                    </div>
+                    
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#451a03] to-[#7c2d12] rounded-[2.5rem] flex items-center justify-center shadow-[0_15px_40px_rgba(69,26,3,0.4)] border-2 border-[#D4AF37]/50 group-hover:rotate-12 transition-transform duration-700 relative z-10">
+                      <Heart className="text-[#D4AF37]" size={48} />
+                    </div>
+                    
+                    <div className="space-y-3 relative z-10">
+                      <h3 className="text-3xl sm:text-4xl font-black text-[#451a03] uppercase tracking-widest astrological-font leading-tight">
+                        {t.donate_support || 'Donate & Support'}
+                      </h3>
+                      <p className="text-xs sm:text-sm font-black text-[#451a03]/60 uppercase tracking-[0.4em]">
+                        {t.scan_to_donate || 'Tap to Donate via UPI ➔'}
+                      </p>
+                    </div>
+                  </motion.a>
                 </div>
               </div>
 
@@ -958,9 +1046,15 @@ const App: React.FC = () => {
                 { id: 'menu_health', label: t.menu_health || 'Health' },
                 { id: 'menu_money', label: t.menu_money || 'Money' },
                 { id: 'menu_transit', label: t.menu_transit || 'Transit' },
-                { id: 'menu_dasha_effect', label: t.menu_dasha_effect || 'Dasha Effect' }
+                { id: 'menu_dasha_effect', label: t.menu_dasha_effect || 'Dasha Effect' },
+                { id: 'menu_sade_sati', label: t.menu_sade_sati || 'Sade Sati' },
+                { id: 'menu_gemstones', label: t.menu_gemstones || 'Gemstones' },
+                { id: 'menu_nakshatra', label: t.menu_nakshatra || 'Nakshatra' },
+                { id: 'menu_doshas', label: t.menu_doshas || 'Dosha Check' },
+                { id: 'menu_character', label: t.menu_character || 'Character' }
               ] : [ 
                 { id: 'menu_details', label: t.birth_analysis || 'Birth Analysis' }, 
+                { id: 'menu_character', label: t.menu_character || 'Character' },
                 { id: 'menu_timeline', label: t.timeline || 'Timeline' },
                 { id: 'menu_hora', label: t.shastriya || 'Shastriya' },
                 { id: 'menu_rasi', label: t.rasi_kundli || 'Rasi Kundli' }, 
