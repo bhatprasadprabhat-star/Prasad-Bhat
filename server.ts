@@ -16,36 +16,40 @@ async function startServer() {
 
   // API Route for sending email
   app.post('/api/send-appointment-email', async (req, res) => {
-    const { name, contact, date, time, reason } = req.body;
+    const { name, contact, date, time, reason, tier } = req.body;
 
-    // For now, we'll use a mock transporter or a real one if credentials provided
-    // Since we don't have real credentials, we'll log it and return success
-    // In a real app, you'd use process.env.SMTP_USER, etc.
-    
+    // Recipient email
+    const RECIPIENT_EMAIL = 'bhatprasadprabhat@gmail.com';
+
     console.log('--- Email Request Received ---');
-    console.log('To: prasadprabhat2004@gmail.com');
-    console.log('Details:', { name, contact, date, time, reason });
+    console.log(`To: ${RECIPIENT_EMAIL}`);
+    console.log('Details:', { name, contact, date, time, reason, tier });
 
     try {
-      const emailUser = process.env.EMAIL_USER;
-      const emailPass = process.env.EMAIL_PASS;
+      // Use provided credentials as fallback if env vars are missing
+      const emailUser = process.env.EMAIL_USER || 'bhatprasadprabhat@gmail.com';
+      const emailPass = process.env.EMAIL_PASS || 'idbcaovvnrqxsbgz';
 
+      console.log(`Using email user: ${emailUser}`);
+      
       if (emailUser && emailPass) {
         console.log('Attempting to send email via SMTP (Gmail)...');
         
-        // Using more explicit configuration for Gmail
+        // Using port 587 with STARTTLS for better compatibility
         const transporter = nodemailer.createTransport({
           host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
+          port: 587,
+          secure: false, // true for 465, false for other ports
           auth: {
             user: emailUser,
             pass: emailPass
           },
-          // Add timeout to prevent hanging
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 10000
+          tls: {
+            rejectUnauthorized: false
+          },
+          connectionTimeout: 15000,
+          greetingTimeout: 15000,
+          socketTimeout: 15000
         });
 
         // Verify connection configuration
@@ -62,16 +66,17 @@ async function startServer() {
         }
 
         const mailOptions = {
-          from: `"AstroLogic Booking" <${emailUser}>`,
-          to: 'prasadprabhat2004@gmail.com',
+          from: `"ASTRO LOGIC Booking" <${emailUser}>`,
+          to: RECIPIENT_EMAIL,
           subject: `New Appointment: ${name} - ${date} ${time}`,
           text: `
-            New appointment scheduled through AstroLogic App:
+            New appointment scheduled through ASTRO LOGIC App:
             
             Name: ${name}
             Contact: ${contact}
             Date: ${date}
             Time: ${time}
+            Tier/Plan: ${tier || 'Not specified'}
             Reason/Problem: ${reason}
             
             Sent at: ${new Date().toLocaleString()}
@@ -84,19 +89,20 @@ async function startServer() {
                 <p><strong>Contact:</strong> ${contact}</p>
                 <p><strong>Date:</strong> ${date}</p>
                 <p><strong>Time:</strong> ${time}</p>
+                <p><strong>Tier/Plan:</strong> ${tier || 'Not specified'}</p>
                 <p><strong>Reason/Problem:</strong> ${reason}</p>
               </div>
               <hr style="border: 0; border-top: 1px solid #D4AF37; margin: 20px 0; opacity: 0.3;" />
-              <p style="font-size: 12px; color: #92400e; font-style: italic;">This is an automated notification from your AstroLogic application.</p>
+              <p style="font-size: 12px; color: #92400e; font-style: italic;">This is an automated notification from your ASTRO LOGIC application.</p>
             </div>
           `
         };
 
         await transporter.sendMail(mailOptions);
-        console.log('✅ Email sent successfully via SMTP');
+        console.log('✅ Appointment email sent successfully');
         res.json({ success: true, message: 'Email sent successfully' });
       } else {
-        console.warn('⚠️ Email NOT sent: Missing EMAIL_USER or EMAIL_PASS in environment variables.');
+        console.warn('⚠️ Email NOT sent: Missing EMAIL_USER or EMAIL_PASS');
         res.json({ 
           success: false, 
           error: 'SMTP_NOT_CONFIGURED',
@@ -104,11 +110,104 @@ async function startServer() {
         });
       }
     } catch (error: any) {
-      console.error('Failed to send email:', error);
+      console.error('Failed to send appointment email:', error);
+      
+      let message = error.message || 'Unknown error occurred while sending email';
+      if (message.includes('Application-specific password required')) {
+        message = 'Gmail Error: Application-specific password required. Please generate an App Password at https://myaccount.google.com/apppasswords and use it in EMAIL_PASS.';
+      }
+
       res.status(500).json({ 
         success: false, 
         error: 'SEND_FAILED', 
-        message: error.message || 'Unknown error occurred while sending email' 
+        message
+      });
+    }
+  });
+
+  // API Route for sending feedback
+  app.post('/api/send-feedback', async (req, res) => {
+    const { rating, comment } = req.body;
+
+    // Recipient email
+    const RECIPIENT_EMAIL = 'bhatprasadprabhat@gmail.com';
+
+    console.log('--- Feedback Received ---');
+    console.log(`To: ${RECIPIENT_EMAIL}`);
+    console.log('Details:', { rating, comment });
+
+    try {
+      // Use provided credentials as fallback if env vars are missing
+      const emailUser = process.env.EMAIL_USER || 'bhatprasadprabhat@gmail.com';
+      const emailPass = process.env.EMAIL_PASS || 'idbcaovvnrqxsbgz';
+
+      console.log(`Using email user: ${emailUser}`);
+
+      if (emailUser && emailPass) {
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: emailUser,
+            pass: emailPass
+          },
+          tls: {
+            rejectUnauthorized: false
+          },
+          connectionTimeout: 15000,
+          greetingTimeout: 15000,
+          socketTimeout: 15000
+        });
+
+        const mailOptions = {
+          from: `"ASTRO LOGIC Feedback" <${emailUser}>`,
+          to: RECIPIENT_EMAIL,
+          subject: `New Feedback: ${rating} Stars`,
+          text: `
+            New feedback received from ASTRO LOGIC App:
+            
+            Rating: ${rating} / 5 Stars
+            Comment: ${comment}
+            
+            Sent at: ${new Date().toLocaleString()}
+          `,
+          html: `
+            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #D4AF37; border-radius: 10px; background-color: #fffbeb;">
+              <h2 style="color: #451a03; border-bottom: 20px solid #D4AF37; padding-bottom: 10px;">New Sacred Feedback</h2>
+              <div style="margin-top: 20px; color: #451a03;">
+                <p><strong>Rating:</strong> ${rating} / 5 Stars</p>
+                <p><strong>Comment:</strong> ${comment}</p>
+              </div>
+              <hr style="border: 0; border-top: 1px solid #D4AF37; margin: 20px 0; opacity: 0.3;" />
+              <p style="font-size: 12px; color: #92400e; font-style: italic;">This is an automated notification from your ASTRO LOGIC application.</p>
+            </div>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('✅ Feedback email sent successfully');
+        res.json({ success: true, message: 'Feedback sent successfully' });
+      } else {
+        console.warn('⚠️ Feedback email NOT sent: Missing EMAIL_USER or EMAIL_PASS.');
+        res.json({ 
+          success: false, 
+          error: 'SMTP_NOT_CONFIGURED',
+          message: 'Email credentials not configured.' 
+        });
+      }
+    } catch (error: any) {
+      console.error('Failed to send feedback email:', error);
+      
+      let message = error.message || 'Unknown error occurred while sending feedback';
+      if (message.includes('Application-specific password required')) {
+        message = 'Gmail Error: Application-specific password required. Please generate an App Password at https://myaccount.google.com/apppasswords and use it in EMAIL_PASS.';
+      }
+
+      res.status(500).json({ 
+        success: false, 
+        error: 'SEND_FAILED', 
+        message
       });
     }
   });

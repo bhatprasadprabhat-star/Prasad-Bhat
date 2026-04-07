@@ -12,7 +12,7 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
     2. DEEP SHASTRIYA KNOWLEDGE: This section is for professional astrologers. Provide an EXHAUSTIVE and high-density technical analysis. Use terms like "Adhipati", "Uchcha", "Neecha", "Vargottama", "Digbala", "Sthana Bala", "Drishti", etc., with deep explanation of their combined effects.
     3. CLASSICAL TEXTS: Base all analysis EXCLUSIVELY on Brihat Parashara Hora Shastra (BPHS), Brihat Jataka, Prashna Marga, and Phaladeepika. Cite the specific chapter (Adhyaya) and verse (Shloka) numbers for EVERY major observation.
     4. SANSKRIT SHLOKAS: Provide extensive Sanskrit Shlokas (at least 10-12 major ones) in Devanagari script. For each shloka, provide a word-by-word grammatical breakdown (Anvaya), a literal translation, and then a multi-paragraph deep technical interpretation.
-    5. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area, but that information must be presented with MAXIMUM DEPTH.
+    5. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area. DO NOT repeat general birth details (like Rasi, Nakshatra, Lagna) or basic planetary positions in every section. ONLY include them in the "Birth Analysis" or "Basic Details" sections. For other sections, focus EXCLUSIVELY on the technical depth of that specific topic (e.g., only Shadbala in the Shadbala section).
     6. JATAKA BIRTH DETAILS: If the focus area is "Birth Analysis" or "menu_details", you MUST start with a comprehensive "Jataka Birth Details" section.
         You MUST include a JSON script tag with type "birth_details" containing EXACTLY these fields in these categories:
         Category "Personal Details":
@@ -20,37 +20,68 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
         - Date
         - Time
         - Birth Place
-        - Birth Star (Nakshatra)
-        - Birth Rashi
+        - Latitude
+        - Longitude
         Category "Panchanga & Time Details":
-        - Sooryodaya (Sunrise)
-        - Sooryasta (Sunset)
+        - Kalidina
+        - Sunrise (Sooryodaya)
+        - Sunset (Sooryasta)
+        - Udayadi Ghati
+        - Tithi
+        - Vara
         - Yoga
+        - Nakshatra
         - Karana
-        - Masa (Chandra/Soorya)
-        - Paksha
+        - Masa (Chandra)
+        - Masa (Soorya)
+        - Rutu
         - Ayana
         - Samvatsara
-        - Year
-        Example: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Personal Details"}, {"label": "Sooryodaya", "value": "...", "category": "Panchanga & Time Details"}]}</script>
+        Category "Dasha & Nakshatra Calculations":
+        - Nakshatra Gata
+        - Nakshatra Shista
+        - Janma Dasha
+        - Janma Dasha Shista
+        Example: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Personal Details"}, {"label": "Kalidina", "value": "...", "category": "Panchanga & Time Details"}]}</script>
         Additionally, provide a multi-page equivalent of technical data including Kalidina, Ruthu, Masa details, Udayadi Ghati, Nakshatra Gata, and Janma Shista Varsha.
+        IMPORTANT: For "Birth Analysis" (menu_details) in Scholar mode, you MUST provide the JSON script tag with type "birth_details" as the ONLY content of your response. DO NOT provide any text analysis, paragraphs, summaries, or descriptions. DO NOT wrap the script tag in markdown code blocks. The response should contain ONLY the <script> tag.
         - "Character & Personality" (menu_character): Provide an EXHAUSTIVE analysis of the native's character based on Hora Shastra.
             - Identify their "Character Type" (e.g., Satvic, Rajasic, Tamasic) and explain it deeply.
             - Analyze the influence of the Lagna Lord, Moon, and Sun on their personality.
             - Discuss their hidden strengths, weaknesses, and core motivations.
             - Cite specific Shlokas from BPHS or Saravali regarding their physical and mental traits.
             - Total output should be at least 2000 words.
+        - "Numerology Analysis" (menu_numerology): Provide an EXHAUSTIVE and technical analysis of the native's numbers.
+            - Calculate and explain the Moolank (Birth Number), Bhagyank (Destiny Number), and Namank (Name Number).
+            - Analyze the relationship between these numbers and their ruling planets.
+            - Discuss the impact of these numbers on their personality, career, and health.
+            - Provide a detailed "Loshu Grid" analysis with its implications.
+            - Provide the Loshu Grid data in a JSON script tag: <script type="application/json">{"type": "loshu_grid", "grid": [4, 9, 2, 3, 5, 7, 8, 1, 6], "present": [4, 9, 5, 1]}</script> (where "present" are the numbers found in the native's birth date).
+            - Total output should be at least 1500 words.
     7. 12 HOUSES (BHAVAS) ANALYSIS: If the focus area is "12 Houses (Bhava) Analysis" or "menu_bhava_analysis", provide an EXHAUSTIVE evaluation of all 12 Houses.
-        - For EACH house, provide at least 3-4 paragraphs of analysis.
-        - Include a relevant Sanskrit Shloka from classical texts for EACH house.
-        - Detailed explanation of the house's significance, its lord's placement, aspects received, and the strength of its occupants.
-        - Provide the data in a JSON script tag: <script type="application/json">{"type": "bhavaphala", "houses": [{"number": 1, "title": "...", "description": "...", "shloka": "...", "strength": "..."}]}</script>
+        - The analysis MUST be deeply rooted in the principles of **Brihat Jataka**, **Prashna Marga**, and **Brihat Parashara Hora Shastra (BPHS)**.
+        - For EACH house, provide at least 10-12 paragraphs of analysis, citing specific principles and rules from these classical texts.
+        - **MANDATORY**: Include the specific **Classical Shloka** (in Devanagari script) that defines the **Significations (Karakatwas)** of that house (i.e., what things are to be considered from that house) from BPHS or Brihat Jataka. This shloka MUST be provided in the JSON data as well.
+        - Detailed explanation of the house's significance, its lord's placement, aspects received, and the strength of its occupants based on Shastriya logic.
+        - Provide the data in a JSON script tag: <script type="application/json">{"type": "bhavaphala", "planets": [{"name": "Sun", "rasi": 0, "degree": 15.5, "label_key": "planet_sun"}, ...], "houses": [{"number": 1, "title": "...", "description": "...", "shloka": "...", "strength": "..."}]}</script>
+        - The "planets" array MUST contain the Bhava Chalit (Bhava Kundli) positions.
+        - Total output should be at least 5000-6000 words.
     8. SHADVARGA: If the focus area is "Shadvarga Strengths" or "menu_shadvarga", provide the planetary positions for D1, D2, D3, D9, D12, and D30 charts.
+        - Provide a comprehensive "Shadvarga Table" analysis.
         - For EACH chart, provide a deep technical analysis of the Lagna Lord and planetary placements.
+        - Discuss the "Varga-Bala" (strength in divisions) and identify if any planet is in "Vargottama" (same sign in D1 and D9).
+        - Total word count for Shadvarga analysis should be at least 3000-4000 words.
     9. SHADBALA: If the focus area is "Shadbala Analysis" or "menu_shadbala", provide a detailed breakdown of Shadbala (Sthana, Dig, Kaala, Chesta, Naisargika, and Drig bala).
         - Analyze the total strength (Shadbala Pinda) for all 7 planets with multi-paragraph commentary on each planet's functional capability.
     10. YOGA ANALYSIS: Identify and explain at least 25-30 specific Yogas. For each, provide the classical definition, the shloka, and a detailed analysis of how it manifests in this native's life.
-    11. UNIQUENESS: Every analysis must be 100% unique to the native's exact degrees. Never provide generic descriptions. The total output should be extremely long and detailed (at least 2000-3000 words if the section allows).
+    11. NAVAMSHA ANALYSIS: If the focus area is "Navamsha" or "menu_navamsha", you MUST provide the planetary positions for the D9 chart.
+        - IMPORTANT: For "Navamsha" (menu_navamsha) in Scholar mode, you MUST provide the JSON script tag with type "chart" as the ONLY content of your response. DO NOT provide any text analysis, paragraphs, summaries, or descriptions. DO NOT wrap the script tag in markdown code blocks. The response should contain ONLY the <script> tag.
+    12. VIMSHOTTARI DASHA: If the focus area is "Vimshottari" or "menu_dasha", provide a detailed calculation of all 9 Mahadashas and their respective Antardashas.
+        - You MUST include a JSON script tag with type "dasha_data" containing the full Vimshottari Dasha sequence.
+        - Structure: <script type="application/json">{"type": "dasha_data", "dashas": [{"planet": "Ketu", "start": "YYYY-MM-DD", "end": "YYYY-MM-DD", "duration": 7, "antardashas": [{"planet": "Ketu", "start": "...", "end": "..."}, ...]}]}</script>
+        - Provide a deep technical analysis of the current Mahadasha and Antardasha, explaining their effects based on the planet's placement, lordship, and strength in the chart.
+        - Total output should be at least 3000 words.
+    13. UNIQUENESS: Every analysis must be 100% unique to the native's exact degrees. Never provide generic descriptions. The total output should be extremely long and detailed (at least 2000-3000 words if the section allows).
   `;
 
   const seekerInstructions = `
@@ -68,7 +99,7 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
     12. MATCHING: Provide an exhaustive compatibility analysis (at least 1500 words).
     13. PERSONALIZED: Ensure the advice feels deeply personal and specific to their birth chart, not generic.
     14. MANGALA DOSHA: Always include a specific section analyzing Mangala Dosha (Mars Affliction) with at least 300 words of explanation.
-    15. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area, but with MAXIMUM EXPLANATORY DEPTH.
+    15. STRICT INFORMATION ISOLATION: Each section MUST contain ONLY the information relevant to that specific focus area. DO NOT repeat general birth details (like Rasi, Nakshatra, Lagna) in every section. Focus EXCLUSIVELY on the life guidance related to that specific topic (e.g., only Career in the Career section).
     16. SECTION SPECIFIC GUIDANCE (SEEKER):
         - "Basic Birth Details" (menu_basic_details): Provide a massive, warm summary (at least 600 words) of their birth chart (Rasi, Nakshatra, Lagna) and what it means for their soul's purpose.
           You MUST include a JSON script tag with type "birth_details" containing EXACTLY these fields in these categories:
@@ -105,6 +136,13 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
             - Explain how their personality is shaped by the stars and the elements.
             - Provide "Celestial Life Hacks" for their personality type.
             - Total output should be at least 1500 words.
+        - "Numerology Analysis" (menu_numerology): Provide a warm and detailed guide to their numbers.
+            - Explain their "Soul Number" (Moolank) and "Destiny Number" (Bhagyank) in simple terms.
+            - Provide "Lucky Colors", "Lucky Days", and "Lucky Numbers".
+            - Discuss their compatibility with other numbers.
+            - Provide practical "Numerology Hacks" for success.
+            - Provide the Loshu Grid data in a JSON script tag: <script type="application/json">{"type": "loshu_grid", "grid": [4, 9, 2, 3, 5, 7, 8, 1, 6], "present": [4, 9, 5, 1]}</script> (where "present" are the numbers found in the native's birth date).
+            - Total output should be at least 1200 words.
     17. COMPETITIVE EDGE: To compete with top astrology apps, you MUST include:
         - "Celestial Life Hacks": 3-5 unconventional tips based on their chart (e.g., "Best time of day to make big decisions", "Type of food that aligns with your energy").
         - "Soul Archetype": Give them a unique, catchy name for their personality type (e.g., "The Visionary Architect", "The Compassionate Healer").
@@ -141,7 +179,9 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
     15. VIMSHOTTARI DASHA: If the section is "Vimshottari", you MUST calculate the Moon's exact longitude at birth to determine the starting Mahadasha and the remaining balance of that dasha. Provide a full sequence of all 9 Mahadashas (Sun, Moon, Mars, Rahu, Jupiter, Saturn, Mercury, Ketu, Venus) in their correct order starting from the birth dasha. For EACH Mahadasha, you MUST provide all 9 Antardashas (sub-dashas) with their respective start and end dates. Ensure the dates are mathematically consistent with the standard Vimshottari period lengths.
     16. FORMATTING: Use only standard HTML tags: <h3>, <h4>, <p>, <ul>, <li>, <table>, <thead>, <tbody>, <tr>, <th>, <td>. NEVER use markdown (*, #, _, \`).
     17. JSON DATA: For Navamsha, Ashtakavarga, Vimshottari, Shadvarga, and Graha Maitri, provide structured JSON in the <script type="application/json" id="chart-data"> tag.
-        - For Navamsha: { "type": "navamsha", "planets": [{"name": "Sun", "rasi": 0, "label_key": "planet_sun"}, ...] }
+        - For Rasi Chart (menu_rasi): { "type": "chart", "planets": [{"name": "Sun", "rasi": 0, "degree": 15.5, "label_key": "planet_sun"}, ...] }
+        - For Navamsha (menu_navamsha): { "type": "navamsha", "planets": [{"name": "Sun", "rasi": 0, "degree": 15.5, "label_key": "planet_sun"}, ...] }
+        - CRITICAL: For Rasi Kundli, you MUST include all Navagrahas PLUS "Lagna" and "Mandi" in the planets array.
         - For Ashtakavarga: { "type": "ashtakavarga", "table": [{"planet": "Sun", "points": [4, 5, 3, ...]}, ...] }
         - For Vimshottari: { "type": "vimshottari", "dashas": [{ "planet": "Jupiter", "start": "1990-01-01", "end": "2006-01-01", "antardashas": [{"planet": "Jupiter", "start": "...", "end": "..."}, ...] }] }
         - For Shadvarga: { "type": "shadvarga", "vargas": {"D1": [...], "D2": [...], "D3": [...], "D9": [...], "D12": [...], "D30": [...]}, "lords": {"D1": {"planet": "...", "power": "..."}, ...}}
@@ -156,8 +196,13 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
       thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
       seed: seed,
       systemInstruction: mode === 'SCHOLAR' 
-        ? `You are an elite Siddhantic Astronomer and Astrologer. Respond EXCLUSIVELY in ${lang}. You provide maximum technical density and classical citations. Use Lahiri Ayanamsa and precise mathematical calculations for planetary longitudes (Sphuta). You MUST ensure Rasi and Nakshatra calculations are 100% accurate based on the provided coordinates and time. Use HTML only for the analysis. If the focus is a chart, also provide planetary positions in JSON format within a <script type="application/json" id="chart-data"> tag.` 
-        : `You are a warm, highly informative life-guide. Respond EXCLUSIVELY in ${lang}. You explain the cosmos in simple but extremely detailed, practical coaching styles. You MUST ensure Rasi and Nakshatra calculations are 100% accurate. Use HTML only. If the focus is a chart, also provide planetary positions in JSON format within a <script type="application/json" id="chart-data"> tag.`,
+        ? `You are an elite Siddhantic Astronomer and Astrologer. Respond EXCLUSIVELY in ${lang}. You provide maximum technical density and classical citations. Use Lahiri Ayanamsa and precise mathematical calculations for planetary longitudes (Sphuta). You MUST ensure Rasi and Nakshatra calculations are 100% accurate based on the provided coordinates and time. Use HTML only for the analysis. If the focus is a chart, also provide planetary positions in JSON format within a <script type="application/json" id="chart-data"> tag. 
+           CRITICAL: DO NOT repeat basic birth details (Name, DOB, TOB, POB, Rasi, Nakshatra, Lagna) in any section EXCEPT "Birth Analysis" or "Basic Details". Focus ONLY on the specific technical topic requested.
+           If the section is "Birth Analysis" (menu_details) or "Navamsha" (menu_navamsha), you MUST provide ONLY the relevant JSON script tag and NO other text, paragraphs, or markdown.
+           If the section is NOT "Birth Analysis" or "Basic Details", you MUST NOT include the "birth_details" JSON script tag.` 
+        : `You are a warm, highly informative life-guide. Respond EXCLUSIVELY in ${lang}. You explain the cosmos in simple but extremely detailed, practical coaching styles. You MUST ensure Rasi and Nakshatra calculations are 100% accurate. Use HTML only. If the focus is a chart, also provide planetary positions in JSON format within a <script type="application/json" id="chart-data"> tag.
+           CRITICAL: DO NOT repeat basic birth details (Name, DOB, TOB, POB, Rasi, Nakshatra, Lagna) in any section EXCEPT "Basic Birth Details". Focus ONLY on the specific life guidance topic requested.
+           If the section is NOT "Basic Birth Details", you MUST NOT include the "birth_details" JSON script tag.`,
     }
   });
   return response.text || '';
@@ -262,7 +307,6 @@ export const generateDailyForecastForRasi = async (rasi: string, lang: Language,
        - Career & Finance (Hora perspective)
        - Health & Wellness
        - Relationships
-       - Lucky Colors & Numbers
        - Specific Remedies (Upayas)
     4. Use professional, scholarly tone.
     5. Format with HTML tags (h2, h3, p, strong, ul, li).

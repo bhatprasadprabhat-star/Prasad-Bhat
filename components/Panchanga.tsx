@@ -3,51 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TRANSLATIONS } from '../constants';
 import { Language, UserMode, CityData } from '../types';
-import { generatePanchanga, searchCities } from '../services/gemini';
-
-const CitySearch = ({ value, onChange, placeholder }: { value: string, onChange: (v: CityData) => void, placeholder?: string }) => {
-  const [suggestions, setSuggestions] = useState<CityData[]>([]);
-  const [show, setShow] = useState(false);
-  
-  const fetchSuggestions = async (val: string) => {
-    if (val.length < 1) return;
-    const cities = await searchCities(val);
-    setSuggestions(cities);
-    setShow(true);
-  };
-
-  return (
-    <div className="relative w-full">
-      <input 
-        value={value} 
-        onChange={e => { onChange({ name: e.target.value, lat: '', lon: '', tz: '' }); fetchSuggestions(e.target.value); }} 
-        placeholder={placeholder || "Search City..."} 
-        className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] transition-all outline-none" 
-        onFocus={() => setShow(suggestions.length > 0)} 
-        onBlur={() => setTimeout(() => setShow(false), 250)} 
-      />
-      {show && suggestions.length > 0 && (
-        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border-2 border-[#D4AF37] rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto">
-          {suggestions.map((city, i) => (
-            <button key={i} onMouseDown={() => { onChange(city); setShow(false); }} className="w-full px-4 py-3 text-left text-sm font-bold text-[#92400e] hover:bg-[#D4AF37] hover:text-white transition-all border-b border-slate-100 last:border-0">
-              {city.name}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+import { generatePanchanga } from '../services/gemini';
+import CitySearch from './CitySearch';
 
 const Panchanga = ({ lang, mode, goBack }: { lang: Language, mode: UserMode, goBack: () => void }) => {
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const [view, setView] = useState<'OPTIONS' | 'RESULT'>('OPTIONS');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    time: '12:00',
-    city: { name: '', lat: '', lon: '', tz: '' } as CityData
+  const [formData, setFormData] = useState(() => {
+    const now = new Date();
+    const date = now.toISOString().split('T')[0];
+    const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    return {
+      date,
+      time,
+      city: { name: '', lat: '', lon: '', tz: '' } as CityData
+    };
   });
 
   const handleFetch = async (isToday: boolean) => {
@@ -90,32 +62,32 @@ const Panchanga = ({ lang, mode, goBack }: { lang: Language, mode: UserMode, goB
                 className="w-full p-8 bg-white/80 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 hover:scale-[1.02] transition-all group"
               >
                 <span className="text-6xl group-hover:rotate-12 transition-transform">📅</span>
-                <span className="text-2xl font-black text-[#451a03] uppercase tracking-widest">{t.today_panchanga}</span>
+                <span className="text-2xl font-black text-[#312e81] uppercase tracking-widest">{t.today_panchanga}</span>
               </button>
 
               <div className="bg-white/80 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[2.5rem] p-8 shadow-2xl space-y-6">
-                <h3 className="text-xl font-black text-[#451a03] uppercase tracking-widest text-center mb-4">{t.custom_panchanga}</h3>
+                <h3 className="text-xl font-black text-[#312e81] uppercase tracking-widest text-center mb-4">{t.custom_panchanga}</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_date}</label>
-                    <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03]" />
+                    <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.birth_date}</label>
+                    <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#312e81]" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_time}</label>
-                    <input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03]" />
+                    <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.birth_time}</label>
+                    <input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#312e81]" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.location}</label>
+                  <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.location}</label>
                   <CitySearch value={formData.city.name} onChange={city => setFormData({...formData, city})} placeholder={t.search_city_placeholder} />
                 </div>
 
                 <button 
                   onClick={() => handleFetch(false)}
                   disabled={!formData.city.lat}
-                  className="w-full py-5 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full py-5 bg-gradient-to-r from-[#312e81] to-[#1e1b4b] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                 >
                   {t.submit}
                 </button>
@@ -131,7 +103,7 @@ const Panchanga = ({ lang, mode, goBack }: { lang: Language, mode: UserMode, goB
               {loading ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6">
                   <div className="w-24 h-24 border-8 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin" />
-                  <p className="text-[#451a03] font-black uppercase tracking-widest animate-pulse">{t.calculating_heavens}</p>
+                  <p className="text-[#312e81] font-black uppercase tracking-widest animate-pulse">{t.calculating_heavens}</p>
                 </div>
               ) : (
                 <div className="prose prose-amber max-w-none">

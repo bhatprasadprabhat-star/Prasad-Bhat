@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Sun, Moon, Flame, Zap, Crown, Heart, Anchor, Cloud, Wind, Compass } from 'lucide-react';
+import { Sparkles, Sun, Moon, Flame, Zap, Crown, Heart, Anchor, Cloud, Wind, Compass, Skull } from 'lucide-react';
 import { RasiChartData } from '../types';
 import { RASIS, TRANSLATIONS } from '../constants.tsx';
 import { Language } from '../types';
@@ -16,7 +16,8 @@ const PLANET_ICONS: Record<string, any> = {
   "Saturn": Anchor,
   "Rahu": Cloud,
   "Ketu": Wind,
-  "Lagna": Compass
+  "Lagna": Compass,
+  "Mandi": Skull
 };
 
 const PLANET_COLORS: Record<string, string> = {
@@ -29,7 +30,8 @@ const PLANET_COLORS: Record<string, string> = {
   "Saturn": "#475569",
   "Rahu": "#1e293b",
   "Ketu": "#64748b",
-  "Lagna": "#8b5cf6"
+  "Lagna": "#8b5cf6",
+  "Mandi": "#4a044e"
 };
 
 interface SouthIndianChartProps {
@@ -64,7 +66,7 @@ const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data, la
             transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
             className="w-full h-full max-w-[90%] max-h-[90%] flex items-center justify-center"
           >
-            <svg viewBox="0 0 100 100" className="w-full h-full text-[#f97316] drop-shadow-xl">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-[#f97316] drop-shadow-2xl">
               {/* Sun Core */}
               <circle cx="50" cy="50" r="18" fill="currentColor" />
               <circle cx="50" cy="50" r="14" fill="none" stroke="white" strokeWidth="1" opacity="0.4" />
@@ -98,35 +100,40 @@ const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data, la
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: gridIdx * 0.005 }}
-        className="aspect-square border-2 border-[#5d4037]/80 flex flex-col p-1 relative overflow-hidden group bg-transparent"
+        className="aspect-square border-[1px] sm:border-2 border-[#5d4037]/80 flex flex-col p-0.5 sm:p-1 relative overflow-hidden group bg-white/30"
       >
         {/* Rasi Name Label - Very subtle */}
         {rIdx !== -1 && (
           <div className="absolute bottom-0.5 right-1 z-0">
-            <span className="text-[5px] sm:text-[8px] font-bold text-[#5d4037]/10 uppercase">
+            <span className="text-[6px] sm:text-[10px] font-black text-[#5d4037]/20 uppercase tracking-tighter">
               {rasiName}
             </span>
           </div>
         )}
 
         {/* Planets Container */}
-        <div className="flex flex-wrap gap-1 sm:gap-3 justify-start items-start h-full content-start z-10 p-1 sm:p-3">
+        <div className="flex flex-wrap gap-0.5 sm:gap-2 justify-center items-center h-full content-center z-10 p-0.5 sm:p-2">
           {planets.map((p, i) => {
             const planetLabel = t[p.label_key] || p.name;
+            const Icon = PLANET_ICONS[p.name] || Sparkles;
+            const color = PLANET_COLORS[p.name] || '#000';
             
             return (
               <motion.div 
                 key={i} 
                 initial={{ scale: 0, y: -5 }}
                 animate={{ scale: 1, y: 0 }}
-                className="flex flex-col items-start"
+                className="flex flex-col items-center justify-center p-0.5 sm:p-1 rounded-md bg-white/40 border border-[#5d4037]/10 shadow-sm min-w-[30px] sm:min-w-[60px]"
                 title={`${p.name} - ${p.degree}°`}
               >
-                <span className="text-[14px] sm:text-[32px] font-black text-black leading-none tracking-tighter drop-shadow-sm">
-                  {planetLabel}
-                </span>
-                <span className="text-[7px] sm:text-[12px] font-black text-[#5d4037] leading-none mt-1">
-                  {p.degree}°
+                <div className="flex items-center gap-0.5 sm:gap-1">
+                  <Icon size={10} className="sm:w-4 sm:h-4" style={{ color }} />
+                  <span className="text-[10px] sm:text-[18px] font-black text-black leading-none tracking-tighter drop-shadow-sm">
+                    {planetLabel}
+                  </span>
+                </div>
+                <span className="text-[6px] sm:text-[10px] font-bold text-[#5d4037]/80 leading-none mt-0.5">
+                  {p.degree.toFixed(1)}°
                 </span>
               </motion.div>
             );
@@ -137,24 +144,24 @@ const SouthIndianChart: React.FC<SouthIndianChartProps> = React.memo(({ data, la
   };
 
   return (
-    <div className="p-4 sm:p-12 bg-[#fef3c7] rounded-xl border-[12px] border-[#5d4037] shadow-[0_40px_80px_rgba(0,0,0,0.4)] w-full max-w-[400px] sm:max-w-4xl mx-auto overflow-hidden relative">
+    <div className="p-2 sm:p-8 bg-[#fef3c7] rounded-3xl border-[6px] sm:border-[16px] border-[#5d4037] shadow-[0_50px_100px_rgba(69,26,3,0.3)] w-full max-w-[380px] sm:max-w-5xl mx-auto overflow-hidden relative">
       {/* Subtle Parchment Texture */}
-      <div className="absolute inset-0 opacity-[0.15] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/parchment.png")' }}></div>
+      <div className="absolute inset-0 opacity-[0.2] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/parchment.png")' }}></div>
       
       {/* Decorative inner border */}
-      <div className="absolute inset-3 border-2 border-[#5d4037]/20 rounded-lg pointer-events-none"></div>
+      <div className="absolute inset-2 sm:inset-4 border-2 border-[#5d4037]/30 rounded-2xl pointer-events-none"></div>
       
-      <div className="grid grid-cols-4 grid-rows-4 border-4 border-[#5d4037] relative z-10 bg-transparent shadow-inner">
+      <div className="grid grid-cols-4 grid-rows-4 border-[3px] sm:border-[6px] border-[#5d4037] relative z-10 bg-transparent shadow-2xl">
         {[...Array(16)].map((_, i) => renderCell(i))}
       </div>
       
-      <div className="mt-10 text-center space-y-3 relative z-10">
-        <h4 className="text-[18px] sm:text-4xl font-black text-[#5d4037] uppercase tracking-[0.5em] drop-shadow-md">{title || t.rasi_kundli || 'Rasi Kundli'}</h4>
-        <div className="h-1.5 w-40 bg-gradient-to-r from-transparent via-[#5d4037]/60 to-transparent mx-auto rounded-full"></div>
+      <div className="mt-6 sm:mt-12 text-center space-y-2 sm:space-y-4 relative z-10">
+        <h4 className="text-[16px] sm:text-5xl font-black text-[#5d4037] uppercase tracking-[0.4em] drop-shadow-lg astrological-font">{title || t.rasi_kundli || 'Rasi Kundli'}</h4>
+        <div className="h-1 sm:h-2 w-32 sm:w-64 bg-gradient-to-r from-transparent via-[#5d4037]/80 to-transparent mx-auto rounded-full"></div>
+        <p className="text-[8px] sm:text-sm font-bold text-[#5d4037]/60 uppercase tracking-[0.2em]">Siddhantic High-Resolution Chart</p>
       </div>
     </div>
   );
-;
 });
 
 export default SouthIndianChart;

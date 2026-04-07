@@ -19,6 +19,7 @@ export interface UserIntake {
   lat?: string;
   lon?: string;
   tz?: string;
+  pincode?: string;
 }
 
 export interface CityData {
@@ -38,6 +39,7 @@ export interface PlanetPosition {
   name: string;
   rasi: number; // 0-11
   degree: number;
+  label_key?: string;
 }
 
 export type RasiChartData = PlanetPosition[];
@@ -70,5 +72,5 @@ export enum AppTab {
   PANCHANGA = 'Panchanga',
   TIMELINE = 'Life Timeline',
   BLOG = 'Blog',
-  PROFILE = 'Profile'
+  NUMEROLOGY = 'Numerology'
 }

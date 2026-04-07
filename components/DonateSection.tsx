@@ -29,7 +29,7 @@ const DonateSection: React.FC<DonateSectionProps> = ({ isOpen, onClose, lang = '
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-lg bg-gradient-to-br from-[#431407] to-[#1a0803] rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl border-2 border-[#D4AF37]/40 overflow-hidden p-8 sm:p-12 text-center"
+            className="relative w-full max-w-lg bg-gradient-to-br from-[#312e81] to-[#1e1b4b] rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl border-2 border-[#D4AF37]/40 overflow-hidden p-8 sm:p-12 text-center"
           >
             <button 
               onClick={onClose}
@@ -41,7 +41,7 @@ const DonateSection: React.FC<DonateSectionProps> = ({ isOpen, onClose, lang = '
 
             <div className="relative z-10 flex flex-col items-center gap-6">
               <div className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                <Heart className="text-[#431407] w-8 h-8 fill-current" />
+                <Heart className="text-[#1e1b4b] w-8 h-8 fill-current" />
               </div>
 
               <div className="w-full h-32 rounded-3xl overflow-hidden border-2 border-[#D4AF37]/30 shadow-inner mb-2">
@@ -68,9 +68,9 @@ const DonateSection: React.FC<DonateSectionProps> = ({ isOpen, onClose, lang = '
                   />
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                   <div className="bg-[#431407]/90 text-[#D4AF37] px-6 py-3 rounded-full text-[12px] font-black uppercase tracking-widest shadow-2xl border border-[#D4AF37]/30">{t.scan_to_support}</div>
+                   <div className="bg-[#1e1b4b]/90 text-[#D4AF37] px-6 py-3 rounded-full text-[12px] font-black uppercase tracking-widest shadow-2xl border border-[#D4AF37]/30">{t.scan_to_support}</div>
                 </div>
-                <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-[#431407]">{t.scan_to_donate}</p>
+                <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-[#1e1b4b]">{t.scan_to_donate}</p>
               </div>
 
               <div className="mt-6 flex flex-wrap justify-center gap-3">

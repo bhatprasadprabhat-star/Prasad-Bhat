@@ -1,4 +1,13 @@
 
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
 /* Custom Styles for Astro Logic */
 
 .analysis-rich-text h1, 
@@ -33,6 +42,10 @@
   padding: 1rem 1.5rem;
   border-radius: 0 1rem 1rem 0;
 }
+.astrological-font {
+  font-family: var(--font-serif);
+}
+
 /* Scholar Theme */
 .scholar-theme {
   background-color: #0f172a;
@@ -40,24 +53,36 @@
 }
 
 .scholar-theme .astrological-font {
-  color: #D4AF37 !important;
+  /* color: #D4AF37 !important; */
 }
 
 /* Seeker Theme */
 .seeker-theme {
-  background-color: #fff7ed;
-  background-image: radial-gradient(circle at 50% 50%, #fffbeb 0%, #fff7ed 100%);
+  background-color: #0f172a;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 1) 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+.seeker-theme::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, transparent 50%, rgba(30, 27, 75, 0.05) 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .seeker-theme .astrological-font {
-  color: #451a03 !important;
+  /* color: #451a03 !important; */
 }
 
 .scholar-view h1,
 .scholar-view h2,
 .scholar-view h3 {
-  color: #451a03 !important;
-  border-bottom-color: rgba(69, 26, 3, 0.2) !important;
+  color: #312e81 !important;
+  border-bottom-color: rgba(49, 46, 129, 0.2) !important;
 }
 
 .scholar-view p {
@@ -65,13 +90,13 @@
 }
 
 .scholar-view strong {
-  color: #7c2d12 !important;
+  color: #1e1b4b !important;
 }
 
 .scholar-view blockquote {
-  color: #7c2d12 !important;
-  border-left-color: #7c2d12 !important;
-  background: rgba(124, 45, 18, 0.05) !important;
+  color: #1e1b4b !important;
+  border-left-color: #1e1b4b !important;
+  background: rgba(30, 27, 75, 0.05) !important;
 }
 
 /* Eye-catching table styles */
@@ -86,7 +111,7 @@
 
 .birth-details-table th {
   background: #D4AF37;
-  color: #451a03;
+  color: #312e81;
   padding: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -94,22 +119,22 @@
 }
 
 .conclusion-section {
-  background-color: #fffbeb !important;
+  background-color: #f8fafc !important;
   border: 2px solid #d4af37 !important;
   border-radius: 1.5rem !important;
   padding: 2rem !important;
   margin-top: 2rem !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-  color: #451a03 !important;
+  color: #312e81 !important;
 }
 
 .conclusion-section h3 {
-  color: #92400e !important;
+  color: #312e81 !important;
   margin-top: 0 !important;
   border-bottom: 2px solid #d4af37 !important;
 }
 
 .conclusion-section p {
-  color: #451a03 !important;
+  color: #312e81 !important;
   margin-bottom: 0 !important;
 }

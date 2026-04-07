@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Save, History, Calendar, MapPin, Clock, Trash2, ChevronRight, Sparkles } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 import { Language, UserIntake } from '../types';
+import TimePicker from './TimePicker';
 
 interface PastReading {
   id: string;
@@ -52,7 +53,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-8 bg-white/40 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[3rem] shadow-2xl relative overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-8 bg-amber-50/40 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[3rem] shadow-2xl relative overflow-hidden">
       <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
         <User size={120} className="text-[#D4AF37]" />
       </div>
@@ -108,7 +109,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
                   <input 
                     value={localIntake.name} 
                     onChange={e => setLocalIntake({...localIntake, name: e.target.value})}
-                    className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
+                    className="w-full bg-amber-50/30 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
@@ -119,18 +120,17 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
                     type="date"
                     value={localIntake.dob} 
                     onChange={e => setLocalIntake({...localIntake, dob: e.target.value})}
-                    className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
+                    className="w-full bg-amber-50/30 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1 flex items-center gap-2">
                     <Clock size={12} /> {t.tob || 'Time of Birth'}
                   </label>
-                  <input 
-                    type="time"
-                    value={localIntake.tob} 
-                    onChange={e => setLocalIntake({...localIntake, tob: e.target.value})}
-                    className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
+                  <TimePicker 
+                    time={localIntake.tob} 
+                    ampm={localIntake.ampm || 'AM'}
+                    onChange={(t, a) => setLocalIntake({...localIntake, tob: t, ampm: a})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,7 +140,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
                   <input 
                     value={localIntake.pob} 
                     onChange={e => setLocalIntake({...localIntake, pob: e.target.value})}
-                    className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
+                    className="w-full bg-amber-50/30 border-2 border-[#D4AF37]/20 rounded-2xl px-6 py-4 font-bold text-[#451a03] focus:border-[#D4AF37] outline-none transition-all"
                   />
                 </div>
               </div>
@@ -185,7 +185,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
                   {history.map((item) => (
                     <div 
                       key={item.id}
-                      className="bg-white/60 border-2 border-[#D4AF37]/10 rounded-3xl p-6 flex items-center justify-between group hover:border-[#D4AF37]/40 transition-all cursor-pointer"
+                      className="bg-amber-50/40 border-2 border-[#D4AF37]/10 rounded-3xl p-6 flex items-center justify-between group hover:border-[#D4AF37]/40 transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-6">
                         <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
@@ -240,7 +240,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
                         if (data.success) {
                           alert('✅ Test email sent successfully!');
                         } else if (data.message?.includes('Application-specific password required')) {
-                          alert('❌ Gmail Error: Application-specific password required.\n\nHow to Fix:\n1. Go to https://myaccount.google.com/apppasswords\n2. Create an "App Password" for "AstroLogic"\n3. Use the 16-character code in EMAIL_PASS in Settings.');
+                          alert('❌ Gmail Error: Application-specific password required.\n\nHow to Fix:\n1. Go to https://myaccount.google.com/apppasswords\n2. Create an "App Password" for "ASTRO LOGIC"\n3. Use the 16-character code in EMAIL_PASS in Settings.');
                         } else {
                           alert(`❌ Error: ${data.message || 'Failed to send'}`);
                         }
@@ -266,7 +266,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
                     {appointments.map((appt) => (
                       <div 
                         key={appt.id}
-                        className="bg-white/60 border-2 border-[#D4AF37]/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#D4AF37] transition-all"
+                        className="bg-amber-50/40 border-2 border-[#D4AF37]/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#D4AF37] transition-all"
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl bg-[#451a03] text-[#D4AF37] flex items-center justify-center">

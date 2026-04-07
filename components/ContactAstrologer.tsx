@@ -2,11 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TRANSLATIONS } from '../constants';
 import { Language } from '../types';
-import { Calendar, Clock, CreditCard, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { Calendar, Clock, CreditCard, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles, Heart, MessageSquare } from 'lucide-react';
 
 type Step = 'CLOSED' | 'FORM' | 'REMEDY_SELECTION' | 'PAYMENT' | 'SUCCESS';
 
-const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: Language, initialStep?: Step, onClose?: () => void }) => {
+const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose, onDonate, onFeedback }: { lang: Language, initialStep?: Step, onClose?: () => void, onDonate?: () => void, onFeedback?: () => void }) => {
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const [step, setStep] = useState<Step>(initialStep);
   const [problem, setProblem] = useState('');
@@ -131,7 +131,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
         whileHover={{ scale: 1.02, y: -8 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setStep('FORM')}
-        className="w-full bg-gradient-to-br from-white via-[#fffbeb] to-amber-50/50 backdrop-blur-xl border-4 border-[#D4AF37] rounded-[4rem] p-10 sm:p-16 shadow-[0_30px_60px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between group relative overflow-hidden text-center sm:text-left h-full"
+        className="w-full bg-gradient-to-br from-amber-50 via-[#fef3c7] to-amber-100/50 backdrop-blur-xl border-4 border-[#D4AF37] rounded-[4rem] p-10 sm:p-16 shadow-[0_30px_60px_rgba(212,175,55,0.25)] flex flex-col sm:flex-row items-center justify-between group relative overflow-hidden text-center sm:text-left h-full"
       >
         <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-15 transition-all duration-700">
           <Sparkles size={160} className="text-[#D4AF37] animate-pulse" />
@@ -177,7 +177,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-[#fffbeb] w-full max-w-2xl rounded-[3rem] border-4 border-[#D4AF37] shadow-[0_0_100px_rgba(212,175,55,0.3)] overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-[#fef3c7] w-full max-w-2xl rounded-[3rem] border-4 border-[#D4AF37] shadow-[0_0_100px_rgba(212,175,55,0.3)] overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#451a03] to-[#7c2d12] p-8 text-[#D4AF37] flex justify-between items-center relative overflow-hidden shrink-0 border-b-4 border-[#D4AF37]">
@@ -188,7 +188,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
             </svg>
           </div>
           <div className="flex items-center gap-6 z-10">
-            <div className="w-16 h-16 rounded-2xl border-2 border-[#D4AF37] bg-white flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(212,175,55,0.5)]">🍃</div>
+            <div className="w-16 h-16 rounded-2xl border-2 border-[#D4AF37] bg-amber-50 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(212,175,55,0.5)]">🍃</div>
             <div>
               <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-widest astrological-font leading-none">{t.tambula_offering || 'Tambula Offering'}</h2>
               <p className="text-[11px] uppercase tracking-[0.3em] font-black mt-2 text-white/70">Sacred Ritual for Divine Clarity</p>
@@ -236,7 +236,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full bg-white border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
+                    className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
                   />
                 </div>
 
@@ -249,7 +249,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                     value={contact}
                     onChange={e => setContact(e.target.value)}
                     placeholder="Enter your contact number"
-                    className="w-full bg-white border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
+                    className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
                   />
                 </div>
 
@@ -262,7 +262,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                     value={problem}
                     onChange={e => setProblem(e.target.value)}
                     placeholder={t.problem_placeholder}
-                    className="w-full bg-white border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none min-h-[120px] shadow-inner"
+                    className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none min-h-[120px] shadow-inner"
                   />
                 </div>
 
@@ -305,7 +305,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                           className={`p-3 rounded-xl border-2 font-bold text-[10px] flex items-center justify-center transition-all ${
                             selectedTime === slot 
                               ? 'bg-[#451a03] border-[#451a03] text-[#D4AF37] shadow-lg' 
-                              : 'bg-white border-[#D4AF37]/20 text-[#451a03] hover:border-[#D4AF37]'
+                              : 'bg-amber-50/50 border-[#D4AF37]/20 text-[#451a03] hover:border-[#D4AF37]'
                           }`}
                         >
                           {slot}
@@ -453,7 +453,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                   <p className="text-[10px] text-[#451a03]/50 italic">Click the button below to pay via your UPI app. Your appointment will be booked automatically upon payment.</p>
                 </div>
 
-                <div className="bg-white border-4 border-dashed border-[#D4AF37]/40 rounded-[3rem] p-10 space-y-6 shadow-inner relative overflow-hidden">
+                <div className="bg-amber-50 border-4 border-dashed border-[#D4AF37]/40 rounded-[3rem] p-10 space-y-6 shadow-inner relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-4 opacity-10">
                     <Sparkles size={64} className="text-[#D4AF37]" />
                   </div>
@@ -498,7 +498,8 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                                 contact,
                                 date: selectedDate,
                                 time: selectedTime,
-                                reason: problem
+                                reason: problem,
+                                tier: tiers.find(t => t.id === selectedTier)?.title
                               })
                             });
                             const data = await response.json();
@@ -575,7 +576,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                   {emailStatus === 'SENT' && (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-2xl flex items-center gap-3 text-green-800 text-xs font-bold">
                       <CheckCircle2 size={16} />
-                      Details sent to prasadprabhat2004@gmail.com
+                      Details sent to bhatprasadprabhat@gmail.com
                     </div>
                   )}
                   {emailStatus === 'SIMULATED' && (
@@ -600,7 +601,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                           <p className="text-[10px] text-red-900 uppercase tracking-wider">How to Fix:</p>
                           <ol className="list-decimal list-inside text-[9px] font-medium space-y-1 opacity-80">
                             <li>Go to <a href="https://myaccount.google.com/apppasswords" target="_blank" className="underline">Google App Passwords</a></li>
-                            <li>Select "Other", name it "AstroLogic"</li>
+                            <li>Select "Other", name it "ASTRO LOGIC"</li>
                             <li>Copy the 16-character code</li>
                             <li>Paste it into <b>EMAIL_PASS</b> in AI Studio Settings</li>
                           </ol>
@@ -613,6 +614,28 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose }: { lang: La
                     </div>
                   )}
                 </div>
+
+                <div className="flex justify-center gap-6 py-4 border-t border-[#D4AF37]/20">
+                  <button 
+                    onClick={onDonate}
+                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#92400e] hover:text-[#451a03] transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                      <Heart size={14} className="text-red-500 fill-current" />
+                    </div>
+                    {t.donate_support}
+                  </button>
+                  <button 
+                    onClick={onFeedback}
+                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#92400e] hover:text-[#451a03] transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                      <MessageSquare size={14} className="text-blue-500" />
+                    </div>
+                    {t.feedback}
+                  </button>
+                </div>
+
                 <button 
                   onClick={reset}
                   className="w-full py-5 bg-[#451a03] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl hover:scale-[1.02] active:scale-95 transition-all"

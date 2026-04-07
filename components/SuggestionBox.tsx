@@ -22,7 +22,7 @@ const SuggestionBox: React.FC<SuggestionBoxProps> = ({ lang }) => {
     setIsSubmitting(true);
     
     // Use mailto to ensure user actually "sends" it to the specified email
-    const mailtoLink = `mailto:prasadprabhat2004@gmail.com?subject=Astro Logic Suggestion&body=${encodeURIComponent(suggestion)}`;
+    const mailtoLink = `mailto:bhatprasadprabhat@gmail.com?subject=ASTRO LOGIC Suggestion&body=${encodeURIComponent(suggestion)}`;
     window.open(mailtoLink, '_blank');
     
     setIsSubmitting(false);
