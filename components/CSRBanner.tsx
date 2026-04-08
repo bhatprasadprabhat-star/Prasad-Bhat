@@ -18,14 +18,14 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
       title: t.csr_books_title || "Educational Empowerment for Special Children",
       desc: t.csr_books_desc || "ASTRO LOGIC is deeply committed to the holistic development of children with special needs. We provide essential educational kits, specialized learning tools, and infrastructure support to special schools across India. By dedicating nearly 90% of our service revenue, we ensure these brilliant young minds have the resources they need to overcome challenges and achieve their full potential.",
       icon: <BookOpen className="text-amber-400" size={32} />,
-      image: "https://images.unsplash.com/photo-1503919219737-6762869974ef?auto=format&fit=crop&q=80&w=1000",
+      image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1000",
       color: "from-blue-900/70 to-indigo-900/70"
     },
     {
       title: t.csr_oldage_title || "Dignity in Aging: Holistic Old Age Home Care",
       desc: t.csr_oldage_desc || "Our 'Dignity in Aging' initiative focuses on providing comprehensive support to abandoned and underprivileged elders. We partner with old age homes to provide quality healthcare, nutritious meals, and a supportive community. Almost the entirety of our platform's revenue is channeled into these services, ensuring our elders live their golden years with the respect, comfort, and care they truly deserve.",
       icon: <Users className="text-rose-400" size={32} />,
-      image: "https://images.unsplash.com/photo-1516307361476-e74580216032?auto=format&fit=crop&q=80&w=1000",
+      image: "https://images.unsplash.com/photo-1532329686034-8e83f215e091?auto=format&fit=crop&q=80&w=1000",
       color: "from-emerald-900/70 to-teal-900/70"
     }
   ];

@@ -82,18 +82,18 @@ export const PLANETS = [
 ];
 
 export const LANGUAGES = [
-  { code: 'en', name: 'English', image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=400&auto=format&fit=crop' },
-  { code: 'kn', name: 'ಕನ್ನಡ', image: 'https://images.unsplash.com/photo-1600675281904-67490bbad4a6?q=80&w=400&auto=format&fit=crop' },
-  { code: 'hi', name: 'हिन्दी', image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=400&auto=format&fit=crop' },
-  { code: 'bn', name: 'বাংলা', image: 'https://images.unsplash.com/photo-1581089781785-603411ffdaa1?q=80&w=400&auto=format&fit=crop' },
-  { code: 'gu', name: 'ગુજરાતી', image: 'https://images.unsplash.com/photo-1597041066774-9d2752157a92?q=80&w=400&auto=format&fit=crop' },
-  { code: 'kok', name: 'कोंकणी', image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=400&auto=format&fit=crop' },
-  { code: 'ml', name: 'മലയാളം', image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=400&auto=format&fit=crop' },
-  { code: 'mr', name: 'मराठी', image: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?q=80&w=400&auto=format&fit=crop' },
-  { code: 'ta', name: 'தமிழ்', image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=400&auto=format&fit=crop' },
-  { code: 'tcy', name: 'ತುಳು', image: 'https://images.unsplash.com/photo-1621360841013-c7683c659ec6?q=80&w=400&auto=format&fit=crop' },
-  { code: 'te', name: 'తెలుగు', image: 'https://images.unsplash.com/photo-1608976328267-e673d3ec06ce?q=80&w=400&auto=format&fit=crop' },
-  { code: 'sa', name: 'संस्कृतम्', image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop' }
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=400&auto=format&fit=crop' },
+  { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1600675281904-67490bbad4a6?q=80&w=400&auto=format&fit=crop' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=400&auto=format&fit=crop' },
+  { code: 'bn', name: 'Bengali', nativeName: 'বাংলা', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1581089781785-603411ffdaa1?q=80&w=400&auto=format&fit=crop' },
+  { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1597041066774-9d2752157a92?q=80&w=400&auto=format&fit=crop' },
+  { code: 'kok', name: 'Konkani', nativeName: 'कोंकणी', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=400&auto=format&fit=crop' },
+  { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=400&auto=format&fit=crop' },
+  { code: 'mr', name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?q=80&w=400&auto=format&fit=crop' },
+  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=400&auto=format&fit=crop' },
+  { code: 'tcy', name: 'Tulu', nativeName: 'ತುಳು', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1621360841013-c7683c659ec6?q=80&w=400&auto=format&fit=crop' },
+  { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1608976328267-e673d3ec06ce?q=80&w=400&auto=format&fit=crop' },
+  { code: 'sa', name: 'Sanskrit', nativeName: 'संस्कृतम्', flag: '🇮🇳', image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop' }
 ];
 
 export const TRANSLATIONS: Record<string, any> = {
@@ -161,6 +161,11 @@ export const TRANSLATIONS: Record<string, any> = {
     save_continue: "Save & Continue",
     skip_for_now: "Skip for now",
     lang_select: "Language",
+    loshu_grid: "Loshu Grid",
+    full_name: "Full Name",
+    classical_predictions: "Classical Predictions",
+    sacred_guide: "Sacred Guide",
+    seeker_scholar_desc: "Select Seeker for simple, easy-to-understand life guidance. Select Scholar for deep technical details, Sanskrit shlokas, and mathematical precision based on Brihat Jataka and Phaladeepika.",
     save_profile: "Save Profile",
     saved_profiles: "Recent Charts",
     matching_title: "Divine Relationship Synergy",
@@ -428,6 +433,11 @@ export const TRANSLATIONS: Record<string, any> = {
     save_continue: "ಉಳಿಸಿ ಮತ್ತು ಮುಂದುವರಿಯಿರಿ",
     skip_for_now: "ಸದ್ಯಕ್ಕೆ ಬಿಟ್ಟುಬಿಡಿ",
     lang_select: "ಭಾಷೆ",
+    loshu_grid: "ಲೋಶು ಗ್ರಿಡ್",
+    full_name: "ಪೂರ್ಣ ಹೆಸರು",
+    classical_predictions: "ಶಾಸ್ತ್ರೀಯ ಭವಿಷ್ಯಗಳು",
+    sacred_guide: "ಪವಿತ್ರ ಮಾರ್ಗದರ್ಶಿ",
+    seeker_scholar_desc: "ಸರಳ ಮತ್ತು ಸುಲಭವಾಗಿ ಅರ್ಥವಾಗುವ ಜೀವನ ಮಾರ್ಗದರ್ಶನಕ್ಕಾಗಿ 'ಸೀಕರ್' ಆಯ್ಕೆಮಾಡಿ. ಬೃಹತ್ ಜಾತಕ ಮತ್ತು ಫಲದೀಪಿಕಾ ಆಧಾರಿತ ಆಳವಾದ ತಾಂತ್ರಿಕ ವಿವರಗಳು, ಸಂಸ್ಕೃತ ಶ್ಲೋಕಗಳು ಮತ್ತು ಗಣಿತದ ನಿಖರತೆಗಾಗಿ 'ಸ್ಕಾಲರ್' ಆಯ್ಕೆಮಾಡಿ.",
     save_profile: "ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ",
     saved_profiles: "ಇತ್ತೀಚಿನ ಜಾತಕಗಳು",
     matching_title: "ಗುಣಮೇಲನ ಮತ್ತು ಹೊಂದಾಣಿಕೆ",

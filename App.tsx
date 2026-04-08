@@ -136,18 +136,18 @@ const BirthSummary = ({ details, lang }: { details: any[], lang: Language }) => 
   const nakshatra = details.find(d => d.label?.toLowerCase()?.includes('nakshatra'))?.value || '';
 
   return (
-    <div className="mb-8 text-left space-y-3 p-6 bg-[#fdf2d0]/60 backdrop-blur-sm rounded-3xl border-2 border-[#5d4037]/20 shadow-inner max-w-2xl mx-auto">
-      <div className="flex items-center justify-between border-b border-[#5d4037]/10 pb-2">
-        <span className="text-xs font-black text-[#5d4037]/60 uppercase tracking-[0.2em]">{t.name || 'Name'} :</span>
-        <span className="text-lg font-black text-[#5d4037]">{name}</span>
+    <div className="mb-8 text-left space-y-3 p-6 bg-[#312e81]/40 backdrop-blur-md rounded-3xl border-2 border-[#D4AF37]/30 shadow-inner max-w-2xl mx-auto">
+      <div className="flex items-center justify-between border-b border-[#D4AF37]/10 pb-2">
+        <span className="text-xs font-black text-[#D4AF37]/60 uppercase tracking-[0.2em]">{t.name || 'Name'} :</span>
+        <span className="text-lg font-black text-[#D4AF37]">{name}</span>
       </div>
-      <div className="flex items-center justify-between border-b border-[#5d4037]/10 pb-2">
-        <span className="text-xs font-black text-[#5d4037]/60 uppercase tracking-[0.2em]">{t.date || 'Date'} :</span>
-        <span className="text-base font-bold text-[#5d4037]">{date} <span className="text-sm opacity-60 ml-2">{time}</span></span>
+      <div className="flex items-center justify-between border-b border-[#D4AF37]/10 pb-2">
+        <span className="text-xs font-black text-[#D4AF37]/60 uppercase tracking-[0.2em]">{t.date || 'Date'} :</span>
+        <span className="text-base font-bold text-[#D4AF37]">{date} <span className="text-sm opacity-60 ml-2">{time}</span></span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-black text-[#5d4037]/60 uppercase tracking-[0.2em]">{t.nakshatra || 'Nakshatra'} :</span>
-        <span className="text-lg font-black text-[#5d4037]">{nakshatra}</span>
+        <span className="text-xs font-black text-[#D4AF37]/60 uppercase tracking-[0.2em]">{t.nakshatra || 'Nakshatra'} :</span>
+        <span className="text-lg font-black text-[#D4AF37]">{nakshatra}</span>
       </div>
     </div>
   );
@@ -303,9 +303,11 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const isProfileReady = (p: UserIntake) => !!(p.name && p.dob && p.tob && p.pob);
+
   const handleSaveProfile = () => {
     if (!intake.name) {
-      alert("Please enter a name to save.");
+      setError("Please enter a name to save.");
       return;
     }
     const updated = [intake, ...savedProfiles.filter(p => p.name !== intake.name)].slice(0, 5);
@@ -314,18 +316,20 @@ const App: React.FC = () => {
     localStorage.setItem('astro_user_intake', JSON.stringify(intake));
     lastSavedIntakeRef.current = JSON.stringify(intake);
     setIsDirty(false);
-    alert("Profile Saved.");
+    setError("Profile Saved.");
+    setTimeout(() => setError(null), 3000);
   };
 
   const handleSaveToProfiles = (p: UserIntake) => {
     if (!p.name) {
-      alert("Please enter a name to save.");
+      setError("Please enter a name to save.");
       return;
     }
     const updated = [p, ...savedProfiles.filter(sp => sp.name !== p.name)].slice(0, 10);
     setSavedProfiles(updated);
     localStorage.setItem('astro_logic_profiles_v4', JSON.stringify(updated));
-    alert(`Profile for ${p.name} saved.`);
+    setError(`Profile for ${p.name} saved.`);
+    setTimeout(() => setError(null), 3000);
   };
 
   const saveToHistory = (type: string, summary: string) => {
@@ -345,7 +349,11 @@ const App: React.FC = () => {
       setTabHistory(prev => [...prev, newTab]);
       setActiveTab(newTab);
       setAnalysisResult(null);
-      setHoroscopeState('INPUT');
+      if (newTab === AppTab.HOROSCOPE && isProfileReady(intake)) {
+        setHoroscopeState('MENU');
+      } else {
+        setHoroscopeState('INPUT');
+      }
     }
   };
 
@@ -353,15 +361,25 @@ const App: React.FC = () => {
     if (!mode) return;
 
     // Validation for place selection
-    if (type === 'HOROSCOPE' || type === 'DAILY' || type === 'MUHURTA' || type === 'MATCHING' || type === 'LIFE_PARTNER' || type === 'NUMEROLOGY') {
+    if (type === 'HOROSCOPE' || type === 'DAILY' || type === 'MUHURTA' || type === 'MATCHING' || type === 'LIFE_PARTNER' || type === 'NUMEROLOGY' || type === 'TIMELINE') {
       const checkIntake = type === 'MATCHING' ? matchingIntake.person1 : intake;
+      if (!checkIntake.dob || !checkIntake.tob) {
+        setError(t.enter_details_warning || 'Please enter birth date and time for accurate calculations.');
+        return;
+      }
       if (!checkIntake.lat || !checkIntake.lon) {
         setError(t.select_city_warning || 'Please select a city from the list for accurate calculations.');
         return;
       }
-      if (type === 'MATCHING' && (!matchingIntake.person2.lat || !matchingIntake.person2.lon)) {
-        setError(t.select_city_warning || 'Please select a city from the list for accurate calculations.');
-        return;
+      if (type === 'MATCHING') {
+        if (!matchingIntake.person2.dob || !matchingIntake.person2.tob) {
+          setError(t.enter_details_warning || 'Please enter birth date and time for both persons.');
+          return;
+        }
+        if (!matchingIntake.person2.lat || !matchingIntake.person2.lon) {
+          setError(t.select_city_warning || 'Please select a city from the list for accurate calculations.');
+          return;
+        }
       }
     }
 
@@ -397,7 +415,51 @@ const App: React.FC = () => {
       setCurrentSection(sectionName);
 
       if (type === 'HOROSCOPE') {
-        res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, payload, lang, mode);
+        if (payload === 'menu_timeline') {
+          setActiveTab(AppTab.TIMELINE);
+          setHoroscopeState('RESULT');
+          return;
+        }
+        if (payload === 'menu_numerology') {
+          handleAction('NUMEROLOGY');
+          return;
+        }
+
+        let focusArea = payload;
+        if (mode === 'SCHOLAR') {
+          const scholarMapping: Record<string, string> = {
+            'menu_details': 'menu_details',
+            'menu_rasi': 'menu_rasi',
+            'menu_navamsha': 'menu_navamsha',
+            'menu_dasha': 'Vimshottari',
+            'menu_ashtaka': 'Ashtakavarga',
+            'menu_shadbala': 'menu_shadbala',
+            'menu_shadvarga': 'menu_shadvarga',
+            'menu_yogas': 'Yoga Analysis',
+            'menu_maitri': 'Panchadha Graha Maitri',
+            'menu_hora': 'Shastriya Analysis',
+            'menu_bhava_analysis': 'menu_bhava_analysis',
+            'menu_character': 'menu_character'
+          };
+          focusArea = scholarMapping[payload] || payload;
+        } else {
+          const seekerMapping: Record<string, string> = {
+            'menu_basic_details': 'menu_basic_details',
+            'menu_yoga': 'menu_yoga',
+            'menu_career': 'menu_career',
+            'menu_health': 'menu_health',
+            'menu_money': 'menu_money',
+            'menu_transit': 'menu_transit',
+            'menu_dasha_effect': 'menu_dasha_effect',
+            'menu_sade_sati': 'menu_sade_sati',
+            'menu_gemstones': 'menu_gemstones',
+            'menu_nakshatra': 'menu_nakshatra',
+            'menu_doshas': 'menu_doshas',
+            'menu_character': 'menu_character'
+          };
+          focusArea = seekerMapping[payload] || payload;
+        }
+        res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, focusArea, lang, mode);
         setHoroscopeState('ANALYSIS');
       } else if (type === 'NUMEROLOGY') {
         res = await generateHoroscope({ ...intake, tob: `${intake.tob} ${intake.ampm}` }, "Numerology Analysis", lang, mode);
@@ -513,7 +575,6 @@ const App: React.FC = () => {
     if (analysisResult) { 
       setAnalysisResult(null); 
       setMuhurthaImage(null);
-      // Ensure we go back to the correct state within the tab
       if (activeTab === AppTab.HOROSCOPE) {
         setHoroscopeState('MENU');
       } else {
@@ -525,14 +586,18 @@ const App: React.FC = () => {
     
     if (tabHistory.length > 1) {
       const newHistory = [...tabHistory];
-      newHistory.pop(); // remove current
+      newHistory.pop();
       const prevTab = newHistory[newHistory.length - 1];
       setTabHistory(newHistory);
       setActiveTab(prevTab);
       setHoroscopeState('INPUT');
-    } else {
+    } else if (activeTab !== AppTab.DASHBOARD) {
       setActiveTab(AppTab.DASHBOARD);
+      setTabHistory([AppTab.DASHBOARD]);
       setHoroscopeState('INPUT');
+    } else {
+      // If on Dashboard, go back to Mode Selection
+      setOnboardingStep(OnboardingStep.MODE_SELECT);
     }
   };
 
@@ -578,7 +643,7 @@ const App: React.FC = () => {
     </div>
   );
 
-  const renderHoroscopeIntake = () => (
+  const renderHoroscopeIntake = (onNext?: () => void) => (
     <div className="min-h-screen parchment-bg flex flex-col animate-in slide-in-from-right duration-500 overflow-x-hidden">
       <MandalaBackground />
       <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-6 flex items-center shadow-xl sticky top-0 z-20 border-b border-[#D4AF37]/30">
@@ -622,10 +687,10 @@ const App: React.FC = () => {
             )}
           <div className="pt-6">
             <button 
-              onClick={() => setHoroscopeState('MENU')}
+              onClick={onNext || (() => setHoroscopeState('MENU'))}
               className="w-full py-6 bg-gradient-to-r from-[#312e81] to-[#1e1b4b] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-[#D4AF37]/30"
             >
-              Next: Choose Analysis ➔
+              {onNext ? (t.continue || 'Continue ➔') : (t.next_choose_analysis || 'Next: Choose Analysis ➔')}
             </button>
           </div>
         </div>
@@ -645,7 +710,7 @@ const App: React.FC = () => {
       </div>
       <div className="bg-[#312e81] fixed bottom-0 left-0 right-0 z-[60] flex shadow-[0_-10px_30px_rgba(0,0,0,0.5)] border-t border-[#D4AF37]/50">
         <button onClick={handleSaveProfile} className="flex-1 py-5 sm:py-8 bg-transparent text-[#D4AF37] uppercase text-[10px] font-black tracking-widest border-r border-white/10 active:bg-white/10">💾 {t.save_info}</button>
-        <button onClick={() => setHoroscopeState('MENU')} className="flex-[2] py-5 sm:py-8 bg-gradient-to-r from-amber-600 to-amber-500 text-[#312e81] uppercase text-[11px] sm:text-xs font-black tracking-[0.2em] active:brightness-90 transition-all">{t.next_page} ➔</button>
+        <button onClick={onNext || (() => setHoroscopeState('MENU'))} className="flex-[2] py-5 sm:py-8 bg-gradient-to-r from-amber-600 to-amber-500 text-[#312e81] uppercase text-[11px] sm:text-xs font-black tracking-[0.2em] active:brightness-90 transition-all">{t.next_page} ➔</button>
       </div>
     </div>
   );
@@ -838,7 +903,7 @@ const App: React.FC = () => {
                 transition={{ delay: 0.3 }}
                 className="mb-10"
               >
-                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">Loshu Grid</h3>
+                <h3 className="text-center text-[#92400e] font-black uppercase tracking-[0.3em] mb-6 text-sm sm:text-lg">{t.loshu_grid || 'Loshu Grid'}</h3>
                 <LoshuGrid grid={structuredData.grid} present={structuredData.present || []} />
               </motion.div>
             )}
@@ -849,7 +914,7 @@ const App: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className={`analysis-rich-text detailed-view p-4 sm:p-12 md:p-16 bg-white/95 border-2 border-[#D4AF37]/20 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-x-auto ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
+                className={`analysis-rich-text detailed-view p-4 sm:p-12 md:p-16 bg-[#020617]/90 backdrop-blur-2xl border-4 border-[#D4AF37]/30 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-x-auto ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
                 dangerouslySetInnerHTML={{ __html: analysisResult }} 
               />
             )}
@@ -881,7 +946,7 @@ const App: React.FC = () => {
             className={`min-h-screen flex flex-col overflow-x-hidden relative ${mode === 'SCHOLAR' ? 'scholar-theme' : 'seeker-theme'}`}
           >
             <MandalaBackground />
-            <div className={`fixed inset-0 pointer-events-none z-0 opacity-20 ${mode === 'SCHOLAR' ? 'bg-[#0f172a]' : 'bg-[#fff7ed]'}`}></div>
+            <div className={`fixed inset-0 pointer-events-none z-0 opacity-20 bg-[#0f172a]`}></div>
             {error && (
               <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[70] w-[90%] max-w-md p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-800 text-center font-bold shadow-2xl animate-in slide-in-from-top-4">
                 {error}
@@ -890,6 +955,9 @@ const App: React.FC = () => {
             )}
             <nav className="w-full px-4 sm:px-8 py-5 sm:py-10 flex justify-between items-center z-20">
               <div className="flex items-center gap-3">
+                <button onClick={goBack} className="p-2 text-[#312e81] hover:bg-black/5 rounded-full transition-all group">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                </button>
                 <div className="flex flex-col -gap-1">
                   <span className="text-lg sm:text-4xl font-black text-[#312e81] tracking-tighter uppercase astrological-font leading-none">{t.brand_name || 'ASTRO LOGIC'}</span>
                   <div className="flex items-center gap-2">
@@ -1124,7 +1192,10 @@ const App: React.FC = () => {
           </motion.div>
         );
       case AppTab.HOROSCOPE:
-        return horoscopeState === 'MENU' ? (
+        if (horoscopeState === 'INPUT') {
+          return renderHoroscopeIntake(() => setHoroscopeState('MENU'));
+        }
+        return (
           <motion.div 
             key="horoscope-menu"
             initial={{ opacity: 0, scale: 0.98 }}
@@ -1185,17 +1256,6 @@ const App: React.FC = () => {
                 </motion.button>
               ))}
             </div>
-          </motion.div>
-        ) : (
-          <motion.div 
-            key="horoscope-intake"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="min-h-screen"
-          >
-            {renderHoroscopeIntake()}
           </motion.div>
         );
       case AppTab.DAILY_PREDICTION:
@@ -1270,16 +1330,16 @@ const App: React.FC = () => {
                   </div>
                   <div className="grid gap-6 sm:gap-8 pt-4">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Full Name</label>
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.full_name || 'Full Name'}</label>
                       <input value={matchingIntake.person1.name} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, name: e.target.value}})} placeholder={t.first_name} className="details-input" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Date</label>
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_date || 'Birth Date'}</label>
                         <input type="date" value={matchingIntake.person1.dob} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, dob: e.target.value}})} className="details-input font-bold" />
                       </div>
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Time</label>
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_time || 'Birth Time'}</label>
                         <TimePicker time={matchingIntake.person1.tob} ampm={matchingIntake.person1.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, tob: t, ampm: a}})} />
                       </div>
                     </div>
@@ -1309,16 +1369,16 @@ const App: React.FC = () => {
                   </div>
                   <div className="grid gap-6 sm:gap-8 pt-4">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Full Name</label>
+                      <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.full_name || 'Full Name'}</label>
                       <input value={matchingIntake.person2.name} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, name: e.target.value}})} placeholder={t.second_name} className="details-input" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Date</label>
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_date || 'Birth Date'}</label>
                         <input type="date" value={matchingIntake.person2.dob} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, dob: e.target.value}})} className="details-input font-bold" />
                       </div>
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">Birth Time</label>
+                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_time || 'Birth Time'}</label>
                         <TimePicker time={matchingIntake.person2.tob} ampm={matchingIntake.person2.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, tob: t, ampm: a}})} />
                       </div>
                     </div>
@@ -1436,57 +1496,7 @@ const App: React.FC = () => {
           </motion.div>
         );
       case AppTab.NUMEROLOGY:
-        return horoscopeState === 'ANALYSIS' ? null : (
-          <motion.div 
-            key="numerology-intake"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
-          >
-            <MandalaBackground />
-            <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-4 sm:p-6 flex items-center shadow-xl sticky top-0 z-20 border-b border-[#D4AF37]/30">
-              <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <div className="ml-3">
-                <h2 className="text-lg sm:text-2xl font-black text-[#D4AF37] tracking-widest uppercase astrological-font leading-tight">{t.numerology || 'Numerology'}</h2>
-                <p className="text-[9px] text-white/50 uppercase font-black tracking-widest">Power of Numbers</p>
-              </div>
-            </header>
-            <div className="flex-1 p-4 sm:p-8 space-y-8 max-w-3xl mx-auto w-full overflow-y-auto pb-48 z-10">
-              <div className="grid gap-6 p-6 sm:p-10 bg-amber-50/60 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#D4AF37]/30 shadow-2xl backdrop-blur-md">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
-                  <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_date}</label>
-                    <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input font-bold" />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_time}</label>
-                    <TimePicker time={intake.tob} ampm={intake.ampm || 'AM'} onChange={(t, a) => setIntake({...intake, tob: t, ampm: a})} />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_location}</label>
-                  <CitySearch value={intake.pob} onChange={v => setIntake({...intake, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz, pincode: v.pincode})} placeholder={t.search_city_placeholder} />
-                </div>
-                <div className="pt-6">
-                  <button 
-                    onClick={() => handleAction('NUMEROLOGY')}
-                    className="w-full py-6 bg-gradient-to-r from-[#312e81] to-[#1e1b4b] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-[#D4AF37]/30"
-                  >
-                    Analyze Numerology ➔
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        );
+        return renderHoroscopeIntake(() => handleAction('NUMEROLOGY'));
       case AppTab.PRASHNA: 
         return (
           <motion.div 
@@ -1524,55 +1534,7 @@ const App: React.FC = () => {
         );
       case AppTab.TIMELINE:
         if (horoscopeState === 'INPUT') {
-          return (
-            <motion.div 
-              key="timeline-input"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              className="min-h-screen parchment-bg flex flex-col"
-            >
-              <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-6 flex items-center shadow-2xl border-b border-[#D4AF37]/40">
-                <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <h2 className="ml-3 text-2xl font-black text-[#D4AF37] uppercase astrological-font tracking-widest">{t.timeline_title}</h2>
-              </header>
-              <main className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full">
-                <div className="bg-amber-50/60 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[3rem] p-8 shadow-2xl">
-                  <h3 className="text-xl font-black text-[#312e81] uppercase tracking-widest text-center mb-8">{t.sacred_intake}</h3>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
-                      <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input w-full px-4 font-bold text-[#312e81]" />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.birth_date}</label>
-                        <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input w-full px-4 font-bold text-[#312e81]" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_time}</label>
-                        <TimePicker time={intake.tob} ampm={intake.ampm || 'AM'} onChange={(t, a) => setIntake({...intake, tob: t, ampm: a})} />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-[#451a03] uppercase tracking-widest ml-1">{t.birth_location}</label>
-                      <CitySearch value={intake.pob} onChange={city => setIntake({...intake, pob: city.name, lat: city.lat, lon: city.lon, tz: city.tz})} placeholder={t.search_city_placeholder} />
-                    </div>
-                    <button 
-                      onClick={() => setHoroscopeState('RESULT')}
-                      disabled={!intake.name || !intake.dob || !intake.lat}
-                      className="w-full py-5 bg-gradient-to-r from-[#451a03] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                    >
-                      {t.submit}
-                    </button>
-                  </div>
-                </div>
-              </main>
-            </motion.div>
-          );
+          return renderHoroscopeIntake(() => setHoroscopeState('RESULT'));
         }
         return <TimelineDashboard intake={intake} lang={lang} goBack={() => setHoroscopeState('INPUT')} />;
       case AppTab.BLOG:
@@ -1585,7 +1547,7 @@ const App: React.FC = () => {
             transition={{ duration: 0.2 }}
             className="min-h-screen parchment-bg flex flex-col"
           >
-            <header className="bg-gradient-to-b from-[#451a03] to-[#7c2d12] p-6 flex items-center shadow-2xl border-b border-[#D4AF37]/40">
+            <header className="bg-gradient-to-b from-[#312e81] to-[#1e1b4b] p-6 flex items-center shadow-2xl border-b border-[#D4AF37]/40">
               <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
               </button>
@@ -1599,57 +1561,7 @@ const App: React.FC = () => {
           </motion.div>
         );
       case AppTab.LIFE_PARTNER:
-        return horoscopeState === 'ANALYSIS' ? null : (
-          <motion.div 
-            key="life-partner-intake"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="min-h-screen parchment-bg flex flex-col relative overflow-x-hidden"
-          >
-            <MandalaBackground />
-            <header className="bg-gradient-to-b from-[#451a03] to-[#7c2d12] p-4 sm:p-6 flex items-center shadow-xl sticky top-0 z-20 border-b border-[#D4AF37]/30">
-              <button onClick={goBack} className="p-2 text-white hover:bg-white/20 rounded-full transition-all group">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <div className="ml-3">
-                <h2 className="text-lg sm:text-2xl font-black text-[#D4AF37] tracking-widest uppercase astrological-font leading-tight">Life Partner Analysis</h2>
-                <p className="text-[9px] text-white/50 uppercase font-black tracking-widest">Classical Predictions</p>
-              </div>
-            </header>
-            <div className="flex-1 p-4 sm:p-8 space-y-8 max-w-3xl mx-auto w-full overflow-y-auto pb-48 z-10">
-              <div className="grid gap-6 p-6 sm:p-10 bg-amber-50/60 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#D4AF37]/30 shadow-2xl backdrop-blur-md">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
-                  <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_date}</label>
-                    <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input font-bold" />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_time}</label>
-                    <TimePicker time={intake.tob} ampm={intake.ampm || 'AM'} onChange={(t, a) => setIntake({...intake, tob: t, ampm: a})} />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1">{t.birth_location}</label>
-                  <CitySearch value={intake.pob} onChange={v => setIntake({...intake, pob: v.pincode ? `${v.name} (${v.pincode})` : v.name, lat: v.lat, lon: v.lon, tz: v.tz, pincode: v.pincode})} placeholder={t.search_city_placeholder} />
-                </div>
-                <div className="pt-6">
-                  <button 
-                    onClick={() => handleAction('LIFE_PARTNER')}
-                    className="w-full py-6 bg-gradient-to-r from-[#92400e] to-[#7c2d12] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-[#D4AF37]/30"
-                  >
-                    Analyze Life Partner ➔
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        );
+        return renderHoroscopeIntake(() => handleAction('LIFE_PARTNER'));
       default: 
         return (
           <div className="min-h-screen flex items-center justify-center parchment-bg">
@@ -1704,9 +1616,15 @@ const App: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
-            className="fixed inset-0 z-[100] bg-[#fffbeb] flex items-center justify-center p-6"
+            className="fixed inset-0 z-[100] bg-[#020617] flex items-center justify-center p-6"
           >
             <div className="w-full max-w-2xl bg-amber-50/90 rounded-[3.5rem] p-8 sm:p-16 shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-4 border-[#D4AF37]/20 relative overflow-hidden">
+              <button 
+                onClick={() => setOnboardingStep(OnboardingStep.MODE_SELECT)}
+                className="absolute top-8 left-8 z-20 p-2 text-[#451a03] hover:bg-black/5 rounded-full transition-all group"
+              >
+                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
               <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl" />
               <div className="relative z-10">
                 <h2 className="text-3xl sm:text-5xl font-black text-[#451a03] uppercase tracking-widest astrological-font text-center mb-4">
@@ -1748,7 +1666,7 @@ const App: React.FC = () => {
                       onClick={() => {
                         localStorage.setItem('astro_user_intake', JSON.stringify(intake));
                         setOnboardingStep(OnboardingStep.COMPLETED);
-                        localStorage.setItem('astro_logic_onboarding_v1', 'true');
+                        localStorage.setItem('astro_logic_onboarding_v2', 'true');
                       }}
                       className="w-full py-6 bg-[#451a03] text-[#D4AF37] rounded-[2rem] font-black uppercase tracking-[0.4em] text-sm shadow-xl hover:bg-black transition-all"
                     >
@@ -1758,7 +1676,7 @@ const App: React.FC = () => {
                       onClick={() => {
                         localStorage.setItem('astro_user_intake_skipped', 'true');
                         setOnboardingStep(OnboardingStep.COMPLETED);
-                        localStorage.setItem('astro_logic_onboarding_v1', 'true');
+                        localStorage.setItem('astro_logic_onboarding_v2', 'true');
                       }}
                       className="w-full py-4 text-[#451a03]/40 font-black uppercase tracking-[0.3em] text-xs hover:text-[#451a03] transition-colors"
                     >
@@ -1792,16 +1710,89 @@ const App: React.FC = () => {
           </motion.div>
         )}
 
+        {onboardingStep === OnboardingStep.LANG_SELECT && (
+          <motion.div 
+            key="lang_select"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-start overflow-y-auto"
+          >
+            <div className="w-full max-w-md mx-auto px-6 py-12 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-10">
+                <button 
+                  onClick={() => setOnboardingStep(OnboardingStep.MODE_SELECT)}
+                  className="p-2 text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h1 className="text-2xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font">{t.lang_select || 'Language'}</h1>
+                <button className="w-8 h-8 bg-[#D4AF37] rounded-full flex items-center justify-center text-[#020617] shadow-lg">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-12">
+                {LANGUAGES.map((l: any) => (
+                  <motion.button
+                    key={l.code}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setLang(l.code as Language);
+                      localStorage.setItem('astro_logic_lang', l.code);
+                    }}
+                    className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 ${
+                      lang === l.code 
+                        ? 'bg-[#D4AF37] border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.4)]' 
+                        : 'bg-white/5 backdrop-blur-md border-[#D4AF37]/20 hover:border-[#D4AF37]/50'
+                    }`}
+                  >
+                    <span className="text-4xl mb-3">{l.flag || '🇮🇳'}</span>
+                    <span className={`text-sm font-bold ${lang === l.code ? 'text-[#020617]' : 'text-white'}`}>{l.nativeName}</span>
+                    <span className={`text-[10px] mt-1 ${lang === l.code ? 'text-[#020617]/60' : 'text-white/40'}`}>({l.name})</span>
+                  </motion.button>
+                ))}
+              </div>
+
+                  <div className="mt-auto pt-8">
+                <button 
+                  onClick={() => {
+                    const onboardingDone = localStorage.getItem('astro_logic_onboarding_v2');
+                    if (onboardingDone) {
+                      setOnboardingStep(OnboardingStep.COMPLETED);
+                    } else {
+                      setOnboardingStep(OnboardingStep.QUICK_LOGIN);
+                    }
+                  }}
+                  className="w-full bg-[#D4AF37] text-[#020617] py-4 rounded-2xl font-black uppercase tracking-widest text-lg shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:scale-[1.02] transition-all active:scale-[0.98]"
+                >
+                  {t.save_continue || 'Continue'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {onboardingStep === OnboardingStep.MODE_SELECT && (
           <motion.div
             key="mode_select"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-start p-6 overflow-y-auto"
+            className="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-start p-6 overflow-y-auto overflow-x-hidden"
           >
             <MandalaBackground />
             
+            <div className="absolute top-6 left-6 z-50">
+              <button 
+                onClick={() => window.location.reload()}
+                className="p-2 text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors"
+              >
+                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+            </div>
+
             <div className="absolute top-6 right-6 z-50">
               <div className="relative group">
                 <select 
@@ -1818,99 +1809,106 @@ const App: React.FC = () => {
             </div>
 
             {/* Header Section */}
-            <div className="relative flex flex-col items-center mb-8 sm:mb-12 mt-16 sm:mt-24 z-10 w-full">
+            <div className="relative flex flex-col items-center mb-12 sm:mb-16 mt-12 sm:mt-20 z-10 w-full">
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 1 }}
-                className="relative flex items-center justify-center w-full max-w-4xl"
+                className="flex flex-col items-center"
               >
-                <FantasticLogo className="w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none w-full">
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-[#D4AF37] astrological-font tracking-[0.2em] uppercase drop-shadow-[0_0_30px_rgba(212,175,55,0.8)] flex items-center gap-3 sm:gap-6 whitespace-nowrap">
-                    <span>ASTRO</span>
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20" /> {/* Spacer for the central sun */}
-                    <span>LOGIC</span>
-                  </h1>
-                </div>
+                <h1 className="text-xl min-[380px]:text-2xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[#D4AF37] astrological-font tracking-normal sm:tracking-[0.1em] uppercase drop-shadow-[0_0_30px_rgba(212,175,55,0.8)] flex items-center gap-2 sm:gap-6 md:gap-8 whitespace-nowrap">
+                  <span>ASTRO</span>
+                  <FantasticLogo className="w-14 h-14 min-[380px]:w-16 min-[380px]:h-16 sm:w-32 sm:h-32 md:w-48 md:h-48" />
+                  <span>LOGIC</span>
+                </h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-[#D4AF37] font-serif italic text-[10px] min-[380px]:text-sm sm:text-2xl tracking-widest sm:tracking-[0.2em] mt-2 uppercase text-center px-4 opacity-90"
+                >
+                  Sacred Geometry • Ancient Logic
+                </motion.p>
               </motion.div>
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="text-white/80 font-serif italic text-xs sm:text-xl tracking-[0.3em] mt-4 uppercase text-center px-4"
-              >
-                Sacred Geometry • Ancient Logic
-              </motion.p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 w-full max-w-6xl z-10 pb-12">
+            <div className="flex flex-col gap-8 w-full max-w-xl z-10 pb-20 px-4">
               <motion.button 
-                initial={{ x: -100, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.8, type: "spring" }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setMode('SEEKER');
-                  localStorage.setItem('astro_logic_mode_v1', 'SEEKER');
-                  const onboardingDone = localStorage.getItem('astro_logic_onboarding_v1');
-                  if (onboardingDone) {
-                    setOnboardingStep(OnboardingStep.COMPLETED);
+                  localStorage.setItem('astro_logic_mode_v2', 'SEEKER');
+                  const langSaved = localStorage.getItem('astro_logic_lang');
+                  if (!langSaved) {
+                    setOnboardingStep(OnboardingStep.LANG_SELECT);
                   } else {
-                    setOnboardingStep(OnboardingStep.QUICK_LOGIN);
+                    const onboardingDone = localStorage.getItem('astro_logic_onboarding_v2');
+                    if (onboardingDone) {
+                      setOnboardingStep(OnboardingStep.COMPLETED);
+                    } else {
+                      setOnboardingStep(OnboardingStep.QUICK_LOGIN);
+                    }
                   }
                 }}
-                className="flex-1 group relative flex flex-col items-center justify-center p-10 sm:p-16 transition-all duration-500 bg-[#1e293b]/80 backdrop-blur-md border-4 border-[#D4AF37]/30 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
+                className="group relative flex flex-col items-center justify-center p-10 sm:p-12 transition-all duration-500 bg-[#1e293b]/40 backdrop-blur-xl border-2 border-[#D4AF37]/30 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="z-10 text-center space-y-6">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center mx-auto transition-all">
-                    <span className="text-7xl sm:text-9xl block group-hover:scale-110 transition-transform drop-shadow-[0_0_20px_rgba(212,175,55,0.5)]">⭐</span>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mx-auto transition-all">
+                    <span className="text-6xl sm:text-7xl block group-hover:scale-110 transition-transform drop-shadow-[0_0_20px_rgba(212,175,55,0.5)]">⭐</span>
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-4xl sm:text-6xl font-black text-[#D4AF37] uppercase tracking-[0.2em] astrological-font">{t.seeker || 'Seeker'}</h2>
+                    <h2 className="text-4xl sm:text-5xl font-black text-[#D4AF37] uppercase tracking-[0.2em] astrological-font">{t.seeker || 'Seeker'}</h2>
                   </div>
-                  <p className="text-sm sm:text-lg text-white/90 font-serif leading-relaxed max-w-[320px] mx-auto italic">
+                  <p className="text-sm sm:text-lg text-white/80 font-serif leading-relaxed max-w-[320px] mx-auto italic">
                     "{t.seeker_desc || 'Simple life guidance, career flow, and daily energy in clear, accessible language.'}"
                   </p>
                   <div className="pt-6">
-                    <span className="inline-block px-12 py-4 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-sm font-black tracking-[0.3em] group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all shadow-[0_0_30px_rgba(212,175,55,0.4)]">{t.select_seeker}</span>
+                    <span className="inline-block px-10 py-3 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-xs font-black tracking-[0.3em] group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)]">{t.select_seeker || 'Select Seeker'}</span>
                   </div>
                 </div>
               </motion.button>
 
               <motion.button 
-                initial={{ x: 100, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.8, type: "spring" }}
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 1, type: "spring" }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setMode('SCHOLAR');
-                  localStorage.setItem('astro_logic_mode_v1', 'SCHOLAR');
-                  const onboardingDone = localStorage.getItem('astro_logic_onboarding_v1');
-                  if (onboardingDone) {
-                    setOnboardingStep(OnboardingStep.COMPLETED);
+                  localStorage.setItem('astro_logic_mode_v2', 'SCHOLAR');
+                  const langSaved = localStorage.getItem('astro_logic_lang');
+                  if (!langSaved) {
+                    setOnboardingStep(OnboardingStep.LANG_SELECT);
                   } else {
-                    setOnboardingStep(OnboardingStep.QUICK_LOGIN);
+                    const onboardingDone = localStorage.getItem('astro_logic_onboarding_v2');
+                    if (onboardingDone) {
+                      setOnboardingStep(OnboardingStep.COMPLETED);
+                    } else {
+                      setOnboardingStep(OnboardingStep.QUICK_LOGIN);
+                    }
                   }
                 }}
-                className="flex-1 group relative flex flex-col items-center justify-center p-10 sm:p-16 transition-all duration-500 bg-[#1e293b]/80 backdrop-blur-md border-4 border-[#D4AF37]/30 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
+                className="group relative flex flex-col items-center justify-center p-10 sm:p-12 transition-all duration-500 bg-[#1e293b]/40 backdrop-blur-xl border-2 border-[#D4AF37]/30 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="z-10 text-center space-y-6">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center mx-auto transition-all">
-                    <span className="text-7xl sm:text-9xl block group-hover:scale-110 transition-transform drop-shadow-[0_0_20px_rgba(212,175,55,0.5)]">📜</span>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mx-auto transition-all">
+                    <span className="text-6xl sm:text-7xl block group-hover:scale-110 transition-transform drop-shadow-[0_0_20px_rgba(212,175,55,0.5)]">📜</span>
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-4xl sm:text-6xl font-black text-[#D4AF37] uppercase tracking-[0.2em] astrological-font">{t.scholar || 'Scholar'}</h2>
+                    <h2 className="text-4xl sm:text-5xl font-black text-[#D4AF37] uppercase tracking-[0.2em] astrological-font">{t.scholar || 'Scholar'}</h2>
                   </div>
-                  <p className="text-sm sm:text-lg text-white/90 font-serif leading-relaxed max-w-[320px] mx-auto italic">
+                  <p className="text-sm sm:text-lg text-white/80 font-serif leading-relaxed max-w-[320px] mx-auto italic">
                     "{t.scholar_desc || 'Mathematical precision. Longitudes, classical Shlokas, and deep Siddhantic rules.'}"
                   </p>
                   <div className="pt-6">
-                    <span className="inline-block px-12 py-4 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-sm font-black tracking-[0.3em] group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all shadow-[0_0_30px_rgba(212,175,55,0.4)]">{t.select_scholar}</span>
+                    <span className="inline-block px-10 py-3 border-2 border-[#D4AF37] text-[#D4AF37] rounded-full uppercase text-xs font-black tracking-[0.3em] group-hover:bg-[#D4AF37] group-hover:text-[#020617] transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)]">{t.select_scholar || 'Select Scholar'}</span>
                   </div>
                 </div>
               </motion.button>
@@ -2003,12 +2001,12 @@ const App: React.FC = () => {
                     initial={{ scale: 0.9, y: 20 }}
                     animate={{ scale: 1, y: 0 }}
                     exit={{ scale: 0.9, y: 20 }}
-                    className="bg-[#fffbeb] w-full max-w-2xl rounded-[3rem] border-4 border-[#D4AF37] shadow-[0_0_100px_rgba(212,175,55,0.3)] overflow-hidden flex flex-col max-h-[90vh]"
+                    className="bg-[#020617] w-full max-w-2xl rounded-[3rem] border-4 border-[#D4AF37] shadow-[0_0_100px_rgba(212,175,55,0.3)] overflow-hidden flex flex-col max-h-[90vh]"
                   >
-                    <div className="bg-[#D4AF37] p-6 sm:p-10 text-[#451a03] flex justify-between items-center relative overflow-hidden">
+                    <div className="bg-[#D4AF37] p-6 sm:p-10 text-[#020617] flex justify-between items-center relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
                       <div className="flex items-center gap-6 z-10">
-                        <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full border-4 border-[#451a03] overflow-hidden shadow-2xl">
+                        <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full border-4 border-[#020617] overflow-hidden shadow-2xl">
                           <img 
                             src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=200&auto=format&fit=crop" 
                             alt="Ancient Guruji" 
@@ -2017,33 +2015,33 @@ const App: React.FC = () => {
                           />
                         </div>
                         <div>
-                          <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-widest astrological-font leading-none">Sacred Guide</h2>
+                          <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-widest astrological-font leading-none">{t.sacred_guide || 'Sacred Guide'}</h2>
                           <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] font-bold mt-2 opacity-80">Wisdom from the Ancient Masters</p>
                         </div>
                       </div>
                       <button onClick={() => setIsHelpOpen(false)} className="text-3xl hover:scale-110 transition-transform z-10">✕</button>
                     </div>
-                    <div className="p-6 sm:p-12 overflow-y-auto space-y-10 text-[#451a03]">
+                    <div className="p-6 sm:p-12 overflow-y-auto space-y-10 text-white">
                       <section className="relative">
                         <div className="absolute -left-6 top-0 w-1 h-full bg-[#D4AF37] rounded-full"></div>
-                        <h3 className="font-black uppercase tracking-[0.2em] text-sm sm:text-base mb-4 flex items-center gap-3">
-                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-xs">01</span>
+                        <h3 className="font-black uppercase tracking-[0.2em] text-[#D4AF37] text-sm sm:text-base mb-4 flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-[#020617] text-xs">01</span>
                           Choose Your Path
                         </h3>
-                        <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">Select <b>Seeker</b> for simple, easy-to-understand life guidance. Select <b>Scholar</b> for deep technical details, Sanskrit shlokas, and mathematical precision based on <i>Brihat Jataka</i> and <i>Phaladeepika</i>.</p>
+                        <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">{t.seeker_scholar_desc || 'Select Seeker for simple, easy-to-understand life guidance. Select Scholar for deep technical details, Sanskrit shlokas, and mathematical precision based on Brihat Jataka and Phaladeepika.'}</p>
                       </section>
                       <section className="relative">
                         <div className="absolute -left-6 top-0 w-1 h-full bg-[#D4AF37] rounded-full"></div>
-                        <h3 className="font-black uppercase tracking-[0.2em] text-sm sm:text-base mb-4 flex items-center gap-3">
-                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-xs">02</span>
+                        <h3 className="font-black uppercase tracking-[0.2em] text-[#D4AF37] text-sm sm:text-base mb-4 flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-[#020617] text-xs">02</span>
                           Enter Birth Details
                         </h3>
                         <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">Provide your exact Date, Time, and Place of birth. For the best accuracy, search for your city and select it from the list to get precise coordinates and timezone data.</p>
                       </section>
                       <section className="relative">
                         <div className="absolute -left-6 top-0 w-1 h-full bg-[#D4AF37] rounded-full"></div>
-                        <h3 className="font-black uppercase tracking-[0.2em] text-sm sm:text-base mb-4 flex items-center gap-3">
-                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-xs">03</span>
+                        <h3 className="font-black uppercase tracking-[0.2em] text-[#D4AF37] text-sm sm:text-base mb-4 flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-[#020617] text-xs">03</span>
                           Explore Analysis
                         </h3>
                         <p className="text-sm sm:text-base leading-relaxed font-medium opacity-90">Navigate through <b>Horoscope</b> for birth analysis, <b>Daily</b> for your transit forecast, and <b>Matching</b> for relationship compatibility.</p>
@@ -2051,14 +2049,14 @@ const App: React.FC = () => {
                       <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button 
                           onClick={() => { setIsHelpOpen(false); setIsChatOverlayOpen(true); }}
-                          className="w-full bg-[#451a03] text-[#D4AF37] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm hover:bg-black transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] active:scale-[0.98] flex items-center justify-center gap-3"
+                          className="w-full bg-[#D4AF37] text-[#020617] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm hover:bg-white transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] active:scale-[0.98] flex items-center justify-center gap-3"
                         >
                           <MessageSquare size={20} />
                           Write to Guruji
                         </button>
                         <button 
                           onClick={() => { setIsHelpOpen(false); setIsChatOverlayOpen(true); }}
-                          className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#451a03] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm hover:scale-105 transition-all shadow-[0_20px_40px_rgba(212,175,55,0.3)] active:scale-[0.98] flex items-center justify-center gap-3"
+                          className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#020617] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm hover:scale-105 transition-all shadow-[0_20px_40px_rgba(212,175,55,0.3)] active:scale-[0.98] flex items-center justify-center gap-3"
                         >
                           <Sparkles size={20} className="animate-pulse" />
                           Speak to Guruji
@@ -2071,10 +2069,10 @@ const App: React.FC = () => {
             </AnimatePresence>
 
             {isChatOverlayOpen && (
-              <div className="pointer-events-auto absolute bottom-20 right-0 w-[92vw] sm:w-[440px] h-[75vh] sm:max-h-[800px] bg-white rounded-[2rem] sm:rounded-[3.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.7)] border-4 border-[#D4AF37]/50 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 flex flex-col z-[100]">
-                <div className="bg-[#D4AF37] p-5 sm:p-8 text-[#451a03] flex justify-between items-center shadow-2xl relative">
+              <div className="pointer-events-auto absolute bottom-20 right-0 w-[92vw] sm:w-[440px] h-[75vh] sm:max-h-[800px] bg-[#020617] rounded-[2rem] sm:rounded-[3.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.7)] border-4 border-[#D4AF37]/50 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 flex flex-col z-[100]">
+                <div className="bg-[#D4AF37] p-5 sm:p-8 text-[#020617] flex justify-between items-center shadow-2xl relative">
                    <div className="flex items-center gap-4 z-10">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-[#451a03] overflow-hidden">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-[#020617] overflow-hidden">
                         <img 
                           src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=100&auto=format&fit=crop" 
                           alt="Guruji" 
@@ -2089,7 +2087,7 @@ const App: React.FC = () => {
                    </div>
                    <button onClick={() => setIsChatOverlayOpen(false)} className="hover:opacity-70 text-2xl sm:text-3xl font-bold z-10">✕</button>
                 </div>
-                <div className="flex-1 overflow-hidden bg-[#fffbeb]">
+                <div className="flex-1 overflow-hidden bg-[#020617]">
                   <GurujiChat lang={lang} mode={mode!} intake={intake} />
                 </div>
               </div>
@@ -2185,17 +2183,17 @@ const App: React.FC = () => {
         .astro-btn-maroon { width: 100%; font-weight: 900; color: #451a03 !important; text-transform: uppercase; letter-spacing: 0.3em; background: #D4AF37 !important; border: 2.5px solid #451a03; transition: all 0.4s ease; }
         .astro-btn-maroon:hover:not(:disabled) { background: #B8860B !important; border-color: #000; }
         
-        .analysis-rich-text h3 { color: #451a03; font-size: 1.85rem; sm:font-size: 3rem; font-family: 'Cinzel', serif; margin: 3.5rem 0 2rem; border-bottom: 4px solid #D4AF37; padding-bottom: 1rem; text-align: center; text-transform: uppercase; font-weight: 900; line-height: 1.2; }
-        .analysis-rich-text h4 { color: #b45309; font-size: 1.4rem; sm:font-size: 2rem; font-family: 'Cinzel', serif; margin: 2.5rem 0 1.25rem; border-left: 10px sm:border-left-[15px] solid #D4AF37; padding: 0.8rem 0 0.8rem 1.25rem; sm:padding: 1.25rem 0 1.25rem 2rem; font-weight: 800; background: linear-gradient(to right, rgba(212, 175, 55, 0.08), transparent); border-radius: 0 1.5rem 1.5rem 0; }
-        .analysis-rich-text p { margin-bottom: 2rem; line-height: 1.9; sm:line-height: 2.5; font-size: 1rem; sm:font-size: 1.4rem; text-align: justify; color: #451a03; font-weight: 500; }
-        .analysis-rich-text li { margin-bottom: 1.75rem; font-size: 1rem; sm:font-size: 1.4rem; color: #451a03; padding: 2rem 2.5rem; sm:padding: 3rem 4.5rem; background: #ffffff; border-radius: 1.75rem sm:border-radius: 3rem; border-left: 12px sm:border-left-[20px] solid #D4AF37; box-shadow: 0 12px 30px rgba(0,0,0,0.06); font-weight: 500; }
+        .analysis-rich-text h3 { color: #D4AF37; font-size: 1.85rem; sm:font-size: 3rem; font-family: 'Cinzel', serif; margin: 3.5rem 0 2rem; border-bottom: 4px solid #D4AF37; padding-bottom: 1rem; text-align: center; text-transform: uppercase; font-weight: 900; line-height: 1.2; }
+        .analysis-rich-text h4 { color: #FFD700; font-size: 1.4rem; sm:font-size: 2rem; font-family: 'Cinzel', serif; margin: 2.5rem 0 1.25rem; border-left: 10px sm:border-left-[15px] solid #D4AF37; padding: 0.8rem 0 0.8rem 1.25rem; sm:padding: 1.25rem 0 1.25rem 2rem; font-weight: 800; background: linear-gradient(to right, rgba(212, 175, 55, 0.08), transparent); border-radius: 0 1.5rem 1.5rem 0; }
+        .analysis-rich-text p { margin-bottom: 2rem; line-height: 1.9; sm:line-height: 2.5; font-size: 1rem; sm:font-size: 1.4rem; text-align: justify; color: #f8fafc; font-weight: 500; }
+        .analysis-rich-text li { margin-bottom: 1.75rem; font-size: 1rem; sm:font-size: 1.4rem; color: #f8fafc; padding: 2rem 2.5rem; sm:padding: 3rem 4.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 1.75rem sm:border-radius: 3rem; border-left: 12px sm:border-left-[20px] solid #D4AF37; box-shadow: 0 12px 30px rgba(0,0,0,0.2); font-weight: 500; }
         
         .shadow-glow { box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); }
         
-        .scholar-view h3 { border-bottom-color: #D4AF37; color: #451a03; }
-        .scholar-view li { border-left-color: #D4AF37; background: #fffbeb; }
-        .seeker-view h3 { color: #b45309; border-bottom-color: #D4AF37; }
-        .seeker-view li { border-left-color: #D4AF37; background: #fffcfb; }
+        .scholar-view h3 { border-bottom-color: #D4AF37; color: #D4AF37; }
+        .scholar-view li { border-left-color: #D4AF37; background: rgba(255, 255, 255, 0.08); }
+        .seeker-view h3 { color: #D4AF37; border-bottom-color: #D4AF37; }
+        .seeker-view li { border-left-color: #D4AF37; background: rgba(255, 255, 255, 0.08); }
       `}</style>
     </div>
   );
