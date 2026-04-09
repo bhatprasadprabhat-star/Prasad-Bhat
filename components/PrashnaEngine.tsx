@@ -79,7 +79,7 @@ const PrashnaEngine: React.FC<PrashnaEngineProps> = ({ lang, mode }) => {
                   value={prashnaNumber}
                   onChange={(e) => setPrashnaNumber(e.target.value)}
                   placeholder="e.g. 42"
-                  className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-lg font-bold text-[#312e81] focus:border-[#D4AF37] outline-none shadow-inner"
+                  className="w-full bg-amber-50/95 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-lg font-bold text-[#312e81] focus:border-[#D4AF37] outline-none shadow-inner"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -99,7 +99,7 @@ const PrashnaEngine: React.FC<PrashnaEngineProps> = ({ lang, mode }) => {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder={lang === 'kn' ? 'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಇಲ್ಲಿ ಕೇಳಿ...' : 'Ask your question here...'}
-                className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-[2rem] p-6 sm:p-8 text-lg font-bold text-[#312e81] focus:border-[#D4AF37] outline-none min-h-[150px] shadow-inner transition-all placeholder:text-[#312e81]/30"
+                className="w-full bg-amber-50/95 border-2 border-[#D4AF37]/20 rounded-[2rem] p-6 sm:p-8 text-lg font-bold text-[#312e81] focus:border-[#D4AF37] outline-none min-h-[150px] shadow-inner transition-all placeholder:text-[#312e81]/30"
               />
               <div className="absolute bottom-6 right-6 flex items-center gap-3 text-[#312e81]/40">
                 <Clock size={16} />

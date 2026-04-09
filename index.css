@@ -81,22 +81,22 @@
 .scholar-view h1,
 .scholar-view h2,
 .scholar-view h3 {
-  color: #312e81 !important;
-  border-bottom-color: rgba(49, 46, 129, 0.2) !important;
+  color: #D4AF37 !important;
+  border-bottom-color: rgba(212, 175, 55, 0.2) !important;
 }
 
 .scholar-view p {
-  color: #2d2d2d !important;
+  color: #f8fafc !important;
 }
 
 .scholar-view strong {
-  color: #1e1b4b !important;
+  color: #FFD700 !important;
 }
 
 .scholar-view blockquote {
-  color: #1e1b4b !important;
-  border-left-color: #1e1b4b !important;
-  background: rgba(30, 27, 75, 0.05) !important;
+  color: #D4AF37 !important;
+  border-left-color: #D4AF37 !important;
+  background: rgba(212, 175, 55, 0.05) !important;
 }
 
 /* Eye-catching table styles */

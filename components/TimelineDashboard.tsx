@@ -13,9 +13,26 @@ const TimelineDashboard = ({ intake, lang, goBack }: { intake: UserIntake, lang:
 
   useEffect(() => {
     const fetchData = async () => {
+      const cacheKey = `timeline_${intake.dob}_${intake.tob}_${intake.ampm}_${intake.pob}_${lang}`;
+      const saved = localStorage.getItem(cacheKey);
+      
+      if (saved) {
+        try {
+          setData(JSON.parse(saved));
+          setLoading(false);
+          return;
+        } catch (e) {
+          console.error("Failed to parse cached timeline", e);
+        }
+      }
+
+      setLoading(true);
       try {
         const result = await generateLifeTimeline(intake, lang);
-        setData(result);
+        if (result && result.length > 0) {
+          setData(result);
+          localStorage.setItem(cacheKey, JSON.stringify(result));
+        }
       } catch (e) {
         console.error(e);
       } finally {

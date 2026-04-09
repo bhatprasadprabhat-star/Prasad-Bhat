@@ -37,7 +37,7 @@ const SuggestionBox: React.FC<SuggestionBoxProps> = ({ lang }) => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        className="bg-white/40 backdrop-blur-xl border-2 border-[#f59e0b]/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden"
+        className="bg-white/95 backdrop-blur-xl border-2 border-[#f59e0b]/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
           <MessageSquare size={120} className="text-[#facc15]" />
@@ -59,7 +59,7 @@ const SuggestionBox: React.FC<SuggestionBoxProps> = ({ lang }) => {
               value={suggestion}
               onChange={(e) => setSuggestion(e.target.value)}
               placeholder={t.suggestion_placeholder || "Share your thoughts or report an issue..."}
-              className="w-full h-32 bg-white/50 border-2 border-[#facc15]/10 rounded-3xl p-6 text-[#451a03] placeholder-[#451a03]/30 focus:outline-none focus:border-[#FFD700] transition-all font-medium resize-none"
+              className="w-full h-32 bg-white/90 border-2 border-[#facc15]/10 rounded-3xl p-6 text-[#451a03] placeholder-[#451a03]/30 focus:outline-none focus:border-[#FFD700] transition-all font-medium resize-none"
               disabled={isSubmitting || isSubmitted}
             />
             

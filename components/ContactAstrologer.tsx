@@ -12,7 +12,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose, onDonate, on
   const [problem, setProblem] = useState('');
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [expandedTier, setExpandedTier] = useState<number | null>(null);
@@ -236,7 +236,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose, onDonate, on
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
+                    className="w-full bg-amber-50/95 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
                   />
                 </div>
 
@@ -249,7 +249,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose, onDonate, on
                     value={contact}
                     onChange={e => setContact(e.target.value)}
                     placeholder="Enter your contact number"
-                    className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
+                    className="w-full bg-amber-50/95 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none shadow-inner"
                   />
                 </div>
 
@@ -262,7 +262,7 @@ const ContactAstrologer = ({ lang, initialStep = 'CLOSED', onClose, onDonate, on
                     value={problem}
                     onChange={e => setProblem(e.target.value)}
                     placeholder={t.problem_placeholder}
-                    className="w-full bg-amber-50/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none min-h-[120px] shadow-inner"
+                    className="w-full bg-amber-50/95 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#451a03] focus:border-[#D4AF37] outline-none min-h-[120px] shadow-inner"
                   />
                 </div>
 

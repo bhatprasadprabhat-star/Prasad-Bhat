@@ -82,6 +82,11 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
         - Provide a deep technical analysis of the current Mahadasha and Antardasha, explaining their effects based on the planet's placement, lordship, and strength in the chart.
         - Total output should be at least 3000 words.
     13. UNIQUENESS: Every analysis must be 100% unique to the native's exact degrees. Never provide generic descriptions. The total output should be extremely long and detailed (at least 2000-3000 words if the section allows).
+    14. DAILY FORECAST: If the focus area is "Daily Prediction" or "menu_daily", you MUST provide an EXHAUSTIVE technical forecast (at least 2500 words).
+        - Analyze the Gochara (transits) of all 9 planets relative to the native's Janma Rasi and Lagna.
+        - Discuss Vedha, Latta, and other transit complexities.
+        - Provide a technical hourly breakdown based on Hora and Choghadiya.
+        - Cite specific Shlokas for the day's planetary configurations.
   `;
 
   const seekerInstructions = `
@@ -93,7 +98,11 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
     6. RITUALS & HABITS: Provide 5-7 simple, actionable daily rituals (Pariharas).
     7. CATEGORICAL DEPTH: Dedicate LARGE, multi-paragraph sections to: 1. Your Unique Strengths, 2. Overcoming Current Hurdles, 3. The Path to Financial Abundance, 4. Finding True Love, 5. Your Spiritual Purpose.
     8. LIFE PARTNER: If relevant, include a detailed "Life Partner" section with at least 500 words of personalized analysis.
-    9. DAILY FORECAST: If the focus area is "Daily Prediction" or "menu_daily", you MUST provide a long, detailed forecast (at least 800-1000 words).
+    9. DAILY FORECAST: If the focus area is "Daily Prediction" or "menu_daily", you MUST provide an EXTREMELY long and exhaustive forecast (at least 2000-2500 words).
+       - Provide a detailed hourly breakdown of the day's energy.
+       - Analyze the impact of current transits of all 9 planets on the native's Rasi.
+       - Include specific advice for Career, Finance, Health, Love, and Family.
+       - Provide 5-7 personalized remedies and 3-5 "Celestial Life Hacks" for the day.
     10. PANCHANGA: If the focus area is "Panchanga" or "menu_panchanga", provide a clear HTML table followed by a 1000-word detailed explanation.
     11. LIFE TIMELINE: Provide a clear dashboard of life phases with scores and at least 2-3 paragraphs of description for each major phase.
     12. MATCHING: Provide an exhaustive compatibility analysis (at least 1500 words).
@@ -300,16 +309,20 @@ export const generateDailyForecastForRasi = async (rasi: string, lang: Language,
     Mode: ${mode}.
     
     CRITICAL INSTRUCTIONS:
-    1. Make the forecast LONG and HIGHLY DETAILED.
+    1. Make the forecast EXTREMELY LONG, EXHAUSTIVE, and HIGHLY DETAILED (at least 2000-2500 words).
     2. Base the analysis on Samhita (Mundane astrology) and Hora (Predictive astrology).
     3. Include sections for:
        - General Outlook (Samhita perspective)
-       - Career & Finance (Hora perspective)
-       - Health & Wellness
-       - Relationships
-       - Specific Remedies (Upayas)
-    4. Use professional, scholarly tone.
-    5. Format with HTML tags (h2, h3, p, strong, ul, li).
+       - Detailed Hourly Energy Breakdown (Morning, Afternoon, Evening, Night)
+       - Career & Finance (Hora perspective) - Deep dive into opportunities and risks
+       - Health & Wellness - Physical and mental energy levels
+       - Relationships & Social Life
+       - Impact of Major Transits (Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu)
+       - Lucky Colors, Numbers, and Directions for the day
+       - Specific Remedies (Upayas) and Mantras
+       - "Celestial Life Hacks" for maximum productivity today
+    4. Use professional, scholarly, yet accessible tone.
+    5. Format with HTML tags (h2, h3, p, strong, ul, li, table).
   `;
 
   const response = await ai.models.generateContent({
@@ -458,7 +471,7 @@ export const generateLifeTimeline = async (intake: UserIntake, lang: Language) =
   const consistentSeed = Math.abs(hash);
 
   const prompt = `
-    Generate a detailed Life Timeline (Vimshottari Dasha analysis) for:
+    Generate a highly accurate and detailed Life Timeline (Vimshottari Dasha analysis) for:
     Name: ${intake.name}
     DOB: ${intake.dob}
     TOB: ${intake.tob} ${intake.ampm}
@@ -468,14 +481,14 @@ export const generateLifeTimeline = async (intake: UserIntake, lang: Language) =
     Language: ${lang}
 
     CRITICAL INSTRUCTIONS:
-    1. Ensure HIGH ACCURACY in Dasha calculations.
-    2. The timeline MUST be consistent for the same Kundli.
-    3. Provide a chronological breakdown of major life periods (Mahadashas) and significant Antardashas.
-    4. For each point, include:
-       - year: The year or age.
-       - score: A general "luck/strength" score from 0 to 100.
-       - category: One of "Good", "Risk", "Career", "Marriage", "Investment".
-       - description: A short description in ${lang}.
+    1. EXTREME ACCURACY: You MUST calculate the exact Moon longitude at birth to determine the starting Mahadasha and the remaining balance.
+    2. CONSISTENCY: The timeline MUST be identical for the same birth details. Use the provided coordinates for precision.
+    3. STRUCTURE: Provide a chronological breakdown of major life periods (Mahadashas) and significant Antardashas from birth up to age 80-90.
+    4. ANALYSIS: For each significant point (every 5-10 years or major dasha changes), include:
+       - year: The age (e.g., 5, 12, 25, 40, etc.).
+       - score: A general "luck/strength" score from 0 to 100 based on the dasha lord's placement and strength in the chart.
+       - category: One of "Good", "Risk", "Career", "Marriage", "Investment", "Education", "Health".
+       - description: A detailed, accurate description in ${lang} explaining the astrological reason for this period's quality (e.g., "Jupiter Mahadasha begins, bringing expansion and wisdom...").
     5. Format: JSON only.
   `;
 
@@ -484,7 +497,7 @@ export const generateLifeTimeline = async (intake: UserIntake, lang: Language) =
     contents: prompt,
     config: {
       thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-      seed: 42,
+      seed: consistentSeed,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.ARRAY,

@@ -265,10 +265,10 @@ const BlogSection = ({ lang }: { lang: Language }) => {
         <div className="w-16 h-16 bg-[#D4AF37]/10 rounded-2xl flex items-center justify-center text-[#D4AF37] mb-4 shadow-lg border border-[#D4AF37]/20">
           <BookOpen size={32} />
         </div>
-        <h2 className="text-2xl sm:text-5xl font-black text-[#451a03] uppercase tracking-widest astrological-font mb-2">
+        <h2 className="text-2xl sm:text-5xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font mb-2">
           {lang === 'kn' ? 'ಜ್ಞಾನ ಭಂಡಾರ' : lang === 'tcy' ? 'ಜ್ಞಾನದ ಬಂಡಾರ' : 'Celestial Wisdom Blog'}
         </h2>
-        <p className="text-sm sm:text-lg font-medium text-[#7c2d12] opacity-70 uppercase tracking-[0.2em]">
+        <p className="text-sm sm:text-lg font-medium text-white/70 uppercase tracking-[0.2em]">
           Exploring Siddhanta, Samhita, and Hora
         </p>
       </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stars, Sparkles, Moon, Sun, Compass, Heart, MessageSquare, HelpCircle, ChevronDown, User, Save, X } from 'lucide-react';
+import { Stars, Sparkles, Moon, Sun, Compass, Heart, MessageSquare, HelpCircle, ChevronDown, User, Save, X, Clock } from 'lucide-react';
 import { AppTab, Language, UserIntake, MatchingIntake, UserMode, PlanetPosition, CityData, OnboardingStep } from './types';
 import SearchAssistant from './components/SearchAssistant';
 import SouthIndianChart from './components/SouthIndianChart';
@@ -602,10 +602,10 @@ const App: React.FC = () => {
   };
 
   const ProfileButton = () => (
-    <div className="fixed top-4 left-4 z-[100] flex items-center gap-2">
+    <div className="fixed top-4 right-4 z-[110] flex flex-row-reverse items-center gap-2 pointer-events-none">
       <button 
         onClick={() => setIsProfileOpen(true)}
-        className="w-10 h-10 sm:w-14 sm:h-14 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.4)] border-2 border-[#451a03] hover:scale-110 active:scale-95 transition-all group overflow-hidden"
+        className="pointer-events-auto w-10 h-10 sm:w-14 sm:h-14 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.4)] border-2 border-[#451a03] hover:scale-110 active:scale-95 transition-all group overflow-hidden relative"
       >
         {intake.name ? (
           <span className="text-[#451a03] font-black text-sm sm:text-xl uppercase">{intake.name[0]}</span>
@@ -618,11 +618,11 @@ const App: React.FC = () => {
       <AnimatePresence>
         {isDirty && (
           <motion.button
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+            exit={{ opacity: 0, x: 20 }}
             onClick={handleSaveProfile}
-            className="bg-[#451a03] text-[#D4AF37] px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl border border-[#D4AF37]/30 flex items-center gap-2 hover:bg-[#5d4037] transition-all"
+            className="pointer-events-auto bg-[#451a03] text-[#D4AF37] px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl border border-[#D4AF37]/30 flex items-center gap-2 hover:bg-[#5d4037] transition-all"
           >
             <span className="animate-pulse">💾</span> {t.save_info || 'Save Details'}
           </motion.button>
@@ -635,13 +635,38 @@ const App: React.FC = () => {
           setMode(newMode);
           localStorage.setItem('astro_logic_mode_v1', newMode);
         }}
-        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#312e81]/80 backdrop-blur-md hover:bg-[#312e81] border border-[#D4AF37]/30 rounded-full transition-all group shadow-lg"
+        className="pointer-events-auto hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#312e81]/80 backdrop-blur-md hover:bg-[#312e81] border border-[#D4AF37]/30 rounded-full transition-all group shadow-lg"
       >
         <Sparkles size={12} className={`text-[#D4AF37] ${mode === 'SCHOLAR' ? 'animate-pulse' : ''}`} />
         <span className="text-[9px] font-black text-[#D4AF37] uppercase tracking-widest">{mode === 'SCHOLAR' ? (t.scholar || 'Scholar') : (t.seeker || 'Seeker')}</span>
       </button>
     </div>
   );
+
+  const setToNow = () => {
+    const now = new Date();
+    const dob = now.toISOString().split('T')[0];
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const tob = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setIntake(prev => ({ ...prev, dob, tob, ampm }));
+  };
+
+  const setMatchingToNow = (person: 'person1' | 'person2') => {
+    const now = new Date();
+    const dob = now.toISOString().split('T')[0];
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const tob = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setMatchingIntake(prev => ({
+      ...prev,
+      [person]: { ...prev[person], dob, tob, ampm }
+    }));
+  };
 
   const renderHoroscopeIntake = (onNext?: () => void) => (
     <div className="min-h-screen parchment-bg flex flex-col animate-in slide-in-from-right duration-500 overflow-x-hidden">
@@ -656,14 +681,22 @@ const App: React.FC = () => {
         </div>
       </header>
       <div className="flex-1 p-4 sm:p-8 space-y-8 max-w-3xl mx-auto w-full overflow-y-auto pb-48 z-10">
-        <div className="grid gap-6 p-6 sm:p-10 bg-amber-50/60 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#D4AF37]/30 shadow-2xl backdrop-blur-md">
+        <div className="grid gap-6 p-6 sm:p-10 bg-amber-50/95 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#D4AF37]/30 shadow-2xl backdrop-blur-md">
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold text-[#312e81] uppercase tracking-widest ml-1">{t.name_of_soul}</label>
             <input value={intake.name} onChange={e => setIntake({...intake, name: e.target.value})} placeholder={t.enter_full_name} className="details-input" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-[#312e81] uppercase tracking-widest ml-1">{t.birth_date}</label>
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-bold text-[#312e81] uppercase tracking-widest ml-1">{t.birth_date}</label>
+                <button 
+                  onClick={setToNow}
+                  className="text-[8px] font-black text-[#D4AF37] uppercase tracking-widest hover:text-[#312e81] transition-colors flex items-center gap-1"
+                >
+                  <Clock size={10} /> {t.set_to_now || 'Set to Now'}
+                </button>
+              </div>
               <input type="date" value={intake.dob} onChange={e => setIntake({...intake, dob: e.target.value})} className="details-input font-bold" />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -696,7 +729,7 @@ const App: React.FC = () => {
         </div>
         
         {savedProfiles.length > 0 && (
-          <div className="p-4 sm:p-6 bg-white/50 border border-[#D4AF37]/20 rounded-3xl space-y-3">
+          <div className="p-4 sm:p-6 bg-white/90 border border-[#D4AF37]/20 rounded-3xl space-y-3">
             <h3 className="text-[9px] font-black uppercase text-[#312e81] tracking-widest text-center opacity-70">{t.saved_profiles_title}</h3>
             <div className="flex flex-wrap gap-2 justify-center">
               {savedProfiles.map((p, i) => (
@@ -720,7 +753,7 @@ const App: React.FC = () => {
       if (analysisResult.trim() === '') {
         return (
           <div className="min-h-screen flex items-center justify-center parchment-bg">
-            <div className="text-center p-8 bg-amber-50/60 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
+            <div className="text-center p-8 bg-amber-50/95 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
               <p className="text-[#312e81] font-bold mb-4">{t.stars_obscured || 'The stars are obscured by clouds. Please try again.'}</p>
               <button onClick={goBack} className="astro-btn-maroon px-6 py-2 rounded-full">{t.go_back || 'Go Back'}</button>
             </div>
@@ -744,7 +777,7 @@ const App: React.FC = () => {
               </button>
               <h2 className="ml-3 text-lg sm:text-xl font-black text-[#D4AF37] truncate astrological-font uppercase tracking-widest">{currentSection}</h2>
             </div>
-            <button onClick={() => { setAnalysisResult(null); setActiveTab(AppTab.DASHBOARD); }} className="p-2 text-[#D4AF37] hover:bg-white/10 rounded-full transition-all">
+            <button onClick={() => { setAnalysisResult(null); setActiveTab(AppTab.DASHBOARD); }} className="p-2 text-[#D4AF37] hover:bg-white/10 rounded-full transition-all mr-16 sm:mr-64">
               <Compass className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
           </header>
@@ -914,13 +947,13 @@ const App: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className={`analysis-rich-text detailed-view p-4 sm:p-12 md:p-16 bg-[#020617]/90 backdrop-blur-2xl border-4 border-[#D4AF37]/30 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-x-auto ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
+                className={`analysis-rich-text detailed-view p-4 sm:p-12 md:p-16 bg-[#020617]/90 backdrop-blur-2xl border-4 border-[#D4AF37]/30 shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-x-auto break-words ${mode === 'SCHOLAR' ? 'scholar-view' : 'seeker-view'}`} 
                 dangerouslySetInnerHTML={{ __html: analysisResult }} 
               />
             )}
 
             {mode === 'SEEKER' && (
-              <div className="mt-12 p-8 sm:p-12 bg-white/40 border-4 border-[#D4AF37]/20 rounded-[2rem] sm:rounded-[3rem] text-center">
+              <div className="mt-12 p-8 sm:p-12 bg-white/95 border-4 border-[#D4AF37]/20 rounded-[2rem] sm:rounded-[3rem] text-center">
                 <p className="text-xl sm:text-4xl font-black text-[#312e81] uppercase tracking-tighter leading-tight drop-shadow-sm">
                   {t.disclaimer || 'Astrological predictions are based on planetary calculations and indicate possibilities, not guaranteed outcomes.'}
                 </p>
@@ -954,32 +987,45 @@ const App: React.FC = () => {
               </div>
             )}
             <nav className="w-full px-4 sm:px-8 py-5 sm:py-10 flex justify-between items-center z-20">
-              <div className="flex items-center gap-3">
-                <button onClick={goBack} className="p-2 text-[#312e81] hover:bg-black/5 rounded-full transition-all group">
+              <div className="flex items-center gap-3 sm:gap-6">
+                <button onClick={goBack} className="p-2 text-[#D4AF37] hover:bg-black/5 rounded-full transition-all group">
                   <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                 </button>
                 <div className="flex flex-col -gap-1">
-                  <span className="text-lg sm:text-4xl font-black text-[#312e81] tracking-tighter uppercase astrological-font leading-none">{t.brand_name || 'ASTRO LOGIC'}</span>
+                  <span className="text-lg sm:text-4xl font-black text-[#D4AF37] tracking-tighter uppercase astrological-font leading-none">{t.brand_name || 'ASTRO LOGIC'}</span>
                   <div className="flex items-center gap-2">
                     <span className={`text-[8px] sm:text-[11px] font-black uppercase tracking-[0.3em] px-2 py-0.5 rounded-full ${mode === 'SCHOLAR' ? 'bg-[#D4AF37] text-[#312e81]' : 'bg-[#312e81] text-[#D4AF37]'}`}>
                       {mode === 'SCHOLAR' ? (t.siddhantic_precision || 'Scholar Section') : (t.personal_guidance || 'Seeker Section')}
                     </span>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative group">
+                <div className="relative group hidden sm:block">
                   <select 
                     value={lang} 
                     onChange={(e) => setLang(e.target.value as Language)} 
-                    className="bg-white/50 backdrop-blur-md border-2 border-[#D4AF37]/40 text-[#312e81] text-[10px] sm:text-[12px] font-black rounded-full px-4 py-2 appearance-none cursor-pointer shadow-md tracking-widest hover:border-[#D4AF37] transition-all outline-none"
+                    className="bg-white/95 backdrop-blur-md border-2 border-[#D4AF37]/40 text-[#D4AF37] text-[10px] sm:text-[12px] font-black rounded-full px-4 py-2 appearance-none cursor-pointer shadow-md tracking-widest hover:border-[#D4AF37] transition-all outline-none"
                   >
                     {LANGUAGES.map(l => (
-                      <option key={l.code} value={l.code} className="bg-white text-[#312e81] font-bold">{l.name}</option>
+                      <option key={l.code} value={l.code} className="bg-white text-[#451a03] font-bold">{l.nativeName}</option>
                     ))}
                   </select>
                 </div>
               </div>
+              <div className="flex items-center gap-3 sm:hidden">
+                <div className="relative group">
+                  <select 
+                    value={lang} 
+                    onChange={(e) => setLang(e.target.value as Language)} 
+                    className="bg-white/95 backdrop-blur-md border-2 border-[#D4AF37]/40 text-[#D4AF37] text-[10px] font-black rounded-full px-3 py-1.5 appearance-none cursor-pointer shadow-md tracking-widest hover:border-[#D4AF37] transition-all outline-none"
+                  >
+                    {LANGUAGES.map(l => (
+                      <option key={l.code} value={l.code} className="bg-white text-[#451a03] font-bold">{l.nativeName}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {/* Space for ProfileButton and its companions */}
+              <div className="w-12 sm:w-64"></div> 
             </nav>
 
             {/* Planetary Transit Ticker */}
@@ -999,8 +1045,8 @@ const App: React.FC = () => {
                 ].map((tr, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest">{tr.p}</span>
-                    <span className="text-[10px] font-bold text-[#312e81]/60 uppercase tracking-widest">{t.planetary_transit_in || 'in'}</span>
-                    <span className="text-[10px] font-black text-[#312e81] uppercase tracking-widest">{tr.r}</span>
+                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{t.planetary_transit_in || 'in'}</span>
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{tr.r}</span>
                     <span className="text-[10px] font-bold text-[#D4AF37]">{tr.d}</span>
                   </div>
                 ))}
@@ -1028,7 +1074,7 @@ const App: React.FC = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-sm sm:text-2xl md:text-3xl font-serif italic text-[#4338ca] max-w-4xl mx-auto opacity-95 mb-10 sm:mb-20 leading-relaxed px-4 italic"
+                className="text-sm sm:text-2xl md:text-3xl font-serif italic text-white/90 max-w-4xl mx-auto opacity-95 mb-10 sm:mb-20 leading-relaxed px-4 italic"
               >
                 "{t.tagline}"
               </motion.p>
@@ -1052,7 +1098,7 @@ const App: React.FC = () => {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5 + idx * 0.1 }}
                     onClick={() => changeTab(item.id)} 
-                    className="group relative bg-amber-50/40 border-2 border-[#D4AF37]/30 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 transition-all duration-300 hover:bg-amber-50/60 hover:-translate-y-1.5 hover:shadow-2xl flex flex-col items-center gap-2 sm:gap-4 shadow-xl backdrop-blur-md overflow-hidden"
+                    className="group relative bg-amber-50/90 border-2 border-[#D4AF37]/30 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 transition-all duration-300 hover:bg-amber-50 hover:-translate-y-1.5 hover:shadow-2xl flex flex-col items-center gap-2 sm:gap-4 shadow-xl backdrop-blur-md overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <span className="text-4xl sm:text-6xl group-hover:scale-110 group-hover:rotate-6 transition-all drop-shadow-md">{item.icon}</span>
@@ -1188,7 +1234,7 @@ const App: React.FC = () => {
               </button>
             </div>
             
-            <footer className="w-full py-8 text-center text-[8px] sm:text-[10px] text-[#312e81]/40 font-black uppercase tracking-[0.8em] z-10 px-4">{t.footer_text}</footer>
+            <footer className="w-full py-8 text-center text-[8px] sm:text-[10px] text-[#D4AF37]/60 font-black uppercase tracking-[0.8em] z-10 px-4">{t.footer_text}</footer>
           </motion.div>
         );
       case AppTab.HOROSCOPE:
@@ -1316,7 +1362,7 @@ const App: React.FC = () => {
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="p-8 sm:p-14 bg-amber-50/60 border-2 border-[#D4AF37]/30 rounded-[2.5rem] sm:rounded-[3.5rem] space-y-8 shadow-2xl relative backdrop-blur-md"
+                  className="p-8 sm:p-14 bg-amber-50/95 border-2 border-[#D4AF37]/30 rounded-[2.5rem] sm:rounded-[3.5rem] space-y-8 shadow-2xl relative backdrop-blur-md"
                 >
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-8 py-2 bg-[#92400e] text-[#D4AF37] rounded-full text-[10px] sm:text-sm font-black uppercase tracking-widest shadow-xl border border-[#D4AF37]/30 flex items-center gap-2">
                     {t.partner_one} (Bride)
@@ -1335,7 +1381,10 @@ const App: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_date || 'Birth Date'}</label>
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_date || 'Birth Date'}</label>
+                          <button onClick={() => setMatchingToNow('person1')} className="text-[8px] font-black text-[#D4AF37] uppercase tracking-widest flex items-center gap-1"><Clock size={10} /> Now</button>
+                        </div>
                         <input type="date" value={matchingIntake.person1.dob} onChange={e => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, dob: e.target.value}})} className="details-input font-bold" />
                       </div>
                       <div className="flex flex-col gap-2">
@@ -1343,7 +1392,7 @@ const App: React.FC = () => {
                         <TimePicker time={matchingIntake.person1.tob} ampm={matchingIntake.person1.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person1: {...matchingIntake.person1, tob: t, ampm: a}})} />
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-200/50">
+                    <div className="flex flex-col gap-2 bg-amber-50/95 p-4 rounded-2xl border border-amber-200/50">
                       <label className="text-[11px] font-black text-[#92400e] uppercase tracking-widest ml-1 flex items-center gap-2">
                         <span className="text-lg">📍</span> {t.birth_location}
                       </label>
@@ -1355,7 +1404,7 @@ const App: React.FC = () => {
                   initial={{ x: 50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="p-8 sm:p-14 bg-amber-50/60 border-2 border-[#D4AF37]/30 rounded-[2.5rem] sm:rounded-[3.5rem] space-y-8 shadow-2xl relative backdrop-blur-md"
+                  className="p-8 sm:p-14 bg-amber-50/95 border-2 border-[#D4AF37]/30 rounded-[2.5rem] sm:rounded-[3.5rem] space-y-8 shadow-2xl relative backdrop-blur-md"
                 >
                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-8 py-2 bg-[#D4AF37] text-[#312e81] rounded-full text-[10px] sm:text-sm font-black uppercase tracking-widest shadow-xl border border-[#312e81]/30 flex items-center gap-2">
                     {t.partner_two} (Groom)
@@ -1374,7 +1423,10 @@ const App: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_date || 'Birth Date'}</label>
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] font-bold text-[#92400e] uppercase tracking-widest ml-1 opacity-80">{t.birth_date || 'Birth Date'}</label>
+                          <button onClick={() => setMatchingToNow('person2')} className="text-[8px] font-black text-[#D4AF37] uppercase tracking-widest flex items-center gap-1"><Clock size={10} /> Now</button>
+                        </div>
                         <input type="date" value={matchingIntake.person2.dob} onChange={e => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, dob: e.target.value}})} className="details-input font-bold" />
                       </div>
                       <div className="flex flex-col gap-2">
@@ -1382,7 +1434,7 @@ const App: React.FC = () => {
                         <TimePicker time={matchingIntake.person2.tob} ampm={matchingIntake.person2.ampm || 'AM'} onChange={(t, a) => setMatchingIntake({...matchingIntake, person2: {...matchingIntake.person2, tob: t, ampm: a}})} />
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-200/50">
+                    <div className="flex flex-col gap-2 bg-amber-50/95 p-4 rounded-2xl border border-amber-200/50">
                       <label className="text-[11px] font-black text-[#92400e] uppercase tracking-widest ml-1 flex items-center gap-2">
                         <span className="text-lg">📍</span> {t.birth_location}
                       </label>
@@ -1463,7 +1515,7 @@ const App: React.FC = () => {
                     value={muhurtaSearch} 
                     onChange={(e) => setMuhurtaSearch(e.target.value)} 
                     placeholder={t.search_muhurta || 'Search Muhurta...'} 
-                    className="w-full bg-amber-50/60 border-2 border-[#D4AF37]/30 rounded-full py-4 px-8 pl-14 text-[#312e81] font-bold shadow-xl focus:border-[#D4AF37] outline-none transition-all"
+                    className="w-full bg-amber-50/90 border-2 border-[#D4AF37]/30 rounded-full py-4 px-8 pl-14 text-[#312e81] font-bold shadow-xl focus:border-[#D4AF37] outline-none transition-all"
                   />
                   <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#D4AF37]">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1565,7 +1617,7 @@ const App: React.FC = () => {
       default: 
         return (
           <div className="min-h-screen flex items-center justify-center parchment-bg">
-            <div className="text-center p-8 bg-amber-50/60 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
+            <div className="text-center p-8 bg-amber-50/95 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
               <p className="text-[#92400e] font-bold mb-4">{t.under_construction || 'This celestial path is under construction.'}</p>
               <button onClick={() => setActiveTab(AppTab.DASHBOARD)} className="astro-btn-maroon px-6 py-2 rounded-full">{t.return_home || 'Return Home'}</button>
             </div>
@@ -1605,7 +1657,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-[#451a03] selection:bg-amber-500/30 font-serif overflow-x-hidden break-words">
+    <div className="min-h-screen text-[#D4AF37] selection:bg-amber-500/30 font-serif overflow-x-hidden break-words">
       <AnimatePresence mode="wait">
 
 
@@ -1643,17 +1695,26 @@ const App: React.FC = () => {
                     onChange={e => setIntake(prev => ({ ...prev, name: e.target.value }))}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input 
-                      type="date" 
-                      className="details-input"
-                      value={intake.dob}
-                      onChange={e => setIntake(prev => ({ ...prev, dob: e.target.value }))}
-                    />
-                    <TimePicker 
-                      time={intake.tob} 
-                      ampm={intake.ampm || 'AM'} 
-                      onChange={(t, a) => setIntake(prev => ({ ...prev, tob: t, ampm: a }))} 
-                    />
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[10px] font-bold text-[#451a03] uppercase tracking-widest">{t.birth_date}</label>
+                        <button onClick={setToNow} className="text-[8px] font-black text-[#D4AF37] uppercase tracking-widest flex items-center gap-1"><Clock size={10} /> {t.set_to_now || 'Now'}</button>
+                      </div>
+                      <input 
+                        type="date" 
+                        className="details-input"
+                        value={intake.dob}
+                        onChange={e => setIntake(prev => ({ ...prev, dob: e.target.value }))}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#451a03] uppercase tracking-widest px-1">{t.birth_time}</label>
+                      <TimePicker 
+                        time={intake.tob} 
+                        ampm={intake.ampm || 'AM'} 
+                        onChange={(t, a) => setIntake(prev => ({ ...prev, tob: t, ampm: a }))} 
+                      />
+                    </div>
                   </div>
                   <CitySearch 
                     value={intake.pob} 
@@ -1800,7 +1861,7 @@ const App: React.FC = () => {
                   onChange={(e) => setLang(e.target.value as Language)} 
                   className="bg-white/10 backdrop-blur-md border-2 border-[#D4AF37]/40 text-[#D4AF37] text-[13px] font-black rounded-full px-6 py-2.5 appearance-none cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] tracking-widest hover:border-[#D4AF37] transition-all outline-none"
                 >
-                  {LANGUAGES.map(l => <option key={l.code} value={l.code} className="bg-[#020617] text-white">{l.name}</option>)}
+                  {LANGUAGES.map(l => <option key={l.code} value={l.code} className="bg-[#020617] text-white">{l.nativeName}</option>)}
                 </select>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#D4AF37]/60">
                   <ChevronDown size={14} />

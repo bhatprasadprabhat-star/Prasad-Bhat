@@ -59,23 +59,38 @@ const Panchanga = ({ lang, mode, goBack }: { lang: Language, mode: UserMode, goB
             >
               <button 
                 onClick={() => handleFetch(true)}
-                className="w-full p-8 bg-white/80 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 hover:scale-[1.02] transition-all group"
+                className="w-full p-8 bg-white/95 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 hover:scale-[1.02] transition-all group"
               >
                 <span className="text-6xl group-hover:rotate-12 transition-transform">📅</span>
                 <span className="text-2xl font-black text-[#312e81] uppercase tracking-widest">{t.today_panchanga}</span>
               </button>
 
-              <div className="bg-white/80 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[2.5rem] p-8 shadow-2xl space-y-6">
-                <h3 className="text-xl font-black text-[#312e81] uppercase tracking-widest text-center mb-4">{t.custom_panchanga}</h3>
+              <div className="bg-white/95 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[2.5rem] p-8 shadow-2xl space-y-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-black text-[#312e81] uppercase tracking-widest">{t.custom_panchanga}</h3>
+                  <button 
+                    onClick={() => {
+                      const now = new Date();
+                      setFormData({
+                        ...formData,
+                        date: now.toISOString().split('T')[0],
+                        time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                      });
+                    }}
+                    className="text-[9px] font-black text-[#D4AF37] uppercase tracking-widest flex items-center gap-1 bg-[#312e81] px-3 py-1.5 rounded-full hover:scale-105 transition-all"
+                  >
+                    Set to Now
+                  </button>
+                </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.birth_date}</label>
-                    <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#312e81]" />
+                    <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-white/90 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#312e81]" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-[#312e81] uppercase tracking-widest ml-1">{t.birth_time}</label>
-                    <input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full bg-white/50 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#312e81]" />
+                    <input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full bg-white/90 border-2 border-[#D4AF37]/20 rounded-2xl p-4 text-sm font-bold text-[#312e81]" />
                   </div>
                 </div>
 

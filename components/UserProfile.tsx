@@ -53,7 +53,7 @@ const UserProfile = ({ lang, intake, onUpdateIntake }: {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-8 bg-amber-50/40 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[3rem] shadow-2xl relative overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-8 bg-amber-50/95 backdrop-blur-xl border-4 border-[#D4AF37]/30 rounded-[3rem] shadow-2xl relative overflow-hidden">
       <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
         <User size={120} className="text-[#D4AF37]" />
       </div>
