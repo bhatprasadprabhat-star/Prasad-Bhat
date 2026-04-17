@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, SkipForward, SkipBack, Volume2, Sparkles } from 'lucide-react';
 import { Language } from '../types';
 
@@ -41,15 +41,15 @@ const MantraPlayer: React.FC<MantraPlayerProps> = ({ lang }) => {
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-[#1e1b4b] to-[#312e81] rounded-[3rem] p-8 border-4 border-[#D4AF37]/30 shadow-2xl relative overflow-hidden">
+    <div className="w-full bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-primary)] rounded-[3rem] p-8 border-4 border-[var(--accent-primary)]/30 shadow-2xl relative overflow-hidden">
       <div className="absolute top-0 right-0 p-8 opacity-10">
-        <Volume2 size={80} className="text-[#D4AF37]" />
+        <Volume2 size={80} className="text-[var(--accent-primary)]" />
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="flex items-center gap-3 mb-8">
-          <Sparkles className="text-[#D4AF37]" size={20} />
-          <h3 className="text-xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font">Planetary Mantras</h3>
+          <Sparkles className="text-[var(--accent-primary)]" size={20} />
+          <h3 className="text-xl font-black text-[var(--accent-primary)] uppercase tracking-widest astrological-font">Planetary Mantras</h3>
         </div>
 
         <div className="w-full max-w-md space-y-8">
@@ -58,38 +58,38 @@ const MantraPlayer: React.FC<MantraPlayerProps> = ({ lang }) => {
               key={currentMantra}
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="text-2xl font-black text-white uppercase tracking-tighter"
+              className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter"
             >
               {mantras[currentMantra].title}
             </motion.h4>
-            <p className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.4em]">{mantras[currentMantra].planet}</p>
+            <p className="text-[10px] font-bold text-[var(--accent-primary)] uppercase tracking-[0.4em]">{mantras[currentMantra].planet}</p>
           </div>
 
-          <div className="bg-white/5 p-6 rounded-3xl border border-white/10 text-center">
-            <p className="text-sm font-medium text-white/80 italic leading-relaxed">
+          <div className="bg-[var(--bg-primary)]/50 p-6 rounded-3xl border border-[var(--border-primary)] text-center">
+            <p className="text-sm font-medium text-[var(--text-primary)]/80 italic leading-relaxed">
               "{mantras[currentMantra].mantra}"
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[var(--accent-primary)]/10 rounded-full overflow-hidden">
               <motion.div 
-                className="h-full bg-[#D4AF37]"
+                className="h-full bg-[var(--accent-primary)]"
                 style={{ width: `${progress}%` }}
               />
             </div>
 
             <div className="flex items-center justify-center gap-8">
-              <button onClick={prev} className="text-white/60 hover:text-white transition-colors">
+              <button onClick={prev} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                 <SkipBack size={24} />
               </button>
               <button 
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center text-[#451a03] shadow-xl hover:scale-110 active:scale-95 transition-all"
+                className="w-16 h-16 bg-[var(--accent-primary)] rounded-full flex items-center justify-center text-white dark:text-[#020617] shadow-xl hover:scale-110 active:scale-95 transition-all"
               >
                 {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
               </button>
-              <button onClick={next} className="text-white/60 hover:text-white transition-colors">
+              <button onClick={next} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                 <SkipForward size={24} />
               </button>
             </div>

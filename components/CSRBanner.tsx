@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Heart, Sparkles, Users } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 import { Language } from '../types';
@@ -38,7 +38,7 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
   }, []);
 
   return (
-    <div className="w-full mt-12 mb-8 relative p-4 sm:p-8 rounded-[3.5rem] overflow-hidden">
+    <div className="w-full mt-12 mb-8 relative p-4 sm:p-8 rounded-lg overflow-hidden">
       {/* Section Background */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <img 
@@ -47,20 +47,20 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
           alt="Background"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#fff7ed] via-transparent to-[#fff7ed]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-primary)] via-transparent to-[var(--bg-primary)]" />
       </div>
 
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-6 px-4">
-          <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
-            <Heart className="text-amber-500 animate-pulse" size={20} />
+          <div className="p-2 bg-[var(--accent-primary)]/10 rounded-lg border border-[var(--accent-primary)]/20">
+            <Heart className="text-[var(--accent-primary)] animate-pulse" size={20} />
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-amber-500 uppercase tracking-widest astrological-font">
+          <h2 className="text-xl sm:text-2xl font-ancient font-black gold-leaf uppercase tracking-widest">
             {t.csr_title || "ASTRO LOGIC Social Impact"}
           </h2>
         </div>
 
-        <div className="relative h-[400px] sm:h-[500px] w-full rounded-[2.5rem] overflow-hidden border-2 border-amber-500/20 shadow-2xl group">
+        <div className="relative h-[400px] sm:h-[500px] w-full rounded-lg overflow-hidden border border-[var(--border-primary)] shadow-2xl group">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -90,7 +90,7 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
                   transition={{ delay: 0.2 }}
                   className="flex items-center gap-4"
                 >
-                  <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl">
+                  <div className="p-3 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 shadow-xl">
                     {activities[currentIndex].icon}
                   </div>
                   <div className="h-px flex-1 bg-gradient-to-r from-white/30 to-transparent" />
@@ -101,7 +101,7 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight leading-tight"
+                    className="text-2xl sm:text-4xl font-ancient font-black text-white uppercase tracking-tight leading-tight"
                   >
                     {activities[currentIndex].title}
                   </motion.h3>
@@ -109,7 +109,7 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="text-sm sm:text-lg text-white/80 font-medium italic leading-relaxed"
+                    className="text-sm sm:text-lg text-white/80 font-premium font-bold italic leading-relaxed"
                   >
                     {activities[currentIndex].desc}
                   </motion.p>
@@ -119,7 +119,7 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="flex items-center gap-2 text-amber-400 text-[10px] font-bold uppercase tracking-[0.3em] pt-2"
+                  className="flex items-center gap-2 text-[var(--accent-primary)] text-[10px] font-ancient font-bold uppercase tracking-[0.3em] pt-2"
                 >
                   <Sparkles size={12} />
                   <span>Spreading Light & Compassion</span>
@@ -135,7 +135,7 @@ const CSRBanner: React.FC<CSRBannerProps> = ({ lang }) => {
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`h-2 rounded-full transition-all duration-500 ${
-                  idx === currentIndex ? 'w-12 bg-amber-500' : 'w-3 bg-white/30 hover:bg-white/50'
+                  idx === currentIndex ? 'w-12 bg-[var(--accent-primary)]' : 'w-3 bg-white/30 hover:bg-white/50'
                 }`}
               />
             ))}

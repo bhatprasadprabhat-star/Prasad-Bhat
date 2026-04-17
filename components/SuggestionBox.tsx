@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 
@@ -37,20 +37,21 @@ const SuggestionBox: React.FC<SuggestionBoxProps> = ({ lang }) => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        className="bg-white/95 backdrop-blur-xl border-2 border-[#f59e0b]/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden"
+        className="bg-[var(--bg-secondary)]/50 backdrop-blur-xl border border-[var(--border-primary)] rounded-lg p-8 shadow-2xl relative overflow-hidden group"
       >
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-          <MessageSquare size={120} className="text-[#facc15]" />
+        <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')]"></div>
+        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+          <MessageSquare size={120} className="text-[var(--accent-primary)]" />
         </div>
 
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#facc15] flex items-center justify-center text-[#451a03] shadow-lg">
+            <div className="w-12 h-12 rounded-lg bg-[var(--accent-primary)] flex items-center justify-center text-white dark:text-[#020617] shadow-lg">
               <MessageSquare size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-[#facc15] uppercase tracking-widest leading-none">{t.suggestion_title || 'Suggestions'}</h3>
-              <p className="text-[10px] font-bold text-[#b45309]/60 uppercase tracking-widest mt-1">{t.suggestion_desc || 'Help Guruji improve your experience'}</p>
+              <h3 className="text-xl font-ancient font-black gold-leaf uppercase tracking-widest leading-none">{t.suggestion_title || 'Suggestions'}</h3>
+              <p className="text-[10px] font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-widest mt-1">{t.suggestion_desc || 'Help Guruji improve your experience'}</p>
             </div>
           </div>
 
@@ -59,7 +60,7 @@ const SuggestionBox: React.FC<SuggestionBoxProps> = ({ lang }) => {
               value={suggestion}
               onChange={(e) => setSuggestion(e.target.value)}
               placeholder={t.suggestion_placeholder || "Share your thoughts or report an issue..."}
-              className="w-full h-32 bg-white/90 border-2 border-[#facc15]/10 rounded-3xl p-6 text-[#451a03] placeholder-[#451a03]/30 focus:outline-none focus:border-[#FFD700] transition-all font-medium resize-none"
+              className="w-full h-32 bg-[var(--bg-primary)]/50 border border-[var(--border-primary)] rounded-lg p-6 text-[var(--text-primary)] placeholder-[var(--text-primary)]/60 focus:outline-none focus:border-[var(--accent-primary)] transition-all font-premium font-bold resize-none"
               disabled={isSubmitting || isSubmitted}
             />
             
@@ -67,10 +68,10 @@ const SuggestionBox: React.FC<SuggestionBoxProps> = ({ lang }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || isSubmitted || !suggestion.trim()}
-                className={`group flex items-center gap-3 px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 ${
+                className={`group flex items-center gap-3 px-8 py-4 rounded-lg text-xs font-ancient font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 ${
                   isSubmitted 
-                    ? 'bg-emerald-500 text-white' 
-                    : 'bg-[#facc15] text-[#451a03] hover:scale-105 disabled:opacity-50 disabled:scale-100'
+                    ? 'bg-emerald-600 text-white' 
+                    : 'bg-gradient-to-r from-[var(--accent-primary)] to-[var(--color-gold-dark)] text-white dark:text-[#020617] hover:scale-105 disabled:opacity-50 disabled:scale-100'
                 }`}
               >
                 <AnimatePresence mode="wait">

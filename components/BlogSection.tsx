@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { TRANSLATIONS } from '../constants';
-import { Language } from '../types';
+import { Language, UserMode } from '../types';
 import { BookOpen, ArrowRight, Sparkles, X, Share2, Check } from 'lucide-react';
 
 const BLOG_POSTS = [
@@ -234,15 +234,141 @@ By mastering the science of Vastu, we gain a profound understanding of the relat
   }
 ];
 
-const BlogSection = ({ lang }: { lang: Language }) => {
+interface BlogSectionProps {
+  lang: Language;
+  mode?: UserMode;
+}
+
+const BOOKS = [
+  {
+    id: 'hora',
+    title: "Brihat Parashara Hora Shastra",
+    author: "Maharishi Parashara",
+    category: "Hora",
+    description: "The foundational text of Vedic Astrology, revealed by Maharishi Parashara to his disciple Maitreya.",
+    shlokas: [
+      {
+        verse: "शान्ताय शुद्धमतये सुतपस्याभिरताय च।\nदेयं शास्त्रमिदं नित्यं न देयं यस्य कस्यचित्॥",
+        transliteration: "shāntāya shuddhamataye sutapasyābhiratāya ca |\ndeyaṃ shāstramidaṃ nityaṃ na deyaṃ yasya kasyacit ||",
+        explanation: {
+          en: "This sacred science should be given only to those who are peaceful, pure-minded, and devoted to penance. It should not be given to just anyone.",
+          kn: "ಈ ಪವಿತ್ರ ಶಾಸ್ತ್ರವನ್ನು ಶಾಂತಚಿತ್ತರು, ಶುದ್ಧ ಮನಸ್ಸಿನವರು ಮತ್ತು ತಪಸ್ಸಿನಲ್ಲಿ ನಿರತರಾದವರಿಗೆ ಮಾತ್ರ ನೀಡಬೇಕು. ಇದನ್ನು ಎಲ್ಲರಿಗೂ ಹಂಚಬಾರದು.",
+          hi: "यह पवित्र शास्त्र केवल उन्हीं को दिया जाना चाहिए जो शांत, शुद्ध बुद्धि वाले और तपस्या में लीन हों। यह हर किसी को नहीं दिया जाना चाहिए।"
+        }
+      },
+      {
+        verse: "यथा शिखा मयूराणां नागानां मणयो यथा।\nतद्वद्वेदाङ्गशास्त्राणां ज्योतिषं मूर्धनि स्थितम्॥",
+        transliteration: "yathā shikhā mayūrāṇāṃ nāgānāṃ maṇayo yathā |\ntadvadvedāṅgashāstrāṇāṃ jyotiṣaṃ mūrdhani sthitam ||",
+        explanation: {
+          en: "Like the crest on a peacock and the gem on a cobra, Jyotisha (Astrology) stands at the pinnacle of all Vedanga sciences.",
+          kn: "ನವಿಲಿನ ತಲೆಯ ಮೇಲಿರುವ ಶಿಖೆಯಂತೆ ಮತ್ತು ಸರ್ಪದ ತಲೆಯ ಮೇಲಿರುವ ಮಣಿಯಂತೆ, ಜ್ಯೋತಿಷ್ಯ ಶಾಸ್ತ್ರವು ಎಲ್ಲಾ ವೇದಾಂಗ ಶಾಸ್ತ್ರಗಳ ಶಿರೋಭಾಗದಲ್ಲಿದೆ.",
+          hi: "जैसे मोरों के सिर पर शिखा और नागों के सिर पर मणि होती है, वैसे ही सभी वेदांग शास्त्रों में ज्योतिष शास्त्र सर्वोपरि है।"
+        }
+      },
+      {
+        verse: "सूर्यादीनां ग्रहाणां च यदवस्थाफलं मुने।\nतदहं ते प्रवक्ष्यामि शृणुष्वैकाग्रमानसः॥",
+        transliteration: "sūryādīnāṃ grahāṇāṃ ca yadavasthāphalaṃ mune |\ntadahaṃ te pravakṣyāmi śṛṇuṣvaikāgramānasaḥ ||",
+        explanation: {
+          en: "O Sage, I shall now describe the effects of the states (Avasthas) of the Sun and other planets. Listen with a concentrated mind.",
+          kn: "ಓ ಮುನಿಯೇ, ನಾನು ಈಗ ಸೂರ್ಯ ಮತ್ತು ಇತರ ಗ್ರಹಗಳ ಅವಸ್ಥೆಗಳ ಫಲಗಳನ್ನು ವಿವರಿಸುತ್ತೇನೆ. ಏಕಾಗ್ರ ಮನಸ್ಸಿನಿಂದ ಕೇಳು.",
+          hi: "हे मुनि, अब मैं सूर्य और अन्य ग्रहों की अवस्थाओं के फलों का वर्णन करूँगा। एकाग्र मन से सुनें।"
+        }
+      }
+    ]
+  },
+  {
+    id: 'siddhanta',
+    title: "Surya Siddhanta",
+    author: "Revealed by Surya to Maya",
+    category: "Siddhanta",
+    description: "The ancient mathematical treatise on celestial mechanics and time calculation.",
+    shlokas: [
+      {
+        verse: "अल्पावशिष्टे तु कृते मयौ नाम महासुरः।\nरहस्यं परमं पुण्यं जिज्ञासुर्ज्ञानमुत्तमम्॥",
+        transliteration: "alpāvashiṣṭe tu kṛte mayau nāma mahāsuraḥ |\nrahasyaṃ paramaṃ puṇyaṃ jijñāsurjñānamuttamam ||",
+        explanation: {
+          en: "At the end of the Krita Yuga, a great Asura named Maya, desiring to know the supreme, sacred, and secret knowledge of the stars...",
+          kn: "ಕೃತಯುಗದ ಅಂತ್ಯದಲ್ಲಿ, ಮಯ ಎಂಬ ಮಹಾಸುರನು ನಕ್ಷತ್ರಗಳ ಪರಮ ಪವಿತ್ರ ಮತ್ತು ರಹಸ್ಯ ಜ್ಾನವನ್ನು ತಿಳಿಯಲು ಬಯಸಿದನು...",
+          hi: "कृतयुग के अंत में, मय नामक एक महासुर ने नक्षत्रों के परम पवित्र और गुप्त ज्ञान को जानने की इच्छा की..."
+        }
+      },
+      {
+        verse: "लोकानामन्तकृत्कालो कालोऽन्यः कलनात्मकः।\nस द्विधा स्थूलसूक्ष्मत्वान् मूर्तश्चामूर्त उच्यते॥",
+        transliteration: "lokānāmantakṛtkālo kālo'nyaḥ kalanātmakaḥ |\nsa dvidhā sthūlasūkṣmatvān mūrtaścāmūrta ucyate ||",
+        explanation: {
+          en: "Time is the destroyer of worlds; another Time is for calculation. That is twofold: gross and subtle, called Mūrta (measurable) and Amūrta (immeasurable).",
+          kn: "ಕಾಲವು ಲೋಕಗಳ ನಾಶಕ; ಇನ್ನೊಂದು ಕಾಲವು ಲೆಕ್ಕಾಚಾರಕ್ಕಾಗಿ. ಅದು ಎರಡು ವಿಧ: ಸ್ಥೂಲ ಮತ್ತು ಸೂಕ್ಷ್ಮ, ಇವುಗಳನ್ನು ಮೂರ್ತ ಮತ್ತು ಅಮೂರ್ತ ಎಂದು ಕರೆಯಲಾಗುತ್ತದೆ.",
+          hi: "काल लोकों का संहारक है; दूसरा काल गणना के लिए है। वह दो प्रकार का है: स्थूल और सूक्ष्म, जिन्हें मूर्त और अमूर्त कहा जाता है।"
+        }
+      }
+    ]
+  },
+  {
+    id: 'samhita',
+    title: "Brihat Samhita",
+    author: "Varahamihira",
+    category: "Samhita",
+    description: "The monumental encyclopedia of mundane astrology, omens, and collective destiny.",
+    shlokas: [
+      {
+        verse: "अप्रदीपा यथा रात्रिरनादित्यं यथा नभः।\nतथाऽसांवत्सरो राजा भ्रमत्यन्ध इवाध्वनि॥",
+        transliteration: "apradīpā yathā rātriranādityaṃ yathā nabhaḥ |\ntathā'sāṃvatsaro rājā bhramatyandha ivādhvani ||",
+        explanation: {
+          en: "As a night without a lamp and a sky without the sun, so is a king without an astrologer; he wanders like a blind man on a path.",
+          kn: "ದೀಪವಿಲ್ಲದ ರಾತ್ರಿಯಂತೆ ಮತ್ತು ಸೂರ್ಯನಿಲ್ಲದ ಆಕಾಶದಂತೆ, ಜ್ಯೋತಿಷಿಯಿಲ್ಲದ ರಾಜನು ದಾರಿಯಲ್ಲಿ ಕುರುಡನಂತೆ ಅಲೆದಾಡುತ್ತಾನೆ.",
+          hi: "जैसे दीपक के बिना रात और सूर्य के बिना आकाश होता है, वैसे ही ज्योतिषी के बिना राजा होता है; वह मार्ग पर अंधे व्यक्ति की तरह भटकता है।"
+        }
+      },
+      {
+        verse: "यस्य सम्यग्विजानाति होरागणितसंहिताः।\nतस्य वाक्यममोघं स्यात् त्रिकालज्ञस्य धीमतः॥",
+        transliteration: "yasya samyagvijānāti horāgaṇitasaṃhitāḥ |\ntasya vākyamamoghaṃ syāt trikālajñasya dhīmataḥ ||",
+        explanation: {
+          en: "He who thoroughly knows Hora, Ganita (Siddhanta), and Samhita, his words will be infallible, for he is a wise knower of the three periods of time.",
+          kn: "ಯಾರು ಹೋರಾ, ಗಣಿತ ಮತ್ತು ಸಂಹಿತೆಯನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ತಿಳಿದಿರುತ್ತಾರೋ, ಅವರ ಮಾತುಗಳು ಅಮೋಘವಾಗಿರುತ್ತವೆ, ಏಕೆಂದರೆ ಅವರು ತ್ರಿಕಾಲಜ್ಞಾನಿಗಳಾಗಿರುತ್ತಾರೆ.",
+          hi: "जो होरा, गणित और संहिता को भली-भांति जानता है, उसके वचन अमोघ होंगे, क्योंकि वह त्रिकालज्ञ और बुद्धिमान है।"
+        }
+      }
+    ]
+  },
+  {
+    id: 'phaladeepika',
+    title: "Phaladeepika",
+    author: "Mantreswara",
+    category: "Hora",
+    description: "A comprehensive classic on predictive astrology, covering aspects of life from birth to death.",
+    shlokas: [
+      {
+        verse: "नत्वा गणपतिं देवीं सरस्वतीं गुरुं तथा।\nवक्ष्ये फलदीपिकां शास्त्रं जातकप्रीतिवर्धिनीम्॥",
+        transliteration: "natvā gaṇapatiṃ devīṃ sarasvatīṃ guruṃ तथा |\nvakṣye phaladīpikāṃ śāstraṃ jātakaprītivardhinīm ||",
+        explanation: {
+          en: "Saluting Lord Ganapati, Goddess Saraswati, and the Guru, I shall expound the science of Phaladeepika, which increases the joy of those interested in astrology.",
+          kn: "ಗಣಪತಿ, ಸರಸ್ವತಿ ಮತ್ತು ಗುರುಗಳಿಗೆ ನಮಸ್ಕರಿಸಿ, ಜ್ಯೋತಿಷ್ಯ ಆಸಕ್ತರಿಗೆ ಸಂತೋಷ ನೀಡುವ ಫಲದೀಪಿಕಾ ಶಾಸ್ತ್ರವನ್ನು ನಾನು ವಿವರಿಸುತ್ತೇನೆ.",
+          hi: "गणपति, सरस्वती और गुरु को नमन करके, मैं फलदीपिका शास्त्र का वर्णन करूँगा, जो ज्योतिष प्रेमियों के आनंद को बढ़ाता है।"
+        }
+      }
+    ]
+  }
+];
+
+const BlogSection = ({ lang, mode }: BlogSectionProps) => {
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const [selectedPost, setSelectedPost] = React.useState<typeof BLOG_POSTS[0] | null>(null);
+  const [selectedBook, setSelectedBook] = React.useState<typeof BOOKS[0] | null>(null);
+  const [activeTab, setActiveTab] = React.useState<'BLOGS' | 'BOOKS'>(mode === 'SCHOLAR' ? 'BOOKS' : 'BLOGS');
   const [isShared, setIsShared] = React.useState(false);
 
-  const handleShare = async (post: typeof BLOG_POSTS[0]) => {
+  React.useEffect(() => {
+    if (mode === 'SCHOLAR') {
+      setActiveTab('BOOKS');
+    } else {
+      setActiveTab('BLOGS');
+    }
+  }, [mode]);
+
+  const handleShare = async (title: string, excerpt: string) => {
     const shareData = {
-      title: post.title,
-      text: post.excerpt,
+      title: title,
+      text: excerpt,
       url: window.location.href
     };
 
@@ -250,7 +376,7 @@ const BlogSection = ({ lang }: { lang: Language }) => {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await navigator.clipboard.writeText(`${post.title}\n\n${post.excerpt}\n\nRead more at: ${window.location.href}`);
+        await navigator.clipboard.writeText(`${title}\n\n${excerpt}\n\nRead more at: ${window.location.href}`);
         setIsShared(true);
         setTimeout(() => setIsShared(false), 2000);
       }
@@ -260,125 +386,186 @@ const BlogSection = ({ lang }: { lang: Language }) => {
   };
 
   return (
-    <section className="py-16 px-4 max-w-7xl mx-auto">
-      <div className="flex flex-col items-center mb-12 text-center">
-        <div className="w-16 h-16 bg-[#D4AF37]/10 rounded-2xl flex items-center justify-center text-[#D4AF37] mb-4 shadow-lg border border-[#D4AF37]/20">
-          <BookOpen size={32} />
+    <section className="py-20 px-4 max-w-7xl mx-auto">
+      <div className="flex flex-col items-center mb-12 sm:mb-20 text-center">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[var(--accent-primary)]/10 rounded-lg flex items-center justify-center text-[var(--accent-primary)] mb-6 shadow-2xl border border-[var(--border-primary)]">
+          <BookOpen size={24} className="sm:w-10 sm:h-10" />
         </div>
-        <h2 className="text-2xl sm:text-5xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font mb-2">
-          {lang === 'kn' ? 'ಜ್ಞಾನ ಭಂಡಾರ' : lang === 'tcy' ? 'ಜ್ಞಾನದ ಬಂಡಾರ' : 'Celestial Wisdom Blog'}
+        <h2 className="text-2xl sm:text-6xl font-ancient font-black gold-leaf uppercase tracking-widest mb-4">
+          {activeTab === 'BOOKS' 
+            ? (lang === 'kn' ? 'ಗ್ರಂಥಾಲಯ' : 'Vedic Library')
+            : (lang === 'kn' ? 'ಜ್ಞಾನ ಭಂಡಾರ' : lang === 'tcy' ? 'ಜ್ಞಾನದ ಬಂಡಾರ' : 'Celestial Wisdom Blog')}
         </h2>
-        <p className="text-sm sm:text-lg font-medium text-white/70 uppercase tracking-[0.2em]">
-          Exploring Siddhanta, Samhita, and Hora
+        
+        {mode === 'SCHOLAR' && (
+          <div className="flex gap-4 mt-8 mb-4">
+            <button 
+              onClick={() => setActiveTab('BLOGS')}
+              className={`px-6 py-2 rounded-full font-ancient font-black uppercase tracking-widest text-[10px] transition-all ${activeTab === 'BLOGS' ? 'bg-[var(--accent-primary)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--accent-primary)] border border-[var(--border-primary)]'}`}
+            >
+              Blogs
+            </button>
+            <button 
+              onClick={() => setActiveTab('BOOKS')}
+              className={`px-6 py-2 rounded-full font-ancient font-black uppercase tracking-widest text-[10px] transition-all ${activeTab === 'BOOKS' ? 'bg-[var(--accent-primary)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--accent-primary)] border border-[var(--border-primary)]'}`}
+            >
+              Books
+            </button>
+          </div>
+        )}
+
+        <p className="text-[10px] sm:text-xl font-premium font-bold text-[var(--accent-primary)]/80 uppercase tracking-[0.3em]">
+          {activeTab === 'BOOKS' ? 'Sacred Texts of the Rishis' : 'Exploring Siddhanta, Samhita, and Hora'}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {BLOG_POSTS.map((post, idx) => (
-          <motion.div
-            key={post.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05, duration: 0.3 }}
-            className="bg-white/80 backdrop-blur-md rounded-[2.5rem] border-2 border-[#D4AF37]/20 overflow-hidden shadow-xl hover:shadow-2xl transition-all group flex flex-col cursor-pointer"
-            onClick={() => setSelectedPost(post)}
-          >
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src={post.image} 
-                alt={post.title} 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute top-4 left-4 bg-[#D4AF37] text-[#451a03] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
-                {post.category}
+      {activeTab === 'BLOGS' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {BLOG_POSTS.map((post, idx) => (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05, duration: 0.5 }}
+              className="bg-[var(--bg-secondary)]/50 backdrop-blur-2xl rounded-lg border border-[var(--border-primary)] overflow-hidden shadow-2xl hover:bg-[var(--bg-secondary)] hover:-translate-y-2 transition-all duration-500 group flex flex-col cursor-pointer relative"
+              onClick={() => setSelectedPost(post)}
+            >
+              <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+              <div className="h-56 overflow-hidden relative">
+                <img 
+                  src={post.image} 
+                  alt={post.title} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-4 left-4 bg-[var(--accent-primary)] text-white dark:text-[#020617] text-[10px] font-ancient font-black px-4 py-1.5 rounded-lg uppercase tracking-widest shadow-2xl border border-[var(--border-primary)]/50">
+                  {post.category}
+                </div>
               </div>
-            </div>
-            <div className="p-8 flex-1 flex flex-col">
-              <h3 className="text-xl font-black text-[#451a03] mb-3 leading-tight group-hover:text-[#D4AF37] transition-colors">
-                {post.title}
+              <div className="p-8 sm:p-10 flex-1 flex flex-col relative z-10">
+                <h3 className="text-xl sm:text-2xl font-ancient font-black text-[var(--accent-primary)] mb-4 leading-tight group-hover:gold-leaf transition-all">
+                  {post.title}
+                </h3>
+                <p className="text-xs sm:text-base text-[var(--text-primary)] font-premium leading-relaxed mb-6 flex-1">
+                  {post.excerpt}
+                </p>
+                <button className="flex items-center gap-3 text-[var(--accent-primary)] font-ancient font-black uppercase text-[10px] tracking-[0.2em] group/btn">
+                  Read Full Article 
+                  <ArrowRight size={16} className="group-hover/btn:translate-x-2 transition-transform duration-500" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {BOOKS.map((book, idx) => (
+            <motion.div
+              key={book.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05, duration: 0.5 }}
+              className="bg-[var(--bg-secondary)]/50 backdrop-blur-2xl rounded-lg border border-[var(--border-primary)] p-8 shadow-2xl hover:bg-[var(--bg-secondary)] hover:-translate-y-2 transition-all duration-500 group flex flex-col cursor-pointer relative"
+              onClick={() => setSelectedBook(book)}
+            >
+              <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-12 h-12 bg-[var(--accent-primary)]/10 rounded-lg flex items-center justify-center text-[var(--accent-primary)]">
+                  <BookOpen size={24} />
+                </div>
+                <div className="bg-[var(--accent-primary)] text-white dark:text-[#020617] text-[8px] font-ancient font-black px-3 py-1 rounded-lg uppercase tracking-widest shadow-lg">
+                  {book.category}
+                </div>
+              </div>
+              <h3 className="text-xl font-ancient font-black text-[var(--accent-primary)] mb-2 uppercase tracking-tight">
+                {book.title}
               </h3>
-              <p className="text-sm text-[#451a03]/70 font-medium leading-relaxed mb-6 flex-1">
-                {post.excerpt}
+              <p className="text-[10px] font-ancient font-bold text-[var(--accent-primary)]/60 uppercase tracking-widest mb-4">
+                By {book.author}
               </p>
-              <button className="flex items-center gap-2 text-[#D4AF37] font-black uppercase text-[10px] tracking-widest group/btn">
-                Read Full Article 
-                <ArrowRight size={14} className="group-hover/btn:translate-x-2 transition-transform" />
+              <p className="text-xs text-[var(--text-primary)] font-premium leading-relaxed mb-6 flex-1">
+                {book.description}
+              </p>
+              <button className="flex items-center gap-3 text-[var(--accent-primary)] font-ancient font-black uppercase text-[10px] tracking-[0.2em] group/btn">
+                Study Shlokas
+                <ArrowRight size={16} className="group-hover/btn:translate-x-2 transition-transform duration-500" />
               </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {selectedPost && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-10">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedPost(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-[var(--bg-primary)]/95 backdrop-blur-xl"
             />
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-[90vw] max-w-6xl bg-[#fffbeb] rounded-[3rem] border-4 border-[#D4AF37] shadow-[0_0_100px_rgba(212,175,55,0.3)] overflow-hidden flex flex-col h-[85vh]"
+              exit={{ scale: 0.95, opacity: 0, y: 30 }}
+              className="relative w-full max-w-6xl bg-[var(--bg-primary)] rounded-lg border border-[var(--border-primary)] shadow-[0_0_100px_rgba(212,175,55,0.2)] overflow-hidden flex flex-col h-[90vh]"
             >
-              <div className="h-64 sm:h-80 relative shrink-0">
+              <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+              <div className="h-72 sm:h-96 relative shrink-0">
                 <img 
                   src={selectedPost.image} 
                   alt={selectedPost.title} 
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#451a03] to-transparent" />
-                <div className="absolute top-6 right-6 flex items-center gap-3 z-10">
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/40 to-transparent" />
+                <div className="absolute top-6 right-6 flex items-center gap-4 z-10">
                   <button 
-                    onClick={() => handleShare(selectedPost)}
-                    className="p-3 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-all flex items-center gap-2"
+                    onClick={() => setSelectedPost(null)}
+                    className="p-3 bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--accent-primary)] rounded-lg backdrop-blur-md transition-all border border-[var(--border-primary)] flex items-center gap-2"
                   >
-                    {isShared ? <Check size={20} className="text-green-400" /> : <Share2 size={20} />}
-                    <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">
+                    <X size={20} />
+                    <span className="text-[10px] font-ancient font-black uppercase tracking-widest hidden sm:inline">Close</span>
+                  </button>
+                  <button 
+                    onClick={() => handleShare(selectedPost.title, selectedPost.excerpt)}
+                    className="p-3 bg-[var(--bg-secondary)]/50 hover:bg-[var(--accent-primary)] hover:text-white dark:hover:text-[#020617] text-[var(--accent-primary)] rounded-lg backdrop-blur-md transition-all flex items-center gap-2 border border-[var(--border-primary)]"
+                  >
+                    {isShared ? <Check size={20} className="text-green-500" /> : <Share2 size={20} />}
+                    <span className="text-xs font-ancient font-black uppercase tracking-widest hidden sm:inline">
                       {isShared ? 'Copied' : 'Share'}
                     </span>
                   </button>
-                  <button 
-                    onClick={() => setSelectedPost(null)}
-                    className="p-3 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-all"
-                  >
-                    <X size={24} />
-                  </button>
                 </div>
-                <div className="absolute bottom-8 left-8 right-8">
-                  <div className="bg-[#D4AF37] text-[#451a03] text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg inline-block mb-4">
+                <div className="absolute bottom-10 left-10 right-10">
+                  <div className="bg-[var(--accent-primary)] text-white dark:text-[#020617] text-[10px] font-ancient font-black px-5 py-2 rounded-lg uppercase tracking-widest shadow-2xl inline-block mb-6 border border-[var(--border-primary)]/50">
                     {selectedPost.category}
                   </div>
-                  <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight leading-tight">
+                  <h2 className="text-3xl sm:text-5xl font-ancient font-black gold-leaf uppercase tracking-tight leading-tight">
                     {selectedPost.title}
                   </h2>
                 </div>
               </div>
-              <div className="p-8 sm:p-16 overflow-y-auto flex-1 custom-scrollbar">
-                <div className="prose prose-amber max-w-none">
+              <div className="p-10 sm:p-20 overflow-y-auto flex-1 custom-scrollbar relative z-10">
+                <div className="prose prose-invert max-w-none">
                   {selectedPost.content.split('\n\n').map((paragraph, pIdx) => (
                     <p 
                       key={pIdx}
-                      className={`text-xl sm:text-3xl font-serif text-[#451a03] leading-[1.8] sm:leading-[2] mb-8 ${
-                        pIdx === 0 ? 'first-letter:text-7xl first-letter:font-black first-letter:mr-4 first-letter:float-left first-letter:text-[#D4AF37] drop-shadow-sm' : ''
+                      className={`text-base sm:text-2xl font-premium text-[var(--text-primary)] leading-relaxed mb-10 ${
+                        pIdx === 0 ? 'first-letter:text-6xl sm:first-letter:text-8xl first-letter:font-ancient first-letter:font-black first-letter:mr-4 first-letter:float-left first-letter:text-[var(--accent-primary)] first-letter:drop-shadow-[0_0_15px_rgba(var(--accent-primary-rgb),0.4)]' : ''
                       }`}
                     >
                       {paragraph}
                     </p>
                   ))}
-                  <div className="mt-16 pt-12 border-t-2 border-[#D4AF37]/20 flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] shadow-inner">
-                      <Sparkles size={32} />
+                  <div className="mt-20 pt-16 border-t border-[var(--border-primary)] flex items-center gap-8">
+                    <div className="w-20 h-20 rounded-lg bg-[var(--accent-primary)]/10 flex items-center justify-center text-[var(--accent-primary)] shadow-inner border border-[var(--border-primary)]">
+                      <Sparkles size={40} />
                     </div>
                     <div>
-                      <p className="text-xs font-black text-[#7C2D12] uppercase tracking-[0.4em]">Astro Logic Editorial</p>
-                      <p className="text-sm font-medium text-[#451a03]/60 italic">Ancient Wisdom for the Modern Soul</p>
+                      <p className="text-sm font-ancient font-black text-[var(--accent-primary)] uppercase tracking-[0.5em]">Astro Logic Editorial</p>
+                      <p className="text-lg font-premium font-bold text-[var(--text-primary)]/80 italic">Ancient Wisdom for the Modern Soul</p>
                     </div>
                   </div>
                 </div>
@@ -386,22 +573,90 @@ const BlogSection = ({ lang }: { lang: Language }) => {
             </motion.div>
           </div>
         )}
+
+        {selectedBook && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-10">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedBook(null)}
+              className="absolute inset-0 bg-[var(--bg-primary)]/95 backdrop-blur-xl"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 30 }}
+              className="relative w-full max-w-4xl bg-[var(--bg-primary)] rounded-lg border border-[var(--border-primary)] shadow-[0_0_100px_rgba(212,175,55,0.2)] overflow-hidden flex flex-col h-[90vh]"
+            >
+              <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+              
+              <div className="p-8 sm:p-12 border-b border-[var(--border-primary)] flex justify-between items-center bg-[var(--bg-secondary)]/50 relative z-10">
+                <div>
+                  <h2 className="text-2xl sm:text-4xl font-ancient font-black text-[var(--accent-primary)] uppercase tracking-tight">
+                    {selectedBook.title}
+                  </h2>
+                  <p className="text-xs sm:text-sm font-ancient font-bold text-[var(--accent-primary)]/60 uppercase tracking-widest mt-2">
+                    By {selectedBook.author}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setSelectedBook(null)}
+                  className="p-3 bg-[var(--bg-primary)] hover:bg-red-500/10 text-[var(--accent-primary)] hover:text-red-500 rounded-lg transition-all border border-[var(--border-primary)]"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="p-8 sm:p-16 overflow-y-auto flex-1 custom-scrollbar relative z-10 space-y-16">
+                {selectedBook.shlokas.map((shloka, sIdx) => (
+                  <div key={sIdx} className="space-y-8">
+                    <div className="text-center space-y-4">
+                      <div className="text-2xl sm:text-4xl font-serif text-[var(--accent-primary)] leading-relaxed whitespace-pre-line">
+                        {shloka.verse}
+                      </div>
+                      <div className="text-xs sm:text-sm font-mono text-[var(--text-primary)]/60 italic">
+                        {shloka.transliteration}
+                      </div>
+                    </div>
+                    
+                    <div className="p-8 bg-[var(--bg-secondary)]/80 border-l-4 border-[var(--accent-primary)] rounded-r-xl shadow-lg">
+                      <h4 className="text-[10px] font-ancient font-black text-[var(--accent-primary)] uppercase tracking-[0.3em] mb-4">Explanation</h4>
+                      <p className="text-base sm:text-xl font-premium text-[var(--text-primary)] leading-relaxed">
+                        {shloka.explanation[lang as keyof typeof shloka.explanation] || shloka.explanation.en}
+                      </p>
+                    </div>
+                    
+                    {sIdx < selectedBook.shlokas.length - 1 && (
+                      <div className="flex justify-center py-8">
+                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-[var(--accent-primary)]/30 to-transparent" />
+                        <Sparkles size={16} className="text-[var(--accent-primary)]/30 mx-4" />
+                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-[var(--accent-primary)]/30 to-transparent" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
 
-      <div className="mt-16 p-8 sm:p-12 bg-gradient-to-br from-[#451a03] to-[#7c2d12] rounded-[3rem] text-center relative overflow-hidden shadow-2xl border-4 border-[#D4AF37]/30">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-          <Sparkles size={120} className="text-[#D4AF37]" />
+      <div className="mt-20 sm:mt-32 p-10 sm:p-20 bg-[var(--bg-secondary)]/50 backdrop-blur-2xl rounded-lg text-center relative overflow-hidden shadow-2xl border border-[var(--border-primary)]">
+        <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 p-8 sm:p-12 opacity-5 pointer-events-none">
+          <Sparkles size={100} className="sm:w-[150px] sm:h-[150px] text-[var(--accent-primary)]" />
         </div>
-        <div className="relative z-10 space-y-6">
-          <h3 className="text-2xl sm:text-4xl font-black text-[#D4AF37] uppercase tracking-widest astrological-font">
+        <div className="relative z-10 space-y-6 sm:space-y-10">
+          <h3 className="text-2xl sm:text-5xl font-ancient font-black gold-leaf uppercase tracking-widest">
             Deepen Your Understanding
           </h3>
-          <p className="text-sm sm:text-lg text-white/80 font-serif italic max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-2xl text-[var(--text-primary)] font-premium font-bold italic max-w-3xl mx-auto leading-relaxed">
             "Astrology is a language. If you understand this language, the sky speaks to you."
           </p>
-          <div className="pt-4">
-            <button className="px-10 py-4 bg-[#D4AF37] text-[#451a03] rounded-full font-black uppercase tracking-widest text-xs shadow-xl hover:scale-105 transition-all">
-              View All Articles
+          <div className="pt-6">
+            <button className="px-12 sm:px-16 py-4 sm:py-5 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--color-gold-dark)] text-white dark:text-[#020617] rounded-lg font-ancient font-black uppercase tracking-[0.4em] text-xs sm:text-sm shadow-2xl hover:scale-105 active:scale-95 transition-all">
+              View All {activeTab === 'BOOKS' ? 'Books' : 'Articles'}
             </button>
           </div>
         </div>

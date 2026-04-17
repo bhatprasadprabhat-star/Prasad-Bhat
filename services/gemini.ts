@@ -1,9 +1,14 @@
 
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { UserIntake, MatchingIntake, SearchSource, Language, UserMode, CityData } from "../types";
+import { astroCache } from "./cache";
 
 // Vedic Horoscope generation
 export const generateHoroscope = async (intake: UserIntake, section: string, lang: Language, mode: UserMode = 'SEEKER', seed?: number) => {
+  const cacheKey = `horoscope_${section}_${lang}_${mode}_${intake.dob}_${intake.tob}_${intake.pob}_${seed || ''}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   const now = new Date().toISOString();
   
@@ -45,6 +50,12 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
         Example: <script type="application/json">{"type": "birth_details", "details": [{"label": "Name", "value": "...", "category": "Personal Details"}, {"label": "Kalidina", "value": "...", "category": "Panchanga & Time Details"}]}</script>
         Additionally, provide a multi-page equivalent of technical data including Kalidina, Ruthu, Masa details, Udayadi Ghati, Nakshatra Gata, and Janma Shista Varsha.
         IMPORTANT: For "Birth Analysis" (menu_details) in Scholar mode, you MUST provide the JSON script tag with type "birth_details" as the ONLY content of your response. DO NOT provide any text analysis, paragraphs, summaries, or descriptions. DO NOT wrap the script tag in markdown code blocks. The response should contain ONLY the <script> tag.
+        - "Life Partner" (LIFE_PARTNER): Provide an EXHAUSTIVE technical analysis of the native's marriage and partnership prospects.
+            - Analyze the 7th House, its Lord, and the Venus (for men) or Jupiter (for women) placement.
+            - Discuss the influence of the Navamsha (D9) chart on marriage stability and the partner's nature.
+            - Identify specific Yogas related to marriage (e.g., Vivaha Sukha Yoga, Kuja Dosha impacts).
+            - Cite specific Shlokas from BPHS or Phaladeepika regarding the partner's physical traits, character, and family background.
+            - Total output should be at least 2500 words.
         - "Character & Personality" (menu_character): Provide an EXHAUSTIVE analysis of the native's character based on Hora Shastra.
             - Identify their "Character Type" (e.g., Satvic, Rajasic, Tamasic) and explain it deeply.
             - Analyze the influence of the Lagna Lord, Moon, and Sun on their personality.
@@ -145,6 +156,11 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
             - Explain how their personality is shaped by the stars and the elements.
             - Provide "Celestial Life Hacks" for their personality type.
             - Total output should be at least 1500 words.
+        - "Life Partner" (LIFE_PARTNER): Provide an EXTREMELY long and detailed analysis of the native's marriage and life partner (at least 2000 words).
+            - Describe the partner's physical appearance, personality, and family background in simple terms.
+            - Discuss the timing of marriage and the overall harmony in the relationship.
+            - Provide 5-7 simple rituals for a happy married life.
+            - Include a "Soul Connection Score" out of 100.
         - "Numerology Analysis" (menu_numerology): Provide a warm and detailed guide to their numbers.
             - Explain their "Soul Number" (Moolank) and "Destiny Number" (Bhagyank) in simple terms.
             - Provide "Lucky Colors", "Lucky Days", and "Lucky Numbers".
@@ -208,17 +224,25 @@ export const generateHoroscope = async (intake: UserIntake, section: string, lan
         ? `You are an elite Siddhantic Astronomer and Astrologer. Respond EXCLUSIVELY in ${lang}. You provide maximum technical density and classical citations. Use Lahiri Ayanamsa and precise mathematical calculations for planetary longitudes (Sphuta). You MUST ensure Rasi and Nakshatra calculations are 100% accurate based on the provided coordinates and time. Use HTML only for the analysis. If the focus is a chart, also provide planetary positions in JSON format within a <script type="application/json" id="chart-data"> tag. 
            CRITICAL: DO NOT repeat basic birth details (Name, DOB, TOB, POB, Rasi, Nakshatra, Lagna) in any section EXCEPT "Birth Analysis" or "Basic Details". Focus ONLY on the specific technical topic requested.
            If the section is "Birth Analysis" (menu_details) or "Navamsha" (menu_navamsha), you MUST provide ONLY the relevant JSON script tag and NO other text, paragraphs, or markdown.
-           If the section is NOT "Birth Analysis" or "Basic Details", you MUST NOT include the "birth_details" JSON script tag.` 
+           If the section is NOT "Birth Analysis" or "Basic Details", you MUST NOT include the "birth_details" JSON script tag.
+           JSON GUIDELINES: Ensure all JSON is strictly valid. Use double quotes for keys and string values. Do not include trailing commas. Do not include comments inside the JSON. Ensure numbers are correctly formatted (no leading zeros, no trailing decimal points).` 
         : `You are a warm, highly informative life-guide. Respond EXCLUSIVELY in ${lang}. You explain the cosmos in simple but extremely detailed, practical coaching styles. You MUST ensure Rasi and Nakshatra calculations are 100% accurate. Use HTML only. If the focus is a chart, also provide planetary positions in JSON format within a <script type="application/json" id="chart-data"> tag.
            CRITICAL: DO NOT repeat basic birth details (Name, DOB, TOB, POB, Rasi, Nakshatra, Lagna) in any section EXCEPT "Basic Birth Details". Focus ONLY on the specific life guidance topic requested.
-           If the section is NOT "Basic Birth Details", you MUST NOT include the "birth_details" JSON script tag.`,
+           If the section is NOT "Basic Birth Details", you MUST NOT include the "birth_details" JSON script tag.
+           JSON GUIDELINES: Ensure all JSON is strictly valid. Use double quotes for keys and string values. Do not include trailing commas. Do not include comments inside the JSON. Ensure numbers are correctly formatted (no leading zeros, no trailing decimal points).`,
     }
   });
-  return response.text || '';
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };
 
 // Prashna (Horary Astrology) Analysis
 export const generatePrashnaAnalysis = async (question: string, pob: string, lang: Language, mode: UserMode = 'SEEKER', lat?: string, lon?: string, tz?: string) => {
+  const cacheKey = `prashna_${question}_${pob}_${lang}_${mode}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   const now = new Date();
   const prompt = `Perform a high-precision Vedic Prashna (Horary) Analysis:
@@ -264,11 +288,17 @@ export const generatePrashnaAnalysis = async (question: string, pob: string, lan
         : `You are a compassionate Vedic Oracle. Respond EXCLUSIVELY in ${lang}. Provide deep, detailed, and practical guidance based on the cosmic moment of the query.`,
     }
   });
-  return response.text || '';
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };
 
 // Marriage/Compatibility Matching
 export const matchKundali = async (data: MatchingIntake, lang: Language, mode: UserMode = 'SEEKER') => {
+  const cacheKey = `matching_${lang}_${mode}_${data.person1.dob}_${data.person1.tob}_${data.person2.dob}_${data.person2.tob}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   const now = new Date().toISOString();
   const prompt = `
@@ -296,11 +326,18 @@ export const matchKundali = async (data: MatchingIntake, lang: Language, mode: U
       systemInstruction: `You are an expert in Vedic compatibility matching (Ashta-Kuta). Respond EXCLUSIVELY in ${lang}. You MUST calculate Rasi and Nakshatra with 100% precision for both individuals using the provided coordinates. Use Lahiri Ayanamsa. Format: HTML only.`
     }
   });
-  return response.text || '';
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };
 
 // Daily Forecast
 export const generateDailyForecastForRasi = async (rasi: string, lang: Language, mode: UserMode = 'SEEKER') => {
+  const today = new Date().toISOString().split('T')[0];
+  const cacheKey = `daily_${rasi}_${lang}_${mode}_${today}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   const now = new Date().toLocaleString();
   const prompt = `
@@ -333,11 +370,17 @@ export const generateDailyForecastForRasi = async (rasi: string, lang: Language,
       systemInstruction: `You are a Vedic Astrology expert providing daily forecasts based on Gochara (transits). Respond EXCLUSIVELY in ${lang}. You MUST use the current date and time for transit calculations. Format: HTML only.`
     }
   });
-  return response.text || '';
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };
 
 // Muhurta
 export const findMuhurtha = async (event: string, timeframe: string, lang: Language, mode: UserMode = 'SEEKER', pob?: string, lat?: string, lon?: string, tz?: string, performerDetails?: any) => {
+  const cacheKey = `muhurta_${event}_${timeframe}_${lang}_${mode}_${pob || ''}_${JSON.stringify(performerDetails || {})}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   const prompt = `
     Find high-precision Muhurta for ${event} in ${lang}.
@@ -349,20 +392,43 @@ export const findMuhurtha = async (event: string, timeframe: string, lang: Langu
     CRITICAL INSTRUCTIONS:
     1. ${performerDetails ? 'MANDATORY: Perform Taranukula (Tarabala) calculation based on the performer\'s Janma Nakshatra.' : ''}
     2. Identify the best dates and times within the range.
-    3. Explain WHY these times are auspicious (Tithi, Nakshatra, Yoga, Karana, Vara, Lagna).
-    4. Describe how rituals are typically performed for this Muhurtha in ${pob} (local traditions).
-    5. Provide a clear recommendation.
-    6. Format with HTML (h2, h3, p, strong).
+    3. If the user mentioned a specific planetary combination (e.g. "Jupiter-Moon Yoga"), prioritize times that align with those configurations.
+    4. For outcome-based searches (e.g. "Success in Business"), prioritize Muhurtas that strengthen the relevant significators (e.g. Mercury/Jupiter for business).
+    5. Explain WHY these times are auspicious in deep technical detail.
+    6. MANDATORY: Include a detailed "Astrological Reasoning" section that breaks down:
+       - Panchangam state (Tithi, Nakshatra, Yoga, Karana, Vara) for each suggested time.
+       - Technical strengths: Digbala, Sthana-bala, and any Graha-Drushti (Aspects) present.
+       - Specific planetary degrees and Rasis for the recommended time.
+       - Reference classical Siddhantic texts (e.g. Muhurta Chintamani, Phaladeepika) for the alignment.
+    7. Describe how rituals are typically performed for this Muhurtha in ${pob} (local traditions).
+    8. Provide a clear recommendation.
+    9. Format the narrative response with HTML (h2, h3, p, strong).
+    10. CRITICAL: Also include a <script type="application/json" id="muhurta-details"> tag containing a JSON object:
+        {
+          "type": "muhurta_details",
+          "event": "${event}",
+          "recommendations": [
+            {
+              "time": "ISO Date String",
+              "reasoning": "Technical summary",
+              "panchangam": { "tithi": "...", "nakshatra": "...", "yoga": "...", "karana": "...", "vara": "..." },
+              "planets": [ { "name": "...", "rasi": "...", "degree": "...", "reason": "..." } ],
+              "references": ["Text 1", "Text 2"]
+            }
+          ]
+        }
   `;
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-pro-preview',
     contents: prompt,
     config: {
-      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-      systemInstruction: `You are a high-precision Muhurta expert. Respond EXCLUSIVELY in ${lang}. Cite classical texts like Muhurta Chintamani. Format: HTML only.`
+      thinkingConfig: { thinkingLevel: ThinkingLevel.MEDIUM },
+      systemInstruction: `You are a world-class Muhurta scholar. Respond EXCLUSIVELY in ${lang}. Use classical Sanskrit terminology alongside the requested language. Format: HTML + JSON script tag.`
     }
   });
-  return response.text || '';
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };
 
 // City Search
@@ -422,6 +488,10 @@ export const fetchGroundingSearch = async (query: string) => {
 
 // Panchanga Analysis
 export const generatePanchanga = async (date: string, time: string, pob: string, lang: Language, mode: UserMode = 'SEEKER', lat?: string, lon?: string, tz?: string) => {
+  const cacheKey = `panchanga_${date}_${time}_${pob}_${lang}_${mode}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   const prompt = `
     Perform a high-precision Vedic Panchanga calculation for:
@@ -435,7 +505,9 @@ export const generatePanchanga = async (date: string, time: string, pob: string,
   
     CRITICAL INSTRUCTIONS:
     1. TABLE FIRST: You MUST start the response with a clean, well-formatted HTML table showing the 5 elements (Tithi, Vara, Nakshatra, Yoga, Karana) plus Sunrise, Sunset, and Rahu Kala.
-    2. EXPLANATION: After the table, provide a detailed scholarly explanation of each element.
+    2. JSON DATA: You MUST include a JSON script tag with type "panchanga_data" containing these fields: tithi, vara, nakshatra, yoga, karana, sunrise, sunset, rahu_kala. Each field should have a "value" and a "description" (short).
+       Example: <script type="application/json" id="panchanga-data">{"type": "panchanga_data", "data": {"tithi": {"value": "...", "description": "..."}, ...}}</script>
+    3. EXPLANATION: After the table, provide a detailed scholarly explanation of each element.
     3. Calculate the exact Tithi, Vara, Nakshatra, Yoga, and Karana for the given time and place using Lahiri Ayanamsa.
     4. Calculate Rahu Kala, Gulika Kala, and Yamaghanda Kala precisely for the given location.
     5. Identify any "Dinavishesha" (special significance of the day, festivals, or auspicious/inauspicious yogas like Amrita Siddhi, etc.).
@@ -454,11 +526,17 @@ export const generatePanchanga = async (date: string, time: string, pob: string,
       systemInstruction: `You are a high-precision Vedic Panchanga expert. Respond EXCLUSIVELY in ${lang}. Format: HTML only.`
     }
   });
-  return response.text || '';
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };
 
 // Life Timeline Dashboard Data
 export const generateLifeTimeline = async (intake: UserIntake, lang: Language) => {
+  const cacheKey = `timeline_${lang}_${intake.dob}_${intake.tob}_${intake.pob}`;
+  const cached = astroCache.get<any>(cacheKey);
+  if (cached) return cached;
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
   
   // Create a consistent seed based on birth details to ensure accuracy and consistency for the same Kundli
@@ -516,7 +594,9 @@ export const generateLifeTimeline = async (intake: UserIntake, lang: Language) =
   });
   
   try {
-    return JSON.parse(response.text || '[]');
+    const result = JSON.parse(response.text || '[]');
+    if (result && result.length > 0) astroCache.set(cacheKey, result);
+    return result;
   } catch (e) {
     console.error("Failed to parse timeline data", e);
     return [];
@@ -583,4 +663,45 @@ export const generateMuhurthaImage = async (event: string, description: string) 
     }
   }
   return null;
+};
+
+// Vastu Analysis
+export const generateVastuAnalysis = async (lang: Language, mode: UserMode = 'SEEKER', structureType: string = 'Residential') => {
+  const cacheKey = `vastu_${lang}_${mode}_${structureType}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
+  const prompt = `
+    Perform a comprehensive Vastu Shastra analysis for ${structureType} in ${lang}.
+    MODE: ${mode}
+
+    CRITICAL INSTRUCTIONS:
+    1. Base analysis on Sthapatya Veda and the Vastu Purusha Mandala.
+    2. For SEEKER mode: Focus on "Home Harmony", practical tips, color guidelines, and easy-to-implement remedies for modern homes/apartments.
+    3. For SCHOLAR mode: Deep dive into the "Vastu Purusha Mandala" (81/64 grids), Dikpalas (Directional Guardians), Ayadi calculations, and complex structural alignments. Include Sanskrit terminology.
+    4. STRUCTURE: Provide detailed guidelines for:
+       - Entrance (Simha Dwara)
+       - Living Room (North/East)
+       - Kitchen (Southeast/Agni Zone)
+       - Master Bedroom (Southwest/Nairutya)
+       - Bathroom (Northwest/Vayu)
+       - Space Center (Brahmasthan)
+       - Water & Plants (Northeast/Ishanya)
+    5. Include "Vastu Dosha" remedies for common modern alignment issues.
+    6. Explain the planetary connection to each direction.
+    7. Format the response with HTML (h2, h3, p, strong, ul, li).
+  `;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-3.1-pro-preview',
+    contents: prompt,
+    config: {
+      thinkingConfig: { thinkingLevel: mode === 'SCHOLAR' ? ThinkingLevel.MEDIUM : ThinkingLevel.LOW },
+      systemInstruction: `You are a Vastu Shastra expert and Sthapatya Veda scholar. Respond EXCLUSIVELY in ${lang}. Format: HTML only.`
+    }
+  });
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
 };

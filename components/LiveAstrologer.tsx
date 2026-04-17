@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { GoogleGenAI, Modality, Blob, LiveServerMessage } from '@google/genai';
 import { encode, decode, decodeAudioData } from '../services/gemini';
 import { Language, UserMode } from '../types';
@@ -54,7 +54,7 @@ const LiveAstrologer: React.FC<LiveAstrologerProps> = ({ lang, mode }) => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        model: 'gemini-3.1-flash-live-preview',
         callbacks: {
           onopen: () => {
             setStatus(t.guruji_listening || 'Guruji is listening...');
@@ -142,9 +142,9 @@ const LiveAstrologer: React.FC<LiveAstrologerProps> = ({ lang, mode }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 sm:gap-8 p-4 sm:p-10 h-full overflow-y-auto">
+    <div className="flex flex-col items-center gap-6 sm:gap-8 p-4 sm:p-10 h-full overflow-y-auto bg-[var(--bg-primary)]">
       <div className="relative">
-        <div className={`w-20 h-20 sm:w-36 sm:h-36 rounded-full border-4 sm:border-8 flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden ${isActive ? 'border-[#451a03] scale-105' : 'border-slate-300'}`}>
+        <div className={`w-20 h-20 sm:w-36 sm:h-36 rounded-full border-4 sm:border-8 flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden ${isActive ? 'border-[var(--accent-primary)] scale-105' : 'border-[var(--border-primary)]'}`}>
           <img 
             src="https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?q=80&w=400&auto=format&fit=crop" 
             alt="Ancient Guruji" 
@@ -156,14 +156,14 @@ const LiveAstrologer: React.FC<LiveAstrologerProps> = ({ lang, mode }) => {
           <motion.div 
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute -inset-2 border-4 border-[#f59e0b] rounded-full pointer-events-none"
+            className="absolute -inset-2 border-4 border-[var(--accent-primary)] rounded-full pointer-events-none"
           />
         )}
       </div>
       
       <div className="text-center">
-        <h3 className="text-xl sm:text-3xl font-black text-[#451a03] uppercase tracking-[0.1em] astrological-font leading-tight">Consult the Daivajna</h3>
-        <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#451a03] text-[#f59e0b] text-[10px] sm:text-[11px] font-black uppercase tracking-widest shadow-md">
+        <h3 className="text-xl sm:text-3xl font-black text-[var(--accent-primary)] uppercase tracking-[0.1em] astrological-font leading-tight">Consult the Daivajna</h3>
+        <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-primary)] text-white dark:text-[#020617] text-[10px] sm:text-[11px] font-black uppercase tracking-widest shadow-md">
           <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-slate-400'}`}></span>
           {status}
         </div>
@@ -171,9 +171,9 @@ const LiveAstrologer: React.FC<LiveAstrologerProps> = ({ lang, mode }) => {
 
       <div className="w-full">
         {!isActive ? (
-          <button onClick={startSession} className="w-full py-4.5 bg-[#451a03] text-[#f59e0b] font-black rounded-3xl shadow-2xl uppercase tracking-[0.15em] text-xs sm:text-sm active:brightness-125 transition-all">Invoke Daivajna</button>
+          <button onClick={startSession} className="w-full py-4.5 bg-[var(--accent-primary)] text-white dark:text-[#020617] font-black rounded-3xl shadow-2xl uppercase tracking-[0.15em] text-xs sm:text-sm active:brightness-125 transition-all">Invoke Daivajna</button>
         ) : (
-          <button onClick={stopSession} className="w-full py-4.5 bg-white border-2 border-[#451a03] text-[#451a03] font-black rounded-3xl shadow-md uppercase tracking-[0.15em] text-xs sm:text-sm active:bg-slate-50 transition-all">{t.pranama_end || 'Pranama (End)'}</button>
+          <button onClick={stopSession} className="w-full py-4.5 bg-[var(--bg-primary)] border-2 border-[var(--accent-primary)] text-[var(--accent-primary)] font-black rounded-3xl shadow-md uppercase tracking-[0.15em] text-xs sm:text-sm active:bg-[var(--bg-secondary)] transition-all">{t.pranama_end || 'Pranama (End)'}</button>
         )}
       </div>
 
@@ -193,21 +193,21 @@ const LiveAstrologer: React.FC<LiveAstrologerProps> = ({ lang, mode }) => {
                 startSession();
               }
             }}
-            className="px-3 py-1.5 bg-white/50 border border-[#451a03]/20 rounded-full text-[10px] sm:text-xs font-bold text-[#451a03] hover:bg-[#451a03] hover:text-[#f59e0b] transition-all shadow-sm"
+            className="px-3 py-1.5 bg-[var(--bg-secondary)]/50 border border-[var(--border-primary)] rounded-full text-[10px] sm:text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--accent-primary)] hover:text-white dark:hover:text-[#020617] transition-all shadow-sm"
           >
             {topic.label}
           </button>
         ))}
       </div>
 
-      <div className="w-full flex-1 min-h-[160px] overflow-y-auto bg-white/70 border-2 border-[#451a03]/10 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-inner flex flex-col gap-4">
+      <div className="w-full flex-1 min-h-[160px] overflow-y-auto bg-[var(--bg-secondary)]/50 border-2 border-[var(--border-primary)] p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-inner flex flex-col gap-4">
         {transcription.length === 0 && (
-          <div className="h-full flex items-center justify-center opacity-60 italic text-sm sm:text-lg text-[#451a03] px-4 text-center leading-relaxed font-serif">
+          <div className="h-full flex items-center justify-center opacity-60 italic text-sm sm:text-lg text-[var(--text-primary)] px-4 text-center leading-relaxed font-serif">
             "{t.seek_wisdom_message || 'Seek wisdom and the stars shall answer through Guruji.'}"
           </div>
         )}
         {transcription.map((t, i) => (
-          <div key={i} className="text-xs sm:text-base border-l-4 border-[#f59e0b] pl-4 py-3 font-serif text-[#451a03] bg-white border border-[#451a03]/5 rounded-r-xl shadow-md leading-relaxed font-bold">
+          <div key={i} className="text-xs sm:text-base border-l-4 border-[var(--accent-primary)] pl-4 py-3 font-serif text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-r-xl shadow-md leading-relaxed font-bold">
             {t}
           </div>
         ))}

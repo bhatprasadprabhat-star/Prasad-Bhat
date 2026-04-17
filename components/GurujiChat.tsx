@@ -3,9 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Language, UserMode, UserIntake } from '../types';
 import { TRANSLATIONS } from '../constants';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Send, User, Sparkles, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { LoadingIndicator } from './LoadingIndicator';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -90,15 +91,15 @@ const GurujiChat: React.FC<GurujiChatProps> = ({ lang, mode, intake }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#020617]">
+    <div className="flex flex-col h-full bg-[var(--bg-primary)]">
       <div 
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth"
       >
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-60">
-            <Sparkles size={48} className="text-[#D4AF37] animate-pulse" />
-            <p className="text-white font-serif italic max-w-xs">
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-80">
+            <Sparkles size={48} className="text-[var(--accent-primary)] animate-pulse" />
+            <p className="text-[var(--text-primary)] font-serif italic max-w-xs">
               {t.guruji_welcome || "Ask Guruji about your life path, planetary transits, or any spiritual guidance."}
             </p>
           </div>
@@ -112,14 +113,14 @@ const GurujiChat: React.FC<GurujiChatProps> = ({ lang, mode, intake }) => {
           >
             <div className={`max-w-[85%] p-4 rounded-2xl shadow-md ${
               m.role === 'user' 
-                ? 'bg-[#D4AF37] text-[#020617] rounded-tr-none' 
-                : 'bg-white/10 backdrop-blur-md text-white border border-[#D4AF37]/20 rounded-tl-none'
+                ? 'bg-[var(--accent-primary)] text-white dark:text-[#020617] rounded-tr-none' 
+                : 'bg-[var(--bg-secondary)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-primary)] rounded-tl-none'
             }`}>
-              <div className="flex items-center gap-2 mb-1 opacity-60 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-1 opacity-80 text-[10px] font-black uppercase tracking-widest">
                 {m.role === 'user' ? <User size={12} /> : <Sparkles size={12} />}
                 {m.role === 'user' ? (t.you || 'You') : (t.guruji || 'Guruji')}
               </div>
-              <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-1 text-inherit prose-invert">
+              <div className={`prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-1 text-inherit ${m.role === 'assistant' ? 'dark:prose-invert' : ''}`}>
                 <ReactMarkdown>{m.content}</ReactMarkdown>
               </div>
             </div>
@@ -127,17 +128,14 @@ const GurujiChat: React.FC<GurujiChatProps> = ({ lang, mode, intake }) => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl shadow-md border border-[#D4AF37]/20 rounded-tl-none flex items-center gap-3">
-              <Loader2 className="w-5 h-5 animate-spin text-[#D4AF37]" />
-              <span className="text-xs font-bold text-white/60 uppercase tracking-widest animate-pulse">
-                {t.guruji_thinking || "Guruji is consulting the stars..."}
-              </span>
+            <div className="bg-[var(--bg-secondary)] backdrop-blur-md p-4 rounded-2xl shadow-md border border-[var(--border-primary)] rounded-tl-none">
+              <LoadingIndicator size={18} label={t.guruji_thinking || "Guruji is consulting the stars..."} />
             </div>
           </div>
         )}
       </div>
 
-      <div className="p-4 bg-black/40 border-t border-[#D4AF37]/20">
+      <div className="p-4 bg-[var(--bg-secondary)]/80 backdrop-blur-md border-t border-[var(--border-primary)]">
         <div className="relative flex items-center">
           <input 
             type="text"
@@ -145,12 +143,12 @@ const GurujiChat: React.FC<GurujiChatProps> = ({ lang, mode, intake }) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder={t.ask_guruji_placeholder || "Ask your question..."}
-            className="w-full bg-white/5 border-2 border-[#D4AF37]/30 rounded-full py-3 px-6 pr-14 text-white font-medium focus:border-[#D4AF37] outline-none transition-all"
+            className="w-full bg-[var(--bg-primary)]/50 border-2 border-[var(--border-primary)] rounded-full py-3 px-6 pr-14 text-[var(--text-primary)] font-medium focus:border-[var(--accent-primary)] outline-none transition-all"
           />
           <button 
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="absolute right-2 p-2 bg-[#D4AF37] text-[#020617] rounded-full hover:scale-110 active:scale-95 transition-all disabled:opacity-50"
+            className="absolute right-2 p-2 bg-[var(--accent-primary)] text-white dark:text-[#020617] rounded-full hover:scale-110 active:scale-95 transition-all disabled:opacity-50"
           >
             <Send size={20} />
           </button>

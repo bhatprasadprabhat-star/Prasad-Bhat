@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Quote, Sparkles, RefreshCw } from 'lucide-react';
 import { Language } from '../types';
 
@@ -60,16 +60,21 @@ const DailyWisdom: React.FC<DailyWisdomProps> = ({ lang }) => {
   const text = q[lang] || q.en;
 
   return (
-    <div className="w-full bg-white/10 backdrop-blur-xl rounded-[3rem] p-8 sm:p-12 border-4 border-[#D4AF37]/30 shadow-2xl relative overflow-hidden group">
-      <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
-        <Quote size={120} className="text-[#D4AF37]" />
+    <div className="w-full bg-[var(--bg-secondary)]/50 backdrop-blur-2xl rounded-lg p-6 sm:p-12 border border-[var(--border-primary)] shadow-2xl relative overflow-hidden group">
+      <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')]"></div>
+      <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-700">
+        <Quote size={80} className="sm:w-[120px] sm:h-[120px] text-[var(--accent-primary)]" />
       </div>
       
-      <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-        <div className="flex items-center gap-3">
-          <Sparkles className="text-[#D4AF37] animate-pulse" size={24} />
-          <h3 className="text-xl sm:text-2xl font-black text-[#D4AF37] uppercase tracking-[0.3em] astrological-font">Daily Vedic Wisdom</h3>
-          <Sparkles className="text-[#D4AF37] animate-pulse" size={24} />
+      <div className="relative z-10 flex flex-col items-center text-center space-y-4 sm:space-y-8">
+        <div className="flex items-center gap-4">
+          <div className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent to-[var(--accent-primary)]/50" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Sparkles className="text-[var(--accent-primary)] animate-pulse" size={16} />
+            <h3 className="text-xs sm:text-xl font-ancient font-black gold-leaf uppercase tracking-[0.4em]">Daily Vedic Wisdom</h3>
+            <Sparkles className="text-[var(--accent-primary)] animate-pulse" size={16} />
+          </div>
+          <div className="h-[1px] w-8 sm:w-16 bg-gradient-to-l from-transparent to-[var(--accent-primary)]/50" />
         </div>
 
         <AnimatePresence mode="wait">
@@ -80,15 +85,15 @@ const DailyWisdom: React.FC<DailyWisdomProps> = ({ lang }) => {
             exit={{ opacity: 0, y: -20 }}
             className="max-w-3xl"
           >
-            <p className="text-lg sm:text-2xl font-serif italic text-white leading-relaxed drop-shadow-md">
+            <p className="text-sm sm:text-2xl font-premium font-bold uppercase tracking-widest text-[var(--accent-primary)] leading-relaxed drop-shadow-2xl">
               "{text}"
             </p>
           </motion.div>
         </AnimatePresence>
 
-        <div className="pt-4 flex items-center gap-2 text-[#D4AF37]/40 text-[10px] font-black uppercase tracking-widest">
-          <RefreshCw size={12} className="animate-spin-slow" />
-          <span>Cycles Every 10 Seconds</span>
+        <div className="pt-4 flex items-center gap-2 text-[var(--accent-primary)] text-[8px] sm:text-[10px] font-ancient font-bold uppercase tracking-[0.3em]">
+          <RefreshCw size={10} className="animate-spin-slow" />
+          <span>Celestial Cycle Continues</span>
         </div>
       </div>
       

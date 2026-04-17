@@ -10,6 +10,7 @@ export interface PanchangamData {
 }
 
 export interface UserIntake {
+  id?: string;
   name: string;
   dob: string;
   tob: string;
@@ -20,6 +21,7 @@ export interface UserIntake {
   lon?: string;
   tz?: string;
   pincode?: string;
+  photo?: string;
 }
 
 export interface CityData {
@@ -58,6 +60,7 @@ export enum OnboardingStep {
   LANG_SELECT = 'lang_select',
   QUICK_LOGIN = 'quick_login',
   MODE_SELECT = 'mode_select',
+  TOUR = 'tour',
   COMPLETED = 'completed'
 }
 
@@ -72,5 +75,7 @@ export enum AppTab {
   PANCHANGA = 'Panchanga',
   TIMELINE = 'Life Timeline',
   BLOG = 'Blog',
-  NUMEROLOGY = 'Numerology'
+  NUMEROLOGY = 'Numerology',
+  SAVED_READINGS = 'Archive',
+  VASTU = 'Vastu'
 }

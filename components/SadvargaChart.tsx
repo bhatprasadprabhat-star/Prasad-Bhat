@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import SouthIndianChart from './SouthIndianChart';
 import { Language, PlanetPosition } from '../types';
 import { TRANSLATIONS, RASIS } from '../constants';
@@ -54,8 +54,8 @@ const SadvargaChart: React.FC<SadvargaChartProps> = ({ vargas, lords, lang }) =>
 
   if (!vargas || Object.keys(vargas).length === 0) {
     return (
-      <div className="p-8 text-center bg-white/10 rounded-3xl border-2 border-[#D4AF37]/30 shadow-xl">
-        <p className="text-[#D4AF37] font-bold opacity-50">Calculating Sadvarga charts...</p>
+      <div className="p-8 text-center bg-[var(--bg-secondary)]/50 rounded-3xl border-2 border-[var(--border-primary)] shadow-xl">
+        <p className="text-[var(--accent-primary)] font-bold opacity-80">Calculating Sadvarga charts...</p>
       </div>
     );
   }
@@ -71,28 +71,23 @@ const SadvargaChart: React.FC<SadvargaChartProps> = ({ vargas, lords, lang }) =>
 
   return (
     <div className="w-full space-y-12">
-      {/* Shadvarga Parchment Table */}
+      {/* Shadvarga Premium Dark Table */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[1rem] border-[6px] border-[#451a03] shadow-[0_20px_50px_rgba(0,0,0,0.3)] mx-2 sm:mx-4"
-        style={{
-          background: 'radial-gradient(circle, #fdf2d0 0%, #f3e5ab 100%)',
-          boxShadow: 'inset 0 0 100px rgba(69, 26, 3, 0.1), 0 20px 50px rgba(0,0,0,0.3)'
-        }}
+        className="relative overflow-hidden rounded-lg border border-[var(--border-primary)] shadow-2xl mx-2 sm:mx-4 bg-[var(--bg-secondary)]/50 backdrop-blur-xl"
       >
-        {/* Paper Texture Overlay */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/papyros.png")' }}></div>
+        <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
         
         <div className="overflow-x-auto relative z-10">
-          <table className="w-full text-center border-collapse min-w-[600px] astrological-font">
+          <table className="w-full text-center border-collapse min-w-[600px]">
             <thead>
-              <tr className="border-b-4 border-[#451a03]">
-                <th className="p-6 font-black text-[#451a03] uppercase tracking-widest text-2xl text-left bg-[#451a03]/5">
+              <tr className="bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-b border-[var(--border-primary)]">
+                <th className="p-6 font-ancient font-black uppercase tracking-widest text-xl text-left sticky left-0 bg-[var(--bg-secondary)] backdrop-blur-md z-10">
                   {lang === 'kn' ? 'ಗ್ರಹ' : 'Graha'}
                 </th>
                 {vargaOrder.map(v => (
-                  <th key={v} className="p-6 font-black text-[#451a03] uppercase tracking-widest text-xl bg-[#451a03]/5">
+                  <th key={v} className="p-6 font-ancient font-black uppercase tracking-widest text-sm">
                     {vargaLabels[v]}
                   </th>
                 ))}
@@ -100,8 +95,8 @@ const SadvargaChart: React.FC<SadvargaChartProps> = ({ vargas, lords, lang }) =>
             </thead>
             <tbody>
               {planets.map((planetName, i) => (
-                <tr key={i} className="border-b border-[#451a03]/10 hover:bg-[#451a03]/5 transition-colors">
-                  <td className="p-5 font-black text-[#8b0000] text-2xl text-left pl-8 border-r-2 border-[#451a03]/10">
+                <tr key={i} className="border-b border-[var(--border-primary)]/30 hover:bg-[var(--accent-primary)]/5 transition-colors">
+                  <td className="p-5 font-ancient font-black text-[var(--accent-primary)] text-xl text-left pl-8 sticky left-0 bg-[var(--bg-secondary)] backdrop-blur-md shadow-r z-10">
                     {lang === 'kn' ? getPlanetAbbreviation(planetName) : (planetName ? (t[`planet_${planetName.toLowerCase()}`] || planetName) : '-')}
                   </td>
                   {vargaOrder.map(v => {
@@ -112,12 +107,12 @@ const SadvargaChart: React.FC<SadvargaChartProps> = ({ vargas, lords, lang }) =>
                     const lordAbbr = lordName !== '-' ? getPlanetAbbreviation(lordName) : '-';
                     
                     return (
-                      <td key={v} className="p-5 border-r border-[#451a03]/5 last:border-r-0">
+                      <td key={v} className="p-5">
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-2xl font-black text-[#000080] drop-shadow-sm">
+                          <span className="text-xl font-ancient font-black text-[var(--accent-primary)] drop-shadow-lg group-hover:gold-leaf">
                             {lordAbbr}
                           </span>
-                          <span className="text-[10px] font-bold text-[#451a03]/60 uppercase tracking-tighter">
+                          <span className="text-[10px] font-ancient font-bold text-[var(--accent-primary)]/80 uppercase tracking-tighter">
                             {lordDisplayName}
                           </span>
                         </div>
@@ -132,9 +127,9 @@ const SadvargaChart: React.FC<SadvargaChartProps> = ({ vargas, lords, lang }) =>
       </motion.div>
 
       <div className="flex items-center gap-4 px-4">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#451a03]/30 to-transparent"></div>
-        <span className="text-[#451a03]/40 text-[10px] font-black uppercase tracking-[0.5em]">Varga Visuals</span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#451a03]/30 to-transparent"></div>
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--accent-primary)]/30 to-transparent"></div>
+        <span className="text-[var(--accent-primary)]/70 text-[10px] font-ancient font-black uppercase tracking-[0.5em]">Varga Visuals</span>
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--accent-primary)]/30 to-transparent"></div>
       </div>
 
       {/* Grid of Charts (Secondary View) */}
@@ -144,9 +139,9 @@ const SadvargaChart: React.FC<SadvargaChartProps> = ({ vargas, lords, lang }) =>
             key={v}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#f3e5ab]/30 rounded-[2rem] p-6 border-2 border-[#451a03]/10 shadow-xl flex flex-col items-center backdrop-blur-sm"
+            className="bg-[var(--bg-secondary)]/50 rounded-lg p-6 border border-[var(--border-primary)] shadow-xl flex flex-col items-center backdrop-blur-sm group hover:border-[var(--accent-primary)] transition-all"
           >
-            <h4 className="text-xs font-black text-[#451a03] uppercase tracking-[0.3em] mb-4 border-b-2 border-[#451a03]/20 pb-1">
+            <h4 className="text-xs font-ancient font-black text-[var(--accent-primary)] uppercase tracking-[0.3em] mb-4 border-b border-[var(--border-primary)] pb-1 group-hover:gold-leaf transition-colors">
               {vargaLabels[v] || v}
             </h4>
             <div className="w-full scale-90 origin-top">

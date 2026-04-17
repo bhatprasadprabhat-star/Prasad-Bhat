@@ -37,68 +37,70 @@ const ShadbalaChart: React.FC<ShadbalaChartProps> = ({ lang, shadbalaData }) => 
 
   return (
     <div className="w-full space-y-8">
-      <div className="w-full h-[450px] bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] rounded-[3rem] p-8 border-4 border-[#D4AF37] shadow-[0_0_50px_rgba(212,175,55,0.2)] flex flex-col items-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-50"></div>
-        <h3 className="text-2xl font-black text-[#D4AF37] uppercase tracking-[0.4em] mb-6 astrological-font drop-shadow-lg">Shadbala Analysis</h3>
+      <div className="w-full h-[450px] bg-[var(--bg-secondary)]/50 backdrop-blur-xl rounded-lg p-8 border border-[var(--border-primary)] shadow-2xl flex flex-col items-center relative overflow-hidden group">
+        <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent-primary)] to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <h3 className="text-2xl font-ancient font-black gold-leaf uppercase tracking-[0.4em] mb-6 drop-shadow-lg">Shadbala Analysis</h3>
         
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center relative z-10">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-              <PolarGrid stroke="rgba(212, 175, 55, 0.3)" strokeDasharray="3 3" />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: '#D4AF37', fontSize: 14, fontWeight: '900', letterSpacing: '0.1em' }} />
+              <PolarGrid stroke="var(--border-primary)" strokeDasharray="3 3" />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--accent-primary)', fontSize: 12, fontWeight: '900', letterSpacing: '0.1em', fontFamily: 'Inter' }} />
               <PolarRadiusAxis angle={30} domain={[0, 600]} tick={false} axisLine={false} />
               <Radar
                 name="Strength"
                 dataKey="A"
-                stroke="#D4AF37"
-                strokeWidth={3}
+                stroke="var(--accent-primary)"
+                strokeWidth={2}
                 fill="url(#goldGradient)"
-                fillOpacity={0.7}
+                fillOpacity={0.6}
               />
               <defs>
                 <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#92400e" stopOpacity={0.4}/>
+                  <stop offset="5%" stopColor="var(--accent-primary)" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="var(--color-gold-dark)" stopOpacity={0.2}/>
                 </linearGradient>
               </defs>
             </RadarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="absolute bottom-6 flex gap-4">
+        <div className="absolute bottom-6 flex gap-4 z-10">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.5)]"></div>
-            <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest">Planetary Strength (Virupas)</span>
+            <div className="w-2 h-2 rounded-full bg-[var(--accent-primary)] shadow-[0_0_10px_rgba(212,175,55,0.8)] animate-pulse"></div>
+            <span className="text-[9px] font-ancient font-bold text-[var(--accent-primary)]/80 uppercase tracking-widest">Planetary Strength (Virupas)</span>
           </div>
         </div>
       </div>
 
       {shadbalaData && (
-        <div className="overflow-x-auto bg-[#1a1a1a] rounded-[2rem] border-2 border-[#D4AF37]/30 shadow-2xl">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto bg-[var(--bg-secondary)]/50 backdrop-blur-xl rounded-lg border border-[var(--border-primary)] shadow-2xl relative overflow-hidden">
+          <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+          <table className="w-full text-left border-collapse relative z-10">
             <thead>
-              <tr className="bg-[#D4AF37] text-[#451a03]">
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Planet</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Sthana</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Dig</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Kaala</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Chesta</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Naisargika</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10">Drig</th>
-                <th className="p-4 text-[11px] font-black uppercase tracking-widest border-b-2 border-[#451a03]/10 bg-[#451a03] text-[#D4AF37]">Total (Virupas)</th>
+              <tr className="bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border-b border-[var(--border-primary)]">
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Planet</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Sthana</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Dig</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Kaala</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Chesta</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Naisargika</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest">Drig</th>
+                <th className="p-4 text-[10px] font-ancient font-black uppercase tracking-widest bg-[var(--accent-primary)]/10">Total</th>
               </tr>
             </thead>
             <tbody>
               {shadbalaData.map((d, i) => (
-                <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="p-4 text-sm font-black text-[#D4AF37] border-r border-white/5">{d.planet}</td>
-                  <td className="p-4 text-sm font-bold text-white/80">{d.sthana}</td>
-                  <td className="p-4 text-sm font-bold text-white/80">{d.dig}</td>
-                  <td className="p-4 text-sm font-bold text-white/80">{d.kaala}</td>
-                  <td className="p-4 text-sm font-bold text-white/80">{d.chesta}</td>
-                  <td className="p-4 text-sm font-bold text-white/80">{d.naisargika}</td>
-                  <td className="p-4 text-sm font-bold text-white/80">{d.drig}</td>
-                  <td className="p-4 text-sm font-black text-[#D4AF37] bg-white/5">{d.total || (d.sthana + d.dig + d.kaala + d.chesta + d.naisargika + d.drig)}</td>
+                <tr key={i} className="border-b border-[var(--border-primary)]/30 hover:bg-[var(--accent-primary)]/5 transition-colors">
+                  <td className="p-4 text-xs font-ancient font-black text-[var(--accent-primary)] border-r border-[var(--border-primary)]/30">{d.planet}</td>
+                  <td className="p-4 text-xs font-premium font-bold text-[var(--text-primary)]">{d.sthana}</td>
+                  <td className="p-4 text-xs font-premium font-bold text-[var(--text-primary)]">{d.dig}</td>
+                  <td className="p-4 text-xs font-premium font-bold text-[var(--text-primary)]">{d.kaala}</td>
+                  <td className="p-4 text-xs font-premium font-bold text-[var(--text-primary)]">{d.chesta}</td>
+                  <td className="p-4 text-xs font-premium font-bold text-[var(--text-primary)]">{d.naisargika}</td>
+                  <td className="p-4 text-xs font-premium font-bold text-[var(--text-primary)]">{d.drig}</td>
+                  <td className="p-4 text-xs font-ancient font-black text-[var(--accent-primary)] bg-[var(--accent-primary)]/5">{d.total || (d.sthana + d.dig + d.kaala + d.chesta + d.naisargika + d.drig)}</td>
                 </tr>
               ))}
             </tbody>

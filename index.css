@@ -1,140 +1,373 @@
 
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-ancient: "Cinzel", serif;
+  --font-premium: "Cormorant Garamond", serif;
+
+  --color-gold: #D4AF37;
+  --color-gold-light: #fcf6ba;
+  --color-gold-dark: #b38728;
+  
+  --animate-spin-slow: spin 120s linear infinite;
+  --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  --bg-primary: #fffcf5;
+  --bg-secondary: #ffffff;
+  --text-primary: #451a03;
+  --text-primary-rgb: 69, 26, 3;
+  --text-secondary: #78350f;
+  --accent-primary: #b45309; /* Darker amber for better contrast in light mode */
+  --accent-primary-rgb: 180, 83, 9;
+  --border-primary: rgba(180, 83, 9, 0.2);
+  --glass-bg: rgba(255, 252, 245, 0.8);
+  --glass-border: rgba(180, 83, 9, 0.2);
+  --shadow-soft: 0 4px 20px -2px rgba(180, 83, 9, 0.1), 0 2px 10px -2px rgba(180, 83, 9, 0.05);
+}
+
+.dark {
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --text-primary: #f8fafc;
+  --text-primary-rgb: 248, 250, 252;
+  --text-secondary: #94a3b8;
+  --accent-primary: #D4AF37;
+  --accent-primary-rgb: 212, 175, 55;
+  --border-primary: rgba(212, 175, 55, 0.3);
+  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(212, 175, 55, 0.3);
+  --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 4px 15px -5px rgba(0, 0, 0, 0.2);
+}
+
+@layer base {
+  * {
+    @apply transition-colors duration-500 ease-in-out;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-[var(--accent-primary)]/30 selection:text-[var(--text-primary)];
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Safe Area Utilities */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .min-h-screen-ios {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-[var(--bg-primary)];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--accent-primary), var(--color-gold-light), var(--color-gold-dark));
+    @apply rounded-full border-2 border-[var(--bg-primary)];
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, var(--color-gold-light), var(--accent-primary), var(--color-gold-light));
+  }
+}
+
+@layer utilities {
+  .glass-premium {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .glass-gold {
+    background: rgba(var(--accent-primary-rgb), 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .modern-card {
+    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .text-shadow-gold {
+    text-shadow: 0 0 10px rgba(var(--accent-primary-rgb), 0.5);
+  }
+
+  .gold-gradient-bg {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--color-gold-light) 45%, var(--color-gold-dark) 100%);
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+      box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.3);
+    }
+    50% {
+      opacity: 0.9;
+      filter: brightness(1.2);
+      box-shadow: 0 0 40px rgba(var(--accent-primary-rgb), 0.6);
+    }
+  }
 }
 
 /* Custom Styles for Astro Logic */
 
+.parchment-bg {
+  background-color: var(--bg-primary);
+  background-image: url("https://www.transparenttextures.com/patterns/p6.png");
+  color: var(--text-primary);
+}
+
+.gold-leaf {
+  background: linear-gradient(135deg, var(--accent-primary), var(--color-gold-light), var(--color-gold-dark), var(--color-gold-light), var(--color-gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+}
+
+.ancient-border {
+  border: 2px solid var(--accent-primary);
+  position: relative;
+  padding: 1rem;
+}
+
+.ancient-border::before,
+.ancient-border::after {
+  content: "✦";
+  position: absolute;
+  color: var(--accent-primary);
+  font-size: 1.2rem;
+  background: inherit;
+  padding: 0 5px;
+}
+
+.ancient-border::before {
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ancient-border::after {
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.analysis-rich-text {
+  font-family: var(--font-premium);
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  .analysis-rich-text {
+    font-size: 1.125rem;
+  }
+}
+
 .analysis-rich-text h1, 
 .analysis-rich-text h2, 
 .analysis-rich-text h3 {
-  color: #D4AF37;
+  font-family: var(--font-ancient);
+  color: var(--accent-primary);
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+  letter-spacing: 0.15em;
+  border-bottom: 1px solid var(--border-primary);
   padding-bottom: 0.5rem;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
 }
 
 .analysis-rich-text p {
   line-height: 1.8;
   margin-bottom: 1.5rem;
-  color: #f8fafc;
+  color: var(--text-primary);
+}
+
+.scholar-view .analysis-rich-text p {
+  color: var(--text-primary) !important;
+}
+
+.seeker-view .analysis-rich-text p {
+  color: var(--text-primary) !important;
 }
 
 .analysis-rich-text strong {
-  color: #FFD700;
+  color: var(--accent-primary);
+  font-weight: 700;
 }
 
-.analysis-rich-text blockquote {
-  border-left: 4px solid #D4AF37;
-  padding-left: 1.5rem;
-  margin: 2rem 0;
-  font-style: italic;
-  color: #D4AF37;
-  background: rgba(212, 175, 55, 0.05);
-  padding: 1rem 1.5rem;
-  border-radius: 0 1rem 1rem 0;
-}
-.astrological-font {
-  font-family: var(--font-serif);
-}
-
-/* Scholar Theme */
-.scholar-theme {
-  background-color: #0f172a;
-  background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
-}
-
-.scholar-theme .astrological-font {
-  /* color: #D4AF37 !important; */
-}
-
-/* Seeker Theme */
-.seeker-theme {
-  background-color: #0f172a;
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 1) 100%);
-  background-attachment: fixed;
-  position: relative;
-}
-
-.seeker-theme::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, transparent 50%, rgba(30, 27, 75, 0.05) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.seeker-theme .astrological-font {
-  /* color: #451a03 !important; */
-}
-
-.scholar-view h1,
-.scholar-view h2,
-.scholar-view h3 {
-  color: #D4AF37 !important;
-  border-bottom-color: rgba(212, 175, 55, 0.2) !important;
-}
-
-.scholar-view p {
-  color: #f8fafc !important;
-}
-
-.scholar-view strong {
-  color: #FFD700 !important;
-}
-
-.scholar-view blockquote {
-  color: #D4AF37 !important;
-  border-left-color: #D4AF37 !important;
-  background: rgba(212, 175, 55, 0.05) !important;
-}
-
-/* Eye-catching table styles */
-.birth-details-table {
+.analysis-rich-text table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 1.5rem;
+  margin: 2rem 0;
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
   overflow: hidden;
-  border: 2px solid #D4AF37;
+  font-family: var(--font-premium);
 }
 
-.birth-details-table th {
-  background: #D4AF37;
-  color: #312e81;
+.analysis-rich-text th {
+  background: var(--accent-primary);
+  color: white;
   padding: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: 900;
+  font-weight: 700;
+  font-family: var(--font-ancient);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.analysis-rich-text td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.analysis-rich-text tr:last-child td {
+  border-bottom: none;
+}
+
+.analysis-rich-text tr:hover td {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.analysis-rich-text blockquote {
+  border-left: 4px solid var(--accent-primary);
+  padding: 1.5rem 2rem;
+  margin: 2.5rem 0;
+  font-style: italic;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-radius: 0 1rem 1rem 0;
+  font-family: var(--font-premium);
+  box-shadow: var(--shadow-soft);
+}
+
+.astrological-font {
+  font-family: var(--font-ancient);
+}
+
+/* Scholar Theme - Deep Cosmic Mystery */
+.scholar-theme {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(circle at 50% 0%, var(--accent-primary)/10 0%, transparent 70%),
+    radial-gradient(circle at 0% 100%, var(--accent-primary)/5 0%, transparent 50%);
+  color: var(--text-primary);
+}
+
+/* Seeker Theme - Warm Ancient Gold */
+.seeker-theme {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.seeker-theme .astrological-font {
+  color: var(--accent-primary);
+}
+
+.seeker-theme h1, .seeker-theme h2, .seeker-theme h3 {
+  color: var(--accent-primary);
+}
+
+.details-input {
+  @apply w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] text-[var(--text-primary)] rounded-lg focus:border-[var(--accent-primary)] outline-none transition-all;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .details-input {
+    padding: 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+.birth-details-table-container {
+  @apply overflow-x-auto w-full rounded-lg border border-[var(--border-primary)];
+}
+
+.birth-details-table {
+  width: 100%;
+  min-width: 300px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  font-family: var(--font-premium);
+}
+
+.birth-details-table th {
+  background: var(--accent-primary);
+  color: white;
+  padding: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-family: var(--font-ancient);
+}
+
+.birth-details-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .conclusion-section {
-  background-color: #f8fafc !important;
-  border: 2px solid #d4af37 !important;
-  border-radius: 1.5rem !important;
-  padding: 2rem !important;
-  margin-top: 2rem !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-  color: #312e81 !important;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--accent-primary) !important;
+  border-radius: 0.5rem !important;
+  padding: 2.5rem !important;
+  margin-top: 3rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  color: var(--accent-primary) !important;
+  position: relative;
+}
+
+.conclusion-section::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--border-primary);
+  pointer-events: none;
 }
 
 .conclusion-section h3 {
-  color: #312e81 !important;
+  color: var(--accent-primary) !important;
   margin-top: 0 !important;
-  border-bottom: 2px solid #d4af37 !important;
+  border-bottom: 1px solid var(--accent-primary) !important;
+  font-family: var(--font-ancient) !important;
 }
 
 .conclusion-section p {
-  color: #312e81 !important;
+  color: var(--text-secondary) !important;
   margin-bottom: 0 !important;
 }

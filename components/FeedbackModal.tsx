@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Star } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 import { Language } from '../types';
@@ -67,23 +67,24 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, lang }) 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-lg bg-gradient-to-br from-[#fef3c7] to-[#fde68a] rounded-[2.5rem] shadow-2xl border-4 border-[#D4AF37] overflow-hidden"
+            className="relative w-full max-w-lg bg-[var(--bg-secondary)] rounded-lg shadow-[0_50px_100px_rgba(0,0,0,0.8)] border border-[var(--border-primary)] overflow-hidden"
           >
-            <div className="p-8 sm:p-10">
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-500/10 rounded-lg">
-                    <MessageSquare className="text-[#D4AF37]" size={24} />
+            <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
+            <div className="p-8 sm:p-12 relative z-10">
+              <div className="flex justify-between items-center mb-10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-[var(--accent-primary)]/10 rounded-lg border border-[var(--border-primary)]">
+                    <MessageSquare className="text-[var(--accent-primary)]" size={24} />
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-[#451a03] uppercase tracking-widest astrological-font">
+                  <h2 className="text-2xl sm:text-3xl font-ancient font-black gold-leaf uppercase tracking-widest">
                     {t.feedback_title}
                   </h2>
                 </div>
                 <button 
                   onClick={onClose}
-                  className="p-2 hover:bg-[#451a03]/5 rounded-full transition-colors"
+                  className="p-2 hover:bg-[var(--bg-primary)]/50 rounded-full transition-all text-[var(--accent-primary)]/70 hover:text-[var(--accent-primary)]"
                 >
-                  <X className="text-[#451a03]/40" size={24} />
+                  <X size={24} />
                 </button>
               </div>
 
@@ -91,30 +92,30 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, lang }) 
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-center py-12"
+                  className="text-center py-16"
                 >
-                  <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Star className="text-emerald-600 fill-emerald-600" size={40} />
+                  <div className="w-24 h-24 bg-[var(--accent-primary)]/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-[var(--border-primary)]">
+                    <Star className="text-[var(--accent-primary)] fill-[var(--accent-primary)] animate-pulse" size={48} />
                   </div>
-                  <p className="text-xl font-black text-[#451a03] uppercase tracking-widest">
+                  <p className="text-xl font-ancient font-black gold-leaf uppercase tracking-widest">
                     {t.feedback_success}
                   </p>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="flex justify-center gap-2">
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="flex justify-center gap-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setRating(star)}
-                        className="transition-transform hover:scale-110"
+                        className="transition-all hover:scale-125 hover:rotate-12"
                       >
                         <Star 
-                          size={36} 
+                          size={40} 
                           className={`${
-                            star <= rating ? 'text-amber-500 fill-amber-500' : 'text-amber-200'
-                          }`} 
+                            star <= rating ? 'text-[var(--accent-primary)] fill-[var(--accent-primary)]' : 'text-[var(--accent-primary)]/40'
+                          } drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]`} 
                         />
                       </button>
                     ))}
@@ -125,36 +126,25 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, lang }) 
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder={t.feedback_placeholder}
-                    className="w-full h-32 p-4 bg-white border-2 border-[#451a03]/10 rounded-2xl focus:border-[#D4AF37] focus:ring-0 transition-all resize-none text-[#451a03] font-medium"
+                    className="w-full h-40 p-6 bg-[var(--bg-primary)]/50 border border-[var(--border-primary)] rounded-lg focus:border-[var(--accent-primary)] focus:ring-0 transition-all resize-none text-[var(--text-primary)] font-premium font-bold text-lg placeholder:text-[var(--accent-primary)]/50 backdrop-blur-md shadow-inner"
                   />
 
                   {error && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-[10px] font-bold text-left space-y-2">
+                    <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-[10px] font-ancient font-bold text-left space-y-2">
                       <div className="flex items-center gap-2">
                         <X size={14} className="shrink-0" />
                         <span>{error}</span>
                       </div>
-                      {error.includes('Application-specific password required') && (
-                        <div className="mt-2 p-3 bg-white/50 rounded-lg border border-red-100 space-y-1">
-                          <p className="uppercase tracking-wider opacity-60">How to Fix:</p>
-                          <ol className="list-decimal list-inside space-y-1 opacity-80">
-                            <li>Go to <a href="https://myaccount.google.com/apppasswords" target="_blank" className="underline">Google App Passwords</a></li>
-                            <li>Select "Other", name it "ASTRO LOGIC"</li>
-                            <li>Copy the 16-character code</li>
-                            <li>Paste it into <b>EMAIL_PASS</b> in AI Studio Settings</li>
-                          </ol>
-                        </div>
-                      )}
                     </div>
                   )}
 
                   <button
                     type="submit"
                     disabled={!rating || !comment || loading}
-                    className="w-full py-4 bg-[#451a03] text-[#D4AF37] rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#5a2304] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                    className="w-full py-5 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--color-gold-dark)] text-white dark:text-[#020617] rounded-lg font-ancient font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl border border-[var(--accent-primary)]/20"
                   >
                     {loading ? (
-                      <div className="w-6 h-6 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-6 h-6 border-4 border-white dark:border-[#020617] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <Send size={20} />
@@ -165,10 +155,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, lang }) 
 
                   <div className="relative py-4">
                     <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="w-full border-t border-[#451a03]/10"></div>
+                      <div className="w-full border-t border-[var(--border-primary)]"></div>
                     </div>
-                    <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
-                      <span className="bg-[#fef3c7] px-4 text-[#451a03]/40">Or</span>
+                    <div className="relative flex justify-center text-[10px] uppercase tracking-[0.5em] font-ancient font-black">
+                      <span className="bg-[var(--bg-secondary)] px-6 text-[var(--accent-primary)]/60">Or</span>
                     </div>
                   </div>
 
@@ -178,7 +168,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, lang }) 
                       const mailtoLink = `mailto:bhatprasadprabhat@gmail.com?subject=ASTRO LOGIC Feedback (${rating} Stars)&body=${encodeURIComponent(comment)}`;
                       window.open(mailtoLink, '_blank');
                     }}
-                    className="w-full py-4 bg-white/50 text-[#451a03] border-2 border-[#451a03]/10 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/80 transition-all shadow-lg"
+                    className="w-full py-5 bg-[var(--bg-primary)]/50 text-[var(--accent-primary)] border border-[var(--border-primary)] rounded-lg font-ancient font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-[var(--bg-primary)] transition-all shadow-xl backdrop-blur-md"
                   >
                     <MessageSquare size={20} />
                     Send via Email App
