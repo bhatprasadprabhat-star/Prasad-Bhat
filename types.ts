@@ -77,5 +77,6 @@ export enum AppTab {
   BLOG = 'Blog',
   NUMEROLOGY = 'Numerology',
   SAVED_READINGS = 'Archive',
-  VASTU = 'Vastu'
+  VASTU = 'Vastu',
+  PALM_READING = 'Palm Reading'
 }

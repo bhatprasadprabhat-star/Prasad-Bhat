@@ -18,6 +18,7 @@ import DailyWisdom from './components/DailyWisdom';
 import UserProfile from './components/UserProfile';
 import SavedReadings from './components/SavedReadings';
 import VastuAnalysis from './components/VastuAnalysis';
+import PalmReader from './components/PalmReader';
 import ContactAstrologer from './components/ContactAstrologer';
 import CSRBanner from './components/CSRBanner';
 import FeedbackModal from './components/FeedbackModal';
@@ -100,39 +101,42 @@ const BirthSummary = ({ details, lang }: { details: any[], lang: Language }) => 
       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[var(--accent-primary)]/40"></div>
       
       <div className="flex items-center justify-between border-b border-[var(--accent-primary)]/20 pb-3">
-        <span className="text-[10px] sm:text-xs font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-[0.25em]">{t.name || 'Name'}</span>
+        <span className="text-[10px] sm:text-xs font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-[0.25em]">{t.name}</span>
         <span className="text-lg sm:text-xl font-ancient font-black gold-leaf">{name}</span>
       </div>
       <div className="flex items-center justify-between border-b border-[var(--accent-primary)]/20 pb-3">
-        <span className="text-[10px] sm:text-xs font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-[0.25em]">{t.date || 'Date'}</span>
+        <span className="text-[10px] sm:text-xs font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-[0.25em]">{t.date}</span>
         <span className="text-sm sm:text-base font-premium font-bold text-[var(--text-primary)]">{date} <span className="text-[10px] sm:text-sm opacity-100 font-bold italic ml-2">{time}</span></span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] sm:text-xs font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-[0.25em]">{t.nakshatra || 'Nakshatra'}</span>
+        <span className="text-[10px] sm:text-xs font-ancient font-bold text-[var(--accent-primary)] uppercase tracking-[0.25em]">{t.nakshatra}</span>
         <span className="text-lg sm:text-xl font-ancient font-black gold-leaf">{nakshatra}</span>
       </div>
     </div>
   );
 };
 
-const ThemeToggle = ({ theme, toggle }: { theme: 'light' | 'dark', toggle: () => void }) => (
-  <button 
-    onClick={toggle}
-    className="p-2.5 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30 hover:border-[var(--accent-primary)] transition-all group relative overflow-hidden shadow-sm"
-    title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-  >
-    <motion.div
-      initial={false}
-      animate={{ rotate: theme === 'light' ? 0 : 180, scale: [1, 1.2, 1] }}
-      transition={{ 
-        rotate: { type: "spring", stiffness: 200, damping: 10 },
-        scale: { duration: 0.3 }
-      }}
+const ThemeToggle = ({ theme, toggle, lang }: { theme: 'light' | 'dark', toggle: () => void, lang: Language }) => {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  return (
+    <button 
+      onClick={toggle}
+      className="p-2.5 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30 hover:border-[var(--accent-primary)] transition-all group relative overflow-hidden shadow-sm"
+      title={theme === 'light' ? t.switch_to_dark : t.switch_to_light}
     >
-      {theme === 'light' ? <Moon size={18} className="text-[var(--accent-primary)]" /> : <Sun size={18} className="text-[var(--accent-primary)]" />}
-    </motion.div>
-  </button>
-);
+      <motion.div
+        initial={false}
+        animate={{ rotate: theme === 'light' ? 0 : 180, scale: [1, 1.2, 1] }}
+        transition={{ 
+          rotate: { type: "spring", stiffness: 200, damping: 10 },
+          scale: { duration: 0.3 }
+        }}
+      >
+        {theme === 'light' ? <Moon size={18} className="text-[var(--accent-primary)]" /> : <Sun size={18} className="text-[var(--accent-primary)]" />}
+      </motion.div>
+    </button>
+  );
+};
 
 const DigitalClock = () => {
   const [time, setTime] = useState(new Date());
@@ -372,7 +376,7 @@ const App: React.FC = () => {
 
   const handleSaveProfile = () => {
     if (!intake.name) {
-      setError("Please enter a name to save.");
+      setError(t.save_profile_error);
       return;
     }
     const updated = [intake, ...savedProfiles.filter(p => p.name !== intake.name)].slice(0, 5);
@@ -381,19 +385,19 @@ const App: React.FC = () => {
     localStorage.setItem('astro_user_intake', JSON.stringify(intake));
     lastSavedIntakeRef.current = JSON.stringify(intake);
     setIsDirty(false);
-    setError("Profile Saved.");
+    setError(t.profile_saved);
     setTimeout(() => setError(null), 3000);
   };
 
   const handleSaveToProfiles = (p: UserIntake) => {
     if (!p.name) {
-      setError("Please enter a name to save.");
+      setError(t.save_profile_error);
       return;
     }
     const updated = [p, ...savedProfiles.filter(sp => sp.name !== p.name)].slice(0, 10);
     setSavedProfiles(updated);
     localStorage.setItem('astro_logic_profiles_v4', JSON.stringify(updated));
-    setError(`Profile for ${p.name} saved.`);
+    setError(t.profile_saved_for?.replace('{name}', p.name));
     setTimeout(() => setError(null), 3000);
   };
 
@@ -1286,17 +1290,18 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 w-full px-1 sm:px-2 mb-12">
                 {[
                   { id: AppTab.HOROSCOPE, label: t.horoscope, icon: '📜', desc: mode === 'SCHOLAR' ? (t.shastriya || 'Shastriya') : (t.life_path || 'Life Path') },
-                  { id: AppTab.DAILY_PREDICTION, label: t.daily, icon: '📅', desc: mode === 'SCHOLAR' ? (t.timeline || 'Timeline') : (t.daily_title || 'Daily') },
-                  { id: AppTab.PANCHANGA, label: t.panchanga_title, icon: '🕉️', desc: mode === 'SCHOLAR' ? (t.siddhantic || 'Siddhantic') : (t.today_panchanga || 'Today') },
-                  { id: AppTab.TIMELINE, label: t.timeline_title, icon: '📈', desc: mode === 'SCHOLAR' ? (t.life_phase || 'Life Phase') : (t.life_path || 'Progress') },
-                  { id: AppTab.MATCHING, label: t.matching, icon: '💑', desc: mode === 'SCHOLAR' ? (t.matching_title || 'Matching') : (t.matching || 'Love') },
-                  { id: AppTab.PRASHNA, label: lang === 'kn' ? 'ಪ್ರಶ್ನ ಶಾಸ್ತ್ರ' : 'Prashna', icon: '❓', desc: 'Instant Oracle' },
-                  { id: AppTab.LIFE_PARTNER, label: t.life_partner || 'Life Partner', icon: '💍', desc: 'Possible Traits' },
-                  { id: AppTab.MUHURTHA, label: t.muhurta, icon: '⏰', desc: mode === 'SCHOLAR' ? (t.muhurta_title || 'Muhurta') : (t.muhurta || 'Auspicious') },
-                  { id: AppTab.NUMEROLOGY, label: t.numerology || 'Numerology', icon: '🔢', desc: 'Power of Numbers' },
-                  { id: AppTab.SAVED_READINGS, label: 'Archive', icon: '📥', desc: 'Offline Access' },
-                  { id: AppTab.VASTU, label: t.vastu_title || 'Vastu', icon: '🏠', desc: mode === 'SCHOLAR' ? (t.vastu_analysis || 'Sthapatya Veda') : (t.home_harmony || 'Home Harmony') },
-                  { id: AppTab.BLOG, label: lang === 'kn' ? 'ಜ್ಞಾನ ಭಂಡಾರ' : lang === 'tcy' ? 'ಜ್ಞಾನದ ಬಂಡಾರ' : 'Blog', icon: '📚', desc: 'Siddhanta & Hora' }
+                  { id: AppTab.DAILY_PREDICTION, label: t.daily, icon: '📅', desc: mode === 'SCHOLAR' ? t.timeline : t.daily_title },
+                  { id: AppTab.PANCHANGA, label: t.panchanga_title, icon: '🕉️', desc: mode === 'SCHOLAR' ? t.siddhantic : t.today_panchanga },
+                  { id: AppTab.TIMELINE, label: t.timeline_title, icon: '📈', desc: mode === 'SCHOLAR' ? t.life_phase : t.life_path },
+                  { id: AppTab.MATCHING, label: t.matching, icon: '💑', desc: mode === 'SCHOLAR' ? t.matching_title : t.matching },
+                  { id: AppTab.PRASHNA, label: t.prashna, icon: '❓', desc: t.oracle },
+                  { id: AppTab.LIFE_PARTNER, label: t.life_partner, icon: '💍', desc: t.life_partner_analysis },
+                  { id: AppTab.MUHURTHA, label: t.muhurta, icon: '⏰', desc: mode === 'SCHOLAR' ? t.muhurta_title : t.muhurta },
+                  { id: AppTab.NUMEROLOGY, label: t.numerology, icon: '🔢', desc: t.menu_numerology },
+                  { id: AppTab.SAVED_READINGS, label: t.saved_readings, icon: '📥', desc: t.saved_profiles },
+                  { id: AppTab.VASTU, label: t.vastu_title, icon: '🏠', desc: mode === 'SCHOLAR' ? t.vastu_analysis : t.home_harmony },
+                  { id: AppTab.PALM_READING, label: t.palm_reading_title, icon: '✋', desc: t.palm_reading_desc },
+                  { id: AppTab.BLOG, label: t.blog, icon: '📚', desc: t.blog_desc }
                 ].map((item, idx) => (
                   <motion.button 
                     key={item.id} 
@@ -1336,7 +1341,7 @@ const App: React.FC = () => {
                     className="p-8 border border-[var(--accent-primary)]/30 rounded-lg bg-[var(--bg-secondary)]/50 backdrop-blur-xl text-center space-y-6 relative overflow-hidden"
                   >
                     <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] pointer-events-none"></div>
-                    <h3 className="text-[var(--accent-primary)] font-ancient font-black uppercase tracking-[0.5em] text-xs sm:text-sm gold-leaf relative z-10">Classical Source Authority</h3>
+                    <h3 className="text-[var(--accent-primary)] font-ancient font-black uppercase tracking-[0.5em] text-xs sm:text-sm gold-leaf relative z-10">{t.classical_source_authority}</h3>
                     <div className="flex flex-wrap justify-center gap-4 sm:gap-10 opacity-90 relative z-10">
                       {['Brihat Parashara Hora Shastra', 'Brihat Jataka', 'Prashna Marga', 'Phaladeepika', 'Jataka Parijata', 'Saravali'].map(book => (
                         <span key={book} className="text-[var(--accent-primary)] text-[10px] sm:text-xs font-premium font-bold italic border-b border-[var(--accent-primary)]/40 pb-1 hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)] transition-all cursor-default">{book}</span>
@@ -1356,7 +1361,7 @@ const App: React.FC = () => {
                 <div className="mt-24 mb-16 space-y-12">
                   <div className="text-center space-y-4">
                     <h2 className="text-3xl sm:text-5xl font-ancient font-black gold-leaf uppercase tracking-[0.3em]">
-                      {t.feedback || "Feedback and Suggestions"}
+                      {t.feedback}
                     </h2>
                     <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[var(--accent-primary)] to-transparent mx-auto rounded-full opacity-50" />
                   </div>
@@ -1397,45 +1402,45 @@ const App: React.FC = () => {
               <button onClick={goBack} className="p-2 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 rounded-full transition-all group">
                 <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <h2 className="ml-3 text-lg sm:text-2xl font-ancient font-black gold-leaf uppercase tracking-widest">{t.analysis_tab_title || 'Analysis'}</h2>
+              <h2 className="ml-3 text-lg sm:text-2xl font-ancient font-black gold-leaf uppercase tracking-widest">{t.analysis_tab_title}</h2>
             </header>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-8 p-3 sm:p-12 flex-1 overflow-y-auto max-w-6xl mx-auto w-full pb-32 z-10">
               {(mode === 'SEEKER' ? [
-                { id: 'menu_basic_details', label: t.menu_basic_details || 'Basic Birth Details' },
-                { id: 'menu_yoga', label: t.menu_yoga || 'Yoga Analysis' },
-                { id: 'LIFE_PARTNER', label: t.life_partner || 'Life Partner' },
-                { id: AppTab.DAILY_PREDICTION, label: t.daily || 'Daily Forecast' },
-                { id: AppTab.MATCHING, label: t.matching || 'Matching' },
-                { id: AppTab.MUHURTHA, label: t.muhurta || 'Muhurta' },
-                { id: AppTab.PRASHNA, label: t.prashna || 'Prashna' },
-                { id: 'menu_career', label: t.menu_career || 'Career' },
-                { id: 'menu_health', label: t.menu_health || 'Health' },
-                { id: 'menu_money', label: t.menu_money || 'Money' },
-                { id: 'menu_transit', label: t.menu_transit || 'Transit' },
-                { id: 'menu_dasha_effect', label: t.menu_dasha_effect || 'Dasha Effect' },
-                { id: 'menu_sade_sati', label: t.menu_sade_sati || 'Sade Sati' },
-                { id: 'menu_gemstones', label: t.menu_gemstones || 'Gemstones' },
-                { id: 'menu_nakshatra', label: t.menu_nakshatra || 'Nakshatra' },
-                { id: 'menu_doshas', label: t.menu_doshas || 'Dosha Check' },
-                { id: 'menu_character', label: t.menu_character || 'Character' },
-                { id: 'menu_numerology', label: t.menu_numerology || 'Numerology' }
+                { id: 'menu_basic_details', label: t.menu_basic_details },
+                { id: 'menu_yoga', label: t.menu_yoga },
+                { id: 'LIFE_PARTNER', label: t.life_partner },
+                { id: AppTab.DAILY_PREDICTION, label: t.daily },
+                { id: AppTab.MATCHING, label: t.matching },
+                { id: AppTab.MUHURTHA, label: t.muhurta },
+                { id: AppTab.PRASHNA, label: t.prashna },
+                { id: 'menu_career', label: t.menu_career },
+                { id: 'menu_health', label: t.menu_health },
+                { id: 'menu_money', label: t.menu_money },
+                { id: 'menu_transit', label: t.menu_transit },
+                { id: 'menu_dasha_effect', label: t.menu_dasha_effect },
+                { id: 'menu_sade_sati', label: t.menu_sade_sati },
+                { id: 'menu_gemstones', label: t.menu_gemstones },
+                { id: 'menu_nakshatra', label: t.menu_nakshatra },
+                { id: 'menu_doshas', label: t.menu_doshas },
+                { id: 'menu_character', label: t.menu_character },
+                { id: 'menu_numerology', label: t.menu_numerology }
               ] : [ 
-                { id: 'menu_details', label: t.birth_analysis || 'Birth Analysis' }, 
-                { id: 'menu_character', label: t.menu_character || 'Character' },
-                { id: 'menu_numerology', label: t.menu_numerology || 'Numerology' },
-                { id: 'LIFE_PARTNER', label: t.life_partner || 'Life Partner' },
-                { id: AppTab.DAILY_PREDICTION, label: t.daily || 'Daily Forecast' },
-                { id: AppTab.MATCHING, label: t.matching || 'Matching' },
-                { id: AppTab.MUHURTHA, label: t.muhurta || 'Muhurta' },
-                { id: AppTab.PRASHNA, label: t.prashna || 'Prashna' },
-                { id: 'menu_timeline', label: t.timeline || 'Timeline' },
-                { id: 'menu_hora', label: t.shastriya || 'Shastriya' },
-                { id: 'menu_rasi', label: t.rasi_kundli || 'Rasi Kundli' }, 
-                { id: 'menu_navamsha', label: t.menu_navamsha || 'Navamsha D9' },
-                { id: 'menu_bhava_analysis', label: t.menu_bhava_analysis || '12 Houses Analysis' },
-                { id: 'menu_yogas', label: t.menu_yogas || 'Yoga Analysis' },
-                { id: 'menu_maitri', label: t.menu_maitri || 'Panchadha Graha Maitri' },
-                { id: 'menu_dasha', label: t.vimshottari || 'Vimshottari' }, 
+                { id: 'menu_details', label: t.birth_analysis }, 
+                { id: 'menu_character', label: t.menu_character },
+                { id: 'menu_numerology', label: t.menu_numerology },
+                { id: 'LIFE_PARTNER', label: t.life_partner },
+                { id: AppTab.DAILY_PREDICTION, label: t.daily },
+                { id: AppTab.MATCHING, label: t.matching },
+                { id: AppTab.MUHURTHA, label: t.muhurta },
+                { id: AppTab.PRASHNA, label: t.prashna },
+                { id: 'menu_timeline', label: t.timeline },
+                { id: 'menu_hora', label: t.shastriya },
+                { id: 'menu_rasi', label: t.rasi_kundli }, 
+                { id: 'menu_navamsha', label: t.menu_navamsha },
+                { id: 'menu_bhava_analysis', label: t.menu_bhava_analysis },
+                { id: 'menu_yogas', label: t.menu_yogas },
+                { id: 'menu_maitri', label: t.menu_maitri },
+                { id: 'menu_dasha', label: t.vimshottari }, 
                 { id: 'menu_shadvarga', label: t.shadvarga_strengths || 'Shadvarga' },
                 { id: 'menu_shadbala', label: t.shadbala_analysis || 'Shadbala' },
                 { id: 'menu_ashtaka', label: t.ashtakavarga || 'Ashtakavarga' } 
@@ -1807,6 +1812,8 @@ const App: React.FC = () => {
           return renderHoroscopeIntake(() => setHoroscopeState('RESULT'));
         }
         return <TimelineDashboard intake={intake} lang={lang} goBack={() => setHoroscopeState('INPUT')} />;
+      case AppTab.PALM_READING:
+        return <PalmReader lang={lang} mode={mode!} onBack={goBack} />;
       case AppTab.SAVED_READINGS:
         return (
           <motion.div

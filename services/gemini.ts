@@ -3,6 +3,15 @@ import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { UserIntake, MatchingIntake, SearchSource, Language, UserMode, CityData } from "../types";
 import { astroCache } from "./cache";
 
+const stringToSeed = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
 // Vedic Horoscope generation
 export const generateHoroscope = async (intake: UserIntake, section: string, lang: Language, mode: UserMode = 'SEEKER', seed?: number) => {
   const cacheKey = `horoscope_${section}_${lang}_${mode}_${intake.dob}_${intake.tob}_${intake.pob}_${seed || ''}`;
@@ -701,6 +710,67 @@ export const generateVastuAnalysis = async (lang: Language, mode: UserMode = 'SE
       systemInstruction: `You are a Vastu Shastra expert and Sthapatya Veda scholar. Respond EXCLUSIVELY in ${lang}. Format: HTML only.`
     }
   });
+  const result = response.text || '';
+  if (result) astroCache.set(cacheKey, result);
+  return result;
+};
+
+// Palm Reading Analysis
+export const generatePalmReading = async (imageBase64: string, lang: Language, mode: UserMode = 'SEEKER', mimeType: string = 'image/jpeg') => {
+  // Use a hash of the image and other parameters for caching and consistent seeding
+  const imageHash = stringToSeed(imageBase64.substring(0, 10000)); // Sample start of base64
+  const cacheKey = `palm_${imageHash}_${lang}_${mode}`;
+  const cached = astroCache.get<string>(cacheKey);
+  if (cached) return cached;
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
+  const prompt = `
+    First, verify if the attached image contains a clear human palm suitable for Vedic Palm Reading (Hast Rekha Shastra).
+    If the image does NOT contain a human palm, respond ONLY with the exact text: INVALID_PALM_IMAGE
+    
+    If it is a palm image, perform an EXHAUSTIVE and DEEP Vedic Palm Reading analysis.
+    Language: ${lang}
+    Mode: ${mode}
+    
+    STRICT STABILITY REQUIREMENT: 
+    You MUST provide the exact same analysis for the same palm image. Focus on objectively visible features:
+    1. THE MAJOR LINES: Identify the length, depth, and starting/ending points of the Life Line (Ayur Rekha), Head Line (Matri Rekha), Heart Line (Hridaya Rekha), and Fate Line (Bhagya Rekha).
+    2. THE MOUNTS: Evaluate the prominence and markings on the mounts (Jupiter, Saturn, Apollo, Mercury, Mars, Moon, Venus).
+    3. SIGNS & SYMBOLS: Be highly specific about any Fish (Matsya), Circle, Star, Cross, or Triangle signs.
+    
+    PATH TYPE: 
+       ${mode === 'SCHOLAR' 
+         ? `
+         - Technical Siddhantic analysis.
+         - Cite Samudrika Shastra.
+         - Use technical terminology (Uchcha, Neecha, Bindu).
+         ` 
+         : `
+         - Warm coaching style.
+         - Practical life guidance.
+         - Destiny Score out of 100 for career, love, and health.
+         `}
+    6. FORMATTING: Use only standard HTML tags: <h3>, <h4>, <p>, <ul>, <li>, <strong>. NEVER use markdown.
+    7. CONCLUSION: End with a powerful, one-line bold conclusion.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview', 
+    contents: [
+      { 
+        role: "user", 
+        parts: [
+          { text: prompt }, 
+          { inlineData: { mimeType, data: imageBase64 } }
+        ] 
+      }
+    ],
+    config: {
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      seed: imageHash
+    }
+  });
+
   const result = response.text || '';
   if (result) astroCache.set(cacheKey, result);
   return result;
